@@ -1,0 +1,52 @@
+{
+	"name": "drago-ex/project-blog",
+	"type": "drago-tools-resource",
+	"description": "Blog articles and comments for Drago Project.",
+	"license": ["MIT"],
+	"require": {
+		"php": ">=8.3 <9",
+		"nette/application": "^3.2",
+		"nette/di": "^3.2",
+		"drago-ex/application": "^2.0",
+		"drago-ex/component": "^2.0",
+		"drago-ex/database": "^3.0",
+		"drago-ex/datagrid": "^1.0",
+		"drago-ex/form": "^2.0",
+		"drago-ex/migration": "^2.0",
+		"drago-ex/permission": "^2.0",
+		"drago-ex/project-auth": "^2.0",
+		"drago-ex/project-backend": "^2.0",
+		"drago-ex/project-settings": "^1.0",
+		"drago-ex/translator": "^3.0",
+		"drago-ex/utils": "^2.0"
+	},
+	"extra": {
+		"drago-tools": {
+			"install": {
+				"copy": {
+					"resources/app/Model": "app/Model",
+					"resources/app/Presentation/Backend": "app/Presentation/Backend"
+				}
+			},
+			"commands-priority": 40,
+			"commands": {
+				"db:migrate-blog": "php vendor/bin/migration db:migrate vendor/drago-ex/project-blog/migrations"
+			}
+		}
+	},
+	"require-dev": {
+		"phpstan/phpstan-nette": "^2.0",
+		"drago-ex/project-tools": "^1.0"
+	},
+	"scripts": {
+		"phpstan": "phpstan analyse",
+		"post-install-cmd": [
+			"drago-install --dev",
+			"drago-clean"
+		],
+		"post-update-cmd": [
+			"drago-install --dev",
+			"drago-clean"
+		]
+	}
+}

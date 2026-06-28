@@ -1,0 +1,46 @@
+{templateType App\Presentation\Backend\Blog\Component\BaseTemplate}
+{embed '../../../../Accessory/Widget/@offcanvas.latte', offcanvasId: $offcanvasId, size: '61rem'}
+	{block title}{_'Manage article'}{/block}
+	{block body}
+		{snippet offcanvas}
+			{embed '../../../../Accessory/Widget/@form.latte', class: 'ajax', name: 'article', najaHistory: 'off'}
+				{import '../../../../Accessory/Widget/@dismiss-button.latte'}
+				{block form}
+					{include input, name: 'title'}
+					{include input, name: 'slug'}
+					{include input, type: 'select', name: 'status'}
+					{include input, name: 'published_at'}
+					{include input, type: 'textarea', name: 'perex', rows: 4}
+					{include input, type: 'textarea', name: 'content', rows: 14}
+					{include checkbox, name: 'comments_enabled'}
+					<div class="col-12">
+						{include buttonDismiss, type: 'offcanvas'}
+						{include submit, name: 'send'}
+					</div>
+				{/block}
+			{/embed}
+		{/snippet}
+	{/block}
+{/embed}
+
+{embed '../../../../Accessory/Widget/@modal.latte', modalId: $modalId, options: [header: 'danger']}
+	{block title}{_'Confirm delete'}{/block}
+	{block body}
+		{snippet content}
+			{include '../@modal-body.latte'}
+		{/snippet}
+	{/block}
+	{block footer}
+		{snippet modal}
+			{include '../@modal-footer.latte'}
+		{/snippet}
+	{/block}
+{/embed}
+
+{embed '../@datagrid-heading.latte', access: $user->isAllowed('Backend:Blog', 'blog-write')}
+	{block title}
+		{_'Blog articles'}
+	{/block}
+{/embed}
+
+{control dataGrid}

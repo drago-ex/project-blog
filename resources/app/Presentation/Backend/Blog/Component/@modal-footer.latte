@@ -1,0 +1,7 @@
+{embed ../../../Accessory/Widget/@form.latte, name: 'delete', class: 'ajax', defaultClass: false}
+	{import '../../../Accessory/Widget/@dismiss-button.latte'}
+	{block form}
+		{include buttonDismiss, type: 'modal', class: 'btn btn-secondary'}
+		{include submit, name: 'confirm', class: 'btn btn-danger'}
+	{/block}
+{/embed}
