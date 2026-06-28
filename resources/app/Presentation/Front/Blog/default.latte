@@ -1,0 +1,29 @@
+{templateType App\Presentation\Front\Blog\BlogTemplate}
+
+{block content}
+	<h1 n:block="title" class="display-6 fs-2 mb-4">{_'Blog'}</h1>
+
+	<div class="vstack gap-3">
+		{foreach $articles as $article}
+			<article class="p-4 bg-body-tertiary rounded">
+				<div n:if="$article->published_at" class="small text-body-secondary mb-2">
+					{$article->published_at|date:'j. n. Y'}
+				</div>
+				<h2 class="h4 mb-2">
+					<a n:href="detail, slug: $article->slug" class="text-decoration-none">
+						{$article->title}
+					</a>
+				</h2>
+				<p class="text-body-secondary mb-0">
+					{if $article->perex}
+						{$article->perex}
+					{else}
+						{$article->content|stripHtml|truncate:180}
+					{/if}
+				</p>
+			</article>
+		{else}
+			<p class="text-body-secondary">{_'No published articles yet.'}</p>
+		{/foreach}
+	</div>
+{/block}

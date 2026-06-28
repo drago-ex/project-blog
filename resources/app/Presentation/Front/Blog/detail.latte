@@ -1,0 +1,31 @@
+{templateType App\Presentation\Front\Blog\BlogTemplate}
+
+{block content}
+	<article class="mx-auto" style="max-width: 48rem">
+		<a n:href="default" class="d-inline-block mb-4 text-decoration-none">&larr; {_'Blog'}</a>
+		<div n:if="$article->published_at" class="small text-body-secondary mb-2">
+			{$article->published_at|date:'j. n. Y'}
+		</div>
+		<h1 n:block="title" class="display-6 fs-2 mb-3">{$article->title}</h1>
+		<p n:if="$article->perex" class="lead text-body-secondary">{$article->perex}</p>
+
+		<div class="content mt-4">
+			{$article->content|noescape}
+		</div>
+
+		<section n:if="$article->comments_enabled" class="mt-5 pt-4 border-top">
+			<h2 class="h4 mb-3">{_'Comments'}</h2>
+			<div class="vstack gap-3">
+				{foreach $comments as $comment}
+					<article class="p-3 bg-body-tertiary rounded">
+						<div class="fw-semibold">{$comment->author_name}</div>
+						<div class="small text-body-secondary mb-2">{$comment->created_at|date:'j. n. Y H:i'}</div>
+						<p class="mb-0">{$comment->content}</p>
+					</article>
+				{else}
+					<p class="text-body-secondary mb-0">{_'No comments yet.'}</p>
+				{/foreach}
+			</div>
+		</section>
+	</article>
+{/block}

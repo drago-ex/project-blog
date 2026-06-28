@@ -25,11 +25,13 @@
 			"install": {
 				"copy": {
 					"resources/app/Model": "app/Model",
-					"resources/app/Presentation/Backend": "app/Presentation/Backend"
+					"resources/app/Presentation/Backend": "app/Presentation/Backend",
+					"resources/app/Presentation/Front": "app/Presentation/Front"
 				}
 			},
 			"commands-priority": 40,
 			"commands": {
+				"create:blog-permission": "php vendor/bin/create-blog-permission",
 				"db:migrate-blog": "php vendor/bin/migration db:migrate vendor/drago-ex/project-blog/migrations"
 			}
 		}
@@ -38,6 +40,9 @@
 		"phpstan/phpstan-nette": "^2.0",
 		"drago-ex/project-tools": "^1.0"
 	},
+	"bin": [
+		"bin/create-blog-permission"
+	],
 	"scripts": {
 		"phpstan": "phpstan analyse",
 		"post-install-cmd": [

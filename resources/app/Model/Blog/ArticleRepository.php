@@ -55,6 +55,6 @@ class ArticleRepository
 		return $this->read('*')
 			->where('%n = ?', ArticleEntity::ColumnSlug, $slug)
 			->where('%n = ?', ArticleEntity::ColumnStatus, ArticleEntity::StatusPublished)
-			->fetch();
+			->record();
 	}
 }

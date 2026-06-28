@@ -22,6 +22,12 @@ The setup command can run the package migration:
 php vendor/bin/migration db:migrate vendor/drago-ex/project-blog/migrations
 ```
 
+It can also generate permission providers:
+
+```bash
+php vendor/bin/create-blog-permission
+```
+
 The migration creates:
 
 - `blog_article`
@@ -34,6 +40,7 @@ The package copies:
 
 - `resources/app/Model/Blog` to `app/Model/Blog`
 - `resources/app/Presentation/Backend/Blog` to `app/Presentation/Backend/Blog`
+- `resources/app/Presentation/Front/Blog` to `app/Presentation/Front/Blog`
 
 ## Backend
 
@@ -51,62 +58,38 @@ $builder->addSection('Content')
 	->setIcon('fa-regular fa-newspaper');
 ```
 
-The module uses the permission resource `Backend:Blog`. Write actions are checked with the `blog-write` privilege.
+The module uses the permission resource `Backend:Blog`. Write actions are checked with the `blog-write` privilege. The backend provider allows the administrator role.
 
-## Frontend List
+## Frontend
 
-Use `ArticleRepository` to list published articles:
+The package includes a simple frontend presenter for listing published articles and rendering a detail by slug:
 
-```php
-use App\Model\Blog\ArticleRepository;
-
-final class BlogPresenter extends BasePresenter
-{
-	public function __construct(
-		private readonly ArticleRepository $articleRepository,
-	) {
-		parent::__construct();
-	}
-
-	public function renderDefault(): void
-	{
-		$this->template->articles = $this->articleRepository
-			->getPublishedArticles()
-			->fetchAll();
-	}
-}
+```latte
+{link :Front:Blog:}
+{link :Front:Blog:detail, slug: 'first-article'}
 ```
 
-## Frontend Detail
-
-Load an article by slug and show approved comments:
+Add routes to your frontend router if you want clean URLs:
 
 ```php
-use App\Model\Blog\ArticleRepository;
-use App\Model\Blog\CommentRepository;
+$router->withModule('Front')
+	->addRoute('[<lang=cs cs|en>/]blog/<slug>', 'Blog:detail')
+	->addRoute('[<lang=cs cs|en>/]blog', 'Blog:default');
+```
 
-final class BlogPresenter extends BasePresenter
-{
-	public function __construct(
-		private readonly ArticleRepository $articleRepository,
-		private readonly CommentRepository $commentRepository,
-	) {
-		parent::__construct();
-	}
+Use `ArticleRepository` directly when you need a custom frontend:
 
-	public function renderDetail(string $slug): void
-	{
-		$article = $this->articleRepository->getPublishedBySlug($slug);
-		if ($article === null) {
-			$this->error();
-		}
+```php
+$articles = $this->articleRepository->getPublishedArticles()->recordAll();
+$article = $this->articleRepository->getPublishedBySlug($slug);
+```
 
-		$this->template->article = $article;
-		$this->template->comments = $this->commentRepository
-			->getApprovedByArticle($article->id)
-			->fetchAll();
-	}
-}
+Use `CommentRepository` to show approved comments:
+
+```php
+$comments = $this->commentRepository
+	->getApprovedByArticle($article->id)
+	->recordAll();
 ```
 
 Template example:
@@ -130,6 +113,8 @@ Template example:
 ```
 
 Use `|noescape` only when the article content is trusted HTML edited by an administrator.
+
+The frontend permission provider uses the resource `Front:Blog`. The guest role can use `blog-read` and `blog-view`. The `blog-comment` privilege is allowed only for the registered user role.
 
 ## Comments
 
