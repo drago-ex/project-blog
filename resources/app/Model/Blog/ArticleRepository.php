@@ -14,7 +14,7 @@ use Drago\Database\ExtraFluent;
 #[Table(ArticleEntity::Table, ArticleEntity::PrimaryKey, entity: ArticleEntity::class)]
 class ArticleRepository
 {
-	/** @phpstan-use Database<ArticleEntity> */
+	/** @use Database<ArticleEntity> */
 	use Database;
 
 	public function __construct(

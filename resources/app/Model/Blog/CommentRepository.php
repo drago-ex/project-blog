@@ -14,7 +14,7 @@ use Drago\Database\ExtraFluent;
 #[Table(CommentEntity::Table, CommentEntity::PrimaryKey, entity: CommentEntity::class)]
 class CommentRepository
 {
-	/** @phpstan-use Database<CommentEntity> */
+	/** @use Database<CommentEntity> */
 	use Database;
 
 	public function __construct(
