@@ -22,4 +22,3 @@ final class PermissionProvider implements Provider
 		$acl->allow(Role::RoleUser, self::Resource, 'blog-comment');
 	}
 }
-
