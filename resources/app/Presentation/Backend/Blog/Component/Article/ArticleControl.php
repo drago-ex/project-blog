@@ -130,7 +130,8 @@ class ArticleControl extends BaseControl
 			$message = (int) $values->id > 0 ? 'Update successful.' : 'Insert successful.';
 
 			$this->articleRepository->save($values);
-			$this->redrawFlashMessage($message, Alert::Success);
+			$this->addFlashMessage($message, Alert::Success);
+			$this->addRedraw($this->snippetMessage);
 
 			$form->reset();
 			$this->closeComponent();

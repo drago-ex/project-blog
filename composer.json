@@ -7,7 +7,7 @@
 		"php": ">=8.3 <9",
 		"nette/application": "^3.2",
 		"nette/di": "^3.2",
-		"drago-ex/application": "^2.0",
+		"drago-ex/application": "^3.0",
 		"drago-ex/component": "^2.0",
 		"drago-ex/database": "^3.0",
 		"drago-ex/datagrid": "^1.0",
