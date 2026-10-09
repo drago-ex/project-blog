@@ -1,7 +1,7 @@
 {
 	"name": "drago-ex/project-blog",
-	"type": "drago-tools-resource",
 	"description": "Blog articles and comments for Drago Project.",
+	"type": "drago-tools-resource",
 	"license": ["MIT"],
 	"require": {
 		"php": ">=8.3 <9",
@@ -20,6 +20,22 @@
 		"drago-ex/translator": "^3.0",
 		"drago-ex/utils": "^2.0"
 	},
+	"require-dev": {
+		"phpstan/phpstan-nette": "^2.0",
+		"drago-ex/project-tools": "^1.0"
+	},
+	"bin": ["bin/create-blog-permission"],
+	"scripts": {
+		"phpstan": "phpstan analyse",
+		"post-install-cmd": [
+			"drago-install --dev",
+			"drago-clean"
+		],
+		"post-update-cmd": [
+			"drago-install --dev",
+			"drago-clean"
+		]
+	},
 	"extra": {
 		"drago-tools": {
 			"install": {
@@ -35,23 +51,5 @@
 				"db:migrate-blog": "php vendor/bin/migration db:migrate vendor/drago-ex/project-blog/migrations"
 			}
 		}
-	},
-	"require-dev": {
-		"phpstan/phpstan-nette": "^2.0",
-		"drago-ex/project-tools": "^1.0"
-	},
-	"bin": [
-		"bin/create-blog-permission"
-	],
-	"scripts": {
-		"phpstan": "phpstan analyse",
-		"post-install-cmd": [
-			"drago-install --dev",
-			"drago-clean"
-		],
-		"post-update-cmd": [
-			"drago-install --dev",
-			"drago-clean"
-		]
 	}
 }
