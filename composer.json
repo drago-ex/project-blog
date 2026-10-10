@@ -52,7 +52,7 @@
 			}
 		},
 		"drago-translator": {
-			"translation": "resources/app/Presentation/Backend/Blog/Translate"
+			"translation": "app/Presentation/Backend/Blog/Translate"
 		}
 	}
 }
