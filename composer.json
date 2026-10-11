@@ -25,17 +25,6 @@
 		"drago-ex/project-tools": "^1.0"
 	},
 	"bin": ["bin/create-blog-permission"],
-	"scripts": {
-		"phpstan": "phpstan analyse",
-		"post-install-cmd": [
-			"drago-install --dev",
-			"drago-clean"
-		],
-		"post-update-cmd": [
-			"drago-install --dev",
-			"drago-clean"
-		]
-	},
 	"extra": {
 		"drago-tools": {
 			"install": {
@@ -54,5 +43,16 @@
 		"drago-translator": {
 			"translation": "app/Presentation/Backend/Blog/Translate"
 		}
+	},
+	"scripts": {
+		"phpstan": "phpstan analyse",
+		"post-install-cmd": [
+			"drago-install --dev",
+			"drago-clean"
+		],
+		"post-update-cmd": [
+			"drago-install --dev",
+			"drago-clean"
+		]
 	}
 }
