@@ -29,6 +29,39 @@ class ArticleControl extends BaseControl
 	}
 
 
+	public function render(): void
+	{
+		$template = $this->createRender();
+		$template->setFile(__DIR__ . '/Article.latte');
+		$template->render();
+	}
+
+
+	/**
+	 * Handles article edit.
+	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 */
+	#[Requires(ajax: true)]
+	public function handleEdit(int $id): void
+	{
+		$item = $this->articleRepository->get($id)->record();
+		if ($item === null) {
+			$this->error();
+		}
+
+		$form = $this->getComponent('article');
+		$defaults = (array) $item;
+		$defaults[ArticleEntity::ColumnCommentsEnabled] = (bool) $item->comments_enabled;
+		$form->setDefaults($defaults);
+
+		$sendControl = $this->getFormComponent($form, 'send');
+		$sendControl?->setCaption('Edit article');
+
+		$this->redrawOffCanvas();
+	}
+
+
 	/** @throws AttributeDetectionException|InvalidColumnException */
 	protected function createComponentDataGrid(): DataGrid
 	{
@@ -70,14 +103,6 @@ class ArticleControl extends BaseControl
 		}
 
 		return $grid;
-	}
-
-
-	public function render(): void
-	{
-		$template = $this->createRender();
-		$template->setFile(__DIR__ . '/Article.latte');
-		$template->render();
 	}
 
 
@@ -124,6 +149,31 @@ class ArticleControl extends BaseControl
 	}
 
 
+	/**
+	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 */
+	protected function getResultRepository(int $id): Result|int|null
+	{
+		return $this->articleRepository
+			->delete(ArticleEntity::PrimaryKey, $id)
+			->execute();
+	}
+
+
+	/**
+	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 */
+	protected function getItemRepository(int $id): string|null
+	{
+		return $this->articleRepository
+			->get($id)
+			->record()
+			?->title;
+	}
+
+
 	private function success(Form $form, ArticleValues $values): void
 	{
 		try {
@@ -147,55 +197,5 @@ class ArticleControl extends BaseControl
 			$form->addError($message);
 			$this->redrawOffCanvas();
 		}
-	}
-
-
-	/**
-	 * Handles article edit.
-	 * @throws AttributeDetectionException
-	 * @throws Exception
-	 */
-	#[Requires(ajax: true)]
-	public function handleEdit(int $id): void
-	{
-		$item = $this->articleRepository->get($id)->record();
-		if ($item === null) {
-			$this->error();
-		}
-
-		$form = $this->getComponent('article');
-		$defaults = (array) $item;
-		$defaults[ArticleEntity::ColumnCommentsEnabled] = (bool) $item->comments_enabled;
-		$form->setDefaults($defaults);
-
-		$sendControl = $this->getFormComponent($form, 'send');
-		$sendControl?->setCaption('Edit article');
-
-		$this->redrawOffCanvas();
-	}
-
-
-	/**
-	 * @throws AttributeDetectionException
-	 * @throws Exception
-	 */
-	protected function getResultRepository(int $id): Result|int|null
-	{
-		return $this->articleRepository
-			->delete(ArticleEntity::PrimaryKey, $id)
-			->execute();
-	}
-
-
-	/**
-	 * @throws AttributeDetectionException
-	 * @throws Exception
-	 */
-	protected function getItemRepository(int $id): string|null
-	{
-		return $this->articleRepository
-			->get($id)
-			->record()
-			?->title;
 	}
 }

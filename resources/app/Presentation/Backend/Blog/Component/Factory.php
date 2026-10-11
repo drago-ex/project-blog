@@ -11,12 +11,6 @@ use Nette\Application\UI\Form;
 /** @extends \Drago\Application\UI\Factory<Forms> */
 readonly class Factory extends \Drago\Application\UI\Factory
 {
-	protected function createForm(): Forms
-	{
-		return new Forms;
-	}
-
-
 	public function createDelete(?int $id = null): Form
 	{
 		$form = $this->create();
@@ -25,5 +19,11 @@ readonly class Factory extends \Drago\Application\UI\Factory
 			->addRule($form::Integer);
 
 		return $form;
+	}
+
+
+	protected function createForm(): Forms
+	{
+		return new Forms;
 	}
 }

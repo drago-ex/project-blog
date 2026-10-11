@@ -29,12 +29,6 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 	protected string $snippetMessage = 'message';
 
 
-	abstract protected function getResultRepository(int $id): Result|int|null;
-
-
-	abstract protected function getItemRepository(int $id): string|null;
-
-
 	public function __construct(
 		public Factory $factory,
 	) {
@@ -91,6 +85,12 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 		$this->modalComponent(self::Modal);
 		$this->redrawControl();
 	}
+
+
+	abstract protected function getResultRepository(int $id): Result|int|null;
+
+
+	abstract protected function getItemRepository(int $id): string|null;
 
 
 	protected function createComponentDelete(): Form
