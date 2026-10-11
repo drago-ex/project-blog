@@ -144,7 +144,7 @@ class ArticleControl extends BaseControl
 			->addRule($form::Integer);
 
 		$form->addSubmit('send', 'Send');
-		$form->onSuccess[] = $this->success(...);
+		$form->onSuccess[] = $this->processArticleForm(...);
 		return $form;
 	}
 
@@ -174,7 +174,7 @@ class ArticleControl extends BaseControl
 	}
 
 
-	private function success(Form $form, ArticleValues $values): void
+	private function processArticleForm(Form $form, ArticleValues $values): void
 	{
 		try {
 			$message = (int) $values->id > 0 ? 'Update successful.' : 'Insert successful.';
