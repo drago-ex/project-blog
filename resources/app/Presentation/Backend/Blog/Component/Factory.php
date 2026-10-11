@@ -21,8 +21,8 @@ readonly class Factory extends \Drago\Application\UI\Factory
 	{
 		$form = $this->create();
 		$form->addHidden('id', $id)
-			->addRule($form::Integer)
-			->setNullable();
+			->setNullable()
+			->addRule($form::Integer);
 
 		return $form;
 	}

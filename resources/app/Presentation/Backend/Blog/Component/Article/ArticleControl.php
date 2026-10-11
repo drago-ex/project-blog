@@ -85,13 +85,13 @@ class ArticleControl extends BaseControl
 	{
 		$form = $this->factory->create();
 		$form->addTextInput(ArticleValues::Title, 'Title')
-			->setRequired('Please enter title.')
-			->setAutocomplete(Autocomplete::Off);
+			->setAutocomplete(Autocomplete::Off)
+			->setRequired('Please enter title.');
 
 		$form->addTextInput(ArticleValues::Slug, 'Slug')
+			->setAutocomplete(Autocomplete::Off)
 			->setRequired('Please enter slug.')
-			->addRule($form::Pattern, 'Use lowercase letters, numbers and hyphens.', '[a-z0-9]+(?:-[a-z0-9]+)*')
-			->setAutocomplete(Autocomplete::Off);
+			->addRule($form::Pattern, 'Use lowercase letters, numbers and hyphens.', '[a-z0-9]+(?:-[a-z0-9]+)*');
 
 		$form->addTextAreaForm(ArticleValues::Perex, 'Perex')
 			->setHtmlAttribute('rows', 4);
@@ -103,20 +103,20 @@ class ArticleControl extends BaseControl
 			ArticleEntity::StatusDraft => 'Draft',
 			ArticleEntity::StatusPublished => 'Published',
 		])
-			->setRequired('Please select status.')
-			->setDefaultValue(ArticleEntity::StatusDraft);
+			->setDefaultValue(ArticleEntity::StatusDraft)
+			->setRequired('Please select status.');
 
 		$form->addTextInput(ArticleValues::PublishedAt, 'Published at')
-			->setNullable()
 			->setPlaceholder('YYYY-MM-DD HH:MM:SS')
-			->setAutocomplete(Autocomplete::Off);
+			->setAutocomplete(Autocomplete::Off)
+			->setNullable();
 
 		$form->addCheckbox(ArticleValues::CommentsEnabled, 'Allow comments')
 			->setDefaultValue(true);
 
 		$form->addHidden('id', $this->id)
-			->addRule($form::Integer)
-			->setNullable();
+			->setNullable()
+			->addRule($form::Integer);
 
 		$form->addSubmit('send', 'Send');
 		$form->onSuccess[] = $this->success(...);
