@@ -4,6 +4,14 @@ Blog articles and comments for Drago Project.
 
 The package adds a backend module for writing articles and database support for article comments. Comments are controlled by the global setting `blog.comments_enabled` and by the article field `comments_enabled`.
 
+[![PHP version](https://badge.fury.io/ph/drago-ex%2Fproject-blog.svg)](https://badge.fury.io/ph/drago-ex%2Fproject-blog)
+[![Coding Style](https://github.com/drago-ex/project-blog/actions/workflows/coding-style.yml/badge.svg)](https://github.com/drago-ex/project-blog/actions/workflows/coding-style.yml)
+
+## Requirements
+
+- PHP >= 8.3, < 9
+- Composer
+
 ## Installation
 
 ```bash

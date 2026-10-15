@@ -2,7 +2,7 @@
 	"name": "drago-ex/project-blog",
 	"description": "Blog articles and comments for Drago Project.",
 	"type": "drago-tools-resource",
-	"license": ["MIT"],
+	"license": "MIT",
 	"require": {
 		"php": ">=8.3 <9",
 		"nette/application": "^3.2",
@@ -24,7 +24,9 @@
 		"phpstan/phpstan-nette": "^2.0",
 		"drago-ex/project-tools": "^1.0"
 	},
-	"bin": ["bin/create-blog-permission"],
+	"bin": [
+		"bin/create-blog-permission"
+	],
 	"extra": {
 		"drago-tools": {
 			"install": {
