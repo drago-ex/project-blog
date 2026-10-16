@@ -20,6 +20,9 @@
 		"drago-ex/translator": "^4.0",
 		"drago-ex/utils": "^2.0"
 	},
+	"suggest": {
+		"drago-ex/permission": "Enables generation of the frontend permission provider."
+	},
 	"require-dev": {
 		"phpstan/phpstan-nette": "^2.0",
 		"drago-ex/project-tools": "^1.0"
