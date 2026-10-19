@@ -1,5 +1,0 @@
-search:
-	blogPermissions:
-		in: %appDir%/Presentation
-		classes: [PermissionProvider]
-		tags: [PermissionTag]

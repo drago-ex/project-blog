@@ -12,8 +12,7 @@
 		"drago-ex/database": "^3.0",
 		"drago-ex/datagrid": "^1.0",
 		"drago-ex/form": "^2.0",
-		"drago-ex/migration": "^2.0",
-		"drago-ex/permission": "^2.0",
+		"drago-ex/migration": "^2.3",
 		"drago-ex/project-auth": "^2.0",
 		"drago-ex/project-backend": "^2.0",
 		"drago-ex/project-settings": "^1.0",
@@ -21,15 +20,14 @@
 		"drago-ex/utils": "^2.0"
 	},
 	"suggest": {
-		"drago-ex/permission": "Enables generation of the frontend permission provider."
+		"drago-ex/permission": "Generates the access rules of the blog administration and the articles (permission.php).",
+		"drago-ex/project-permission": "Role and permission management in the administration, which registers the generated providers.",
+		"drago-ex/project-backend-ui": "Administration layout; the blog administration uses its content widget."
 	},
 	"require-dev": {
 		"phpstan/phpstan-nette": "^2.0",
-		"drago-ex/project-tools": "^1.0"
+		"drago-ex/project-tools": "^2.0"
 	},
-	"bin": [
-		"bin/create-blog-permission"
-	],
 	"extra": {
 		"drago-tools": {
 			"install": {
@@ -39,12 +37,9 @@
 					"resources/app/Presentation/Front": "app/Presentation/Front"
 				}
 			},
-			"commands-priority": 40,
-			"commands": {
-				"create:blog-permission": "php vendor/bin/create-blog-permission",
-				"db:migrate-blog": "php vendor/bin/migration db:migrate vendor/drago-ex/project-blog/migrations"
-			}
+			"migration-priority": 110
 		},
+		"drago-permission": "permission.php",
 		"drago-translator": {
 			"translation": "app/Presentation/Backend/Blog/Translate"
 		}
