@@ -18,33 +18,29 @@ The package adds a backend module for writing articles and database support for 
 composer require drago-ex/project-blog
 ```
 
-## Project files
-
-File copying is handled automatically by [drago-ex/project-tools](https://github.com/drago-ex/project-tools),
-which must be installed in your project. Without it, copy the files manually according to the `copy` section
-in this package's `composer.json`. To skip this package, set `"skip": true` under
-`extra.drago-tools.packages.<package-name>` in your root `composer.json`.
-
-## Database migration
+Run project setup after installation:
 
 ```bash
-php vendor/bin/migration db:migrate --packages
+php vendor/bin/drago-setup
 ```
 
-The migration runs after the one of drago-ex/project-settings (`migration-priority` 110) and creates:
+The setup command can run the package migration:
+
+```bash
+php vendor/bin/migration db:migrate vendor/drago-ex/project-blog/migrations
+```
+
+It can also generate permission providers:
+
+```bash
+php vendor/bin/create-blog-permission
+```
+
+The migration creates:
 
 - `blog_article`
 - `blog_comment`
 - settings value `blog.comments_enabled`
-
-## Permission provider
-
-With [drago-ex/permission](https://github.com/drago-ex/permission), the access rules from [`permission.php`](permission.php)
-are generated into the project by:
-
-```bash
-php vendor/bin/create-permission --packages
-```
 
 ## Installed Files
 
@@ -126,7 +122,7 @@ Template example:
 
 Use `|noescape` only when the article content is trusted HTML edited by an administrator.
 
-The frontend permission provider uses the resource `Front:Blog` and allows it to guests, so the article listing and detail are available without login.
+The frontend permission provider uses the resource `Front:Blog`. The guest role can use `blog-read` and `blog-view`. The `blog-comment` privilege is allowed only for the registered user role.
 
 ## Comments
 

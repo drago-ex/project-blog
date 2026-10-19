@@ -38,12 +38,18 @@ class ArticleRepository
 	 * @return ExtraFluent<ArticleEntity>
 	 * @throws AttributeDetectionException
 	 */
-	public function getPublishedArticles(): ExtraFluent
+	public function getPublishedArticles(?int $categoryId = null): ExtraFluent
 	{
-		return $this->read('*')
+		$fluent = $this->read('*')
 			->where('%n = ?', ArticleEntity::ColumnStatus, ArticleEntity::StatusPublished)
 			->orderBy(ArticleEntity::ColumnPublishedAt, 'DESC')
 			->orderBy(ArticleEntity::PrimaryKey, 'DESC');
+
+		if ($categoryId !== null) {
+			$fluent->where('%n = ?', ArticleEntity::ColumnCategoryId, $categoryId);
+		}
+
+		return $fluent;
 	}
 
 

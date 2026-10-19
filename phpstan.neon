@@ -5,7 +5,3 @@ parameters:
 	level: 8
 	paths:
 		- resources/app
-
-	# resources of the dependencies, installed by drago-install --dev
-	scanDirectories:
-		- .dev-resource

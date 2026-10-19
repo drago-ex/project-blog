@@ -1,26 +1,36 @@
 {templateType App\Presentation\Front\Blog\BlogTemplate}
 
+{* the list of all articles (default) and of one category (category) *}
 {block content}
-	<h1 n:block="title" class="display-6 fs-2 mb-4">{_'Blog'}</h1>
+	<h1 n:block="title" class="display-6 fs-2 mb-4">{if $category}{$category->name}{else}{_'Blog'}{/if}</h1>
+
+	<nav n:if="$categories" class="d-flex flex-wrap gap-2 mb-4" aria-label="{_'Categories'}">
+		<a n:href="default" n:class="'btn btn-sm', $category ? 'btn-outline-secondary' : 'btn-secondary'">{_'All'}</a>
+		{foreach $categories as $item}
+			<a n:href="category, category: $item->slug" n:class="'btn btn-sm', $category?->id === $item->id ? 'btn-secondary' : 'btn-outline-secondary'">
+				{$item->name}
+			</a>
+		{/foreach}
+	</nav>
 
 	<div class="vstack gap-3">
 		{foreach $articles as $article}
 			<article class="p-4 bg-body-tertiary rounded">
-				<div n:if="$article->published_at" class="small text-body-secondary mb-2">
-					{$article->published_at|date:'j. n. Y'}
+				<div class="small text-body-secondary mb-2">
+					<span n:if="$article->published_at">{$article->published_at|date:'j. n. Y'}</span>
+					{ifset $categories[$article->category_id]}
+						&middot; <a n:href="category, category: $categories[$article->category_id]->slug" class="link-secondary">{$categories[$article->category_id]->name}</a>
+					{/ifset}
+					{if $commentsAllowed && $article->comments_enabled}
+						&middot; <a n:href="detail#comments, slug: $article->slug" class="link-secondary">{_'Comments: %d', $commentCounts[$article->id] ?? 0}</a>
+					{/if}
 				</div>
 				<h2 class="h4 mb-2">
 					<a n:href="detail, slug: $article->slug" class="text-decoration-none">
 						{$article->title}
 					</a>
 				</h2>
-				<p class="text-body-secondary mb-0">
-					{if $article->perex}
-						{$article->perex}
-					{else}
-						{$article->content|stripHtml|truncate:180}
-					{/if}
-				</p>
+				<p n:if="$article->perex" class="text-body-secondary mb-0">{$article->perex}</p>
 			</article>
 		{else}
 			<p class="text-body-secondary">{_'No published articles yet.'}</p>

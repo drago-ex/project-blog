@@ -1,0 +1,9 @@
+extensions:
+	# Texy, its toolbar and the code highlighter (drago-ex/texy-toolbar); other packages may register it too
+	texy: Drago\Texy\DI\TexyExtension
+
+services:
+
+	# before the front router (9.conf.neon), whose <presenter>/<action> would take the blog addresses
+	router: {setup: {add(@router.blog)}}
+	router.blog: {factory: App\Presentation\Front\Blog\BlogRouter::create, autowired: no}

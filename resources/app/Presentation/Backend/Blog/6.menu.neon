@@ -1,0 +1,12 @@
+# Item of the administration menu (drago-ex/project-backend-ui merges the sidebar parameter of all packages).
+parameters:
+	sidebar:
+		Content:
+			-
+				title: Blog
+				link: 'Blog:*'
+				icon: fa-regular fa-newspaper bell
+				items:
+					- {title: Articles, link: 'Blog:'}
+					- {title: Categories, link: 'Blog:categories'}
+					- {title: Comments, link: 'Blog:comments'}

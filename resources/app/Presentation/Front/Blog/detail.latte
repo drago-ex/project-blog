@@ -3,29 +3,46 @@
 {block content}
 	<article class="mx-auto" style="max-width: 48rem">
 		<a n:href="default" class="d-inline-block mb-4 text-decoration-none">&larr; {_'Blog'}</a>
-		<div n:if="$article->published_at" class="small text-body-secondary mb-2">
-			{$article->published_at|date:'j. n. Y'}
+		<div class="small text-body-secondary mb-2">
+			<span n:if="$article->published_at">{$article->published_at|date:'j. n. Y'}</span>
+			{if $category}
+				&middot; <a n:href="category, category: $category->slug" class="link-secondary">{$category->name}</a>
+			{/if}
 		</div>
 		<h1 n:block="title" class="display-6 fs-2 mb-3">{$article->title}</h1>
 		<p n:if="$article->perex" class="lead text-body-secondary">{$article->perex}</p>
 
 		<div class="content mt-4">
-			{$article->content|noescape}
+			{$content|noescape}
 		</div>
 
-		<section n:if="$article->comments_enabled" class="mt-5 pt-4 border-top">
-			<h2 class="h4 mb-3">{_'Comments'}</h2>
+		<section n:if="$commentsEnabled" id="comments" class="mt-5 pt-4 border-top">
+			<h2 class="h4 mb-3">{_'Comments'} <span class="text-body-secondary fw-normal">({count($comments)})</span></h2>
 			<div class="vstack gap-3">
 				{foreach $comments as $comment}
 					<article class="p-3 bg-body-tertiary rounded">
 						<div class="fw-semibold">{$comment->author_name}</div>
 						<div class="small text-body-secondary mb-2">{$comment->created_at|date:'j. n. Y H:i'}</div>
-						<p class="mb-0">{$comment->content}</p>
+						<div class="comment-content">{$commentHtml[$comment->id]|noescape}</div>
 					</article>
 				{else}
 					<p class="text-body-secondary mb-0">{_'No comments yet.'}</p>
 				{/foreach}
 			</div>
+
+			<h3 class="h5 mt-4 mb-3">{_'Write a comment'}</h3>
+			{embed '../../Accessory/Widget/@form.latte', name: 'comment'}
+				{block form}
+					{include input, name: 'name', columns: 6}
+					{include input, name: 'email', columns: 6}
+					{include input, type: 'textarea', name: 'content', rows: 5}
+					<div class="d-none" aria-hidden="true">{input website}</div>
+					<div class="col-12">
+						<p class="small text-body-secondary">{_'Comments appear after approval.'}</p>
+						{include submit, name: 'send'}
+					</div>
+				{/block}
+			{/embed}
 		</section>
 	</article>
 {/block}

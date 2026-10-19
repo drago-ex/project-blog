@@ -10,6 +10,7 @@ use Drago\Utils\ExtraArrayHash;
 class ArticleValues extends ExtraArrayHash
 {
 	public const string
+		CategoryId = 'category_id',
 		Title = 'title',
 		Slug = 'slug',
 		Perex = 'perex',
@@ -19,11 +20,12 @@ class ArticleValues extends ExtraArrayHash
 		PublishedAt = 'published_at';
 
 	public ?int $id = null;
+	public ?int $category_id = null;
 	public string $title;
 	public string $slug;
 	public ?string $perex = null;
 	public ?string $content = null;
 	public string $status;
 	public bool $comments_enabled = true;
-	public ?string $published_at = null;
+	public ?\DateTimeImmutable $published_at = null;
 }

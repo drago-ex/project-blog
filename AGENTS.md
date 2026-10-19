@@ -7,25 +7,20 @@ Use this file as package-specific guidance when working in this repository. Keep
 - **Type**: drago-tools-resource
 - **Purpose**: Blog articles and comments for Drago Project.
 - **PHP**: >=8.3 <9
-- **Runtime dependencies**: nette/application (^3.2), nette/di (^3.2), drago-ex/application (^3.0), drago-ex/component (^2.0), drago-ex/database (^3.0), drago-ex/datagrid (^1.0), drago-ex/form (^2.0), drago-ex/migration (^2.3), drago-ex/project-auth (^2.0), drago-ex/project-backend (^2.0), drago-ex/project-settings (^1.0), drago-ex/translator (^4.0), drago-ex/utils (^2.0)
+- **Runtime dependencies**: nette/application (^3.2), nette/di (^3.2), drago-ex/application (^3.0), drago-ex/component (^2.0), drago-ex/database (^3.0), drago-ex/datagrid (^1.0), drago-ex/form (^2.0), drago-ex/migration (^2.0), drago-ex/permission (^2.0), drago-ex/project-auth (^2.0), drago-ex/project-backend (^2.0), drago-ex/project-settings (^1.0), drago-ex/translator (^4.0), drago-ex/utils (^2.0)
 - **License**: MIT
 
 ## Repository Layout
-- `permission.php`: basic access rules for `drago-ex/permission`, declared in `extra.drago-permission` and generated into the project by `create-permission --packages`.
+- `bin/`: command-line entry points.
 - `migrations/`: database migrations.
 - `resources/`: application resources contributed to the consuming Drago project.
 - `.github/`: CI workflows; keep their PHP versions and commands consistent with Composer and the package scripts.
 - `composer.json`: package metadata, dependency constraints, autoloading, and available Composer scripts.
 
-## Key Parts
-- `blog_article` and `blog_comment` (migration `001_blog.sql`); the migration also inserts the setting `blog.comments_enabled`, so it needs the `settings` table of project-settings and runs after it (`migration-priority` 110; packages without a priority have 100 and the blog name sorts before settings).
-- Backend `Backend:Blog` (administrators, writes checked with `blog-write`) manages articles with the datagrid; front `Front:Blog` (guests allowed on the whole resource) lists published articles and shows a detail by slug.
-- The package ships no `PermissionProvider` classes and no config registering them: they are generated from `permission.php`, and the project (`project-permission` or the `drago-ex/permission` config) registers them. The former `blog-read`/`blog-view`/`blog-comment` privileges were dropped: nothing checked them, and there is no comment form yet.
-
 ## Dependencies
 
 Composer constraints describe the package contract. Before changing integration behavior, inspect the source and the actual call sites in this package; do not infer runtime usage solely from dependency declarations.
-Development dependencies include phpstan/phpstan-nette (^2.0), drago-ex/project-tools (^2.0).
+Development dependencies include phpstan/phpstan-nette (^2.0), drago-ex/project-tools (^1.0).
 
 ## Essential Commands
 

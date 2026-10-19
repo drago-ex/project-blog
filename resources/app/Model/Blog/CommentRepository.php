@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Model\Blog;
 
 use Dibi\Connection;
+use Dibi\Exception;
+use Dibi\Fluent;
 use Drago\Attr\AttributeDetectionException;
 use Drago\Attr\Table;
 use Drago\Database\Database;
@@ -37,11 +39,71 @@ class CommentRepository
 
 
 	/**
-	 * @param array<string, mixed> $values
+	 * Numbers of approved comments by article id; articles without one are missing.
+	 * @param int[] $articleIds
+	 * @return array<int, int>
 	 * @throws AttributeDetectionException
 	 */
-	public function addComment(array $values): void
+	public function getApprovedCounts(array $articleIds): array
 	{
-		$this->insert($values)->execute();
+		if ($articleIds === []) {
+			return [];
+		}
+
+		/** @var array<int, int> */
+		return $this->read('%n, COUNT(*) AS count', CommentEntity::ColumnArticleId)
+			->where('%n IN %in', CommentEntity::ColumnArticleId, $articleIds)
+			->where('%n = ?', CommentEntity::ColumnApproved, 1)
+			->groupBy(CommentEntity::ColumnArticleId)
+			->fetchPairs(CommentEntity::ColumnArticleId, 'count');
+	}
+
+
+	/**
+	 * All comments with the title of their article (column article_title), the newest first. A subquery,
+	 * so the datagrid can filter and sort by plain column names.
+	 */
+	public function getCommentsFluent(): Fluent
+	{
+		return $this->connection
+			->select('*')
+			->from(
+				'(SELECT c.*, a.%n AS article_title FROM %n c JOIN %n a ON a.%n = c.%n) AS comments',
+				ArticleEntity::ColumnTitle,
+				CommentEntity::Table,
+				ArticleEntity::Table,
+				ArticleEntity::PrimaryKey,
+				CommentEntity::ColumnArticleId,
+			)
+			->orderBy(CommentEntity::PrimaryKey, 'DESC');
+	}
+
+
+	/**
+	 * New comments wait for approval in the administration.
+	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 */
+	public function addComment(int $articleId, string $authorName, ?string $authorEmail, string $content): void
+	{
+		$this->insert([
+			CommentEntity::ColumnArticleId => $articleId,
+			CommentEntity::ColumnAuthorName => $authorName,
+			CommentEntity::ColumnAuthorEmail => $authorEmail,
+			CommentEntity::ColumnContent => $content,
+			CommentEntity::ColumnApproved => 0,
+		])->execute();
+	}
+
+
+	/**
+	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 */
+	public function approve(int $id): void
+	{
+		$this->update([CommentEntity::ColumnApproved => 1])
+			->where('%n = ?', CommentEntity::PrimaryKey, $id)
+			->execute();
 	}
 }

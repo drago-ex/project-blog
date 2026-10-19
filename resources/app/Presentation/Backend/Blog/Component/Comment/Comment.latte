@@ -1,0 +1,22 @@
+{templateType App\Presentation\Backend\Blog\Component\BaseTemplate}
+{embed '../../../../Accessory/Widget/@modal.latte', modalId: $modalId, options: [header: 'danger']}
+	{block title}{_'Confirm delete'}{/block}
+	{block body}
+		{snippet content}
+			{include '../@modal-body.latte'}
+		{/snippet}
+	{/block}
+	{block footer}
+		{snippet modal}
+			{include '../@modal-footer.latte'}
+		{/snippet}
+	{/block}
+{/embed}
+
+{embed '../@datagrid-heading.latte'}
+	{block title}
+		{_'Comments'}
+	{/block}
+{/embed}
+
+{control dataGrid}

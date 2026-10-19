@@ -1,17 +1,18 @@
 {templateType App\Presentation\Backend\Blog\Component\BaseTemplate}
-{embed '../../../../Accessory/Widget/@offcanvas.latte', offcanvasId: $offcanvasId, size: '61rem'}
+{embed '../../../../Accessory/Widget/@offcanvas.latte', offcanvasId: $offcanvasId, size: '100vw'}
 	{block title}{_'Manage article'}{/block}
 	{block body}
 		{snippet offcanvas}
 			{embed '../../../../Accessory/Widget/@form.latte', class: 'ajax', name: 'article', najaHistory: 'off'}
 				{import '../../../../Accessory/Widget/@dismiss-button.latte'}
 				{block form}
-					{include input, name: 'title'}
-					{include input, name: 'slug'}
-					{include input, type: 'select', name: 'status'}
-					{include input, name: 'published_at'}
-					{include input, type: 'textarea', name: 'perex', rows: 4}
-					{include input, type: 'textarea', name: 'content', rows: 14}
+					{include input, name: 'title', columns: 6}
+					{include input, name: 'slug', columns: 6}
+					{include input, type: 'select', name: 'category_id', columns: 4}
+					{include input, type: 'select', name: 'status', columns: 4}
+					{include input, name: 'published_at', columns: 4}
+					{include input, type: 'textarea', name: 'perex', rows: 3}
+					{include input, type: 'textarea', name: 'content', rows: 24}
 					{include checkbox, name: 'comments_enabled'}
 					<div class="col-12">
 						{include buttonDismiss, type: 'offcanvas'}

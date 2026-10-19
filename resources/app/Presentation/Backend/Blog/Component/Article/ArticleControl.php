@@ -6,6 +6,7 @@ namespace App\Presentation\Backend\Blog\Component\Article;
 
 use App\Model\Blog\ArticleEntity;
 use App\Model\Blog\ArticleRepository;
+use App\Model\Blog\CategoryRepository;
 use App\Presentation\Backend\Blog\Component\BaseControl;
 use App\Presentation\Backend\Blog\Component\Factory;
 use Dibi\Exception;
@@ -15,6 +16,7 @@ use Drago\Attr\AttributeDetectionException;
 use Drago\Datagrid\DataGrid;
 use Drago\Datagrid\Exception\InvalidColumnException;
 use Drago\Form\Autocomplete;
+use Drago\Texy\TexyToolbar;
 use Nette\Application\Attributes\Requires;
 use Nette\Application\UI\Form;
 
@@ -24,6 +26,8 @@ class ArticleControl extends BaseControl
 	public function __construct(
 		public Factory $factory,
 		private readonly ArticleRepository $articleRepository,
+		private readonly CategoryRepository $categoryRepository,
+		private readonly TexyToolbar $texyToolbar,
 	) {
 		parent::__construct($this->factory);
 	}
@@ -62,6 +66,14 @@ class ArticleControl extends BaseControl
 	}
 
 
+	/** Returns the HTML of the content for the preview of the Texy toolbar. */
+	#[Requires(methods: 'POST', ajax: true)]
+	public function handlePreview(): void
+	{
+		$this->getPresenter()->sendJson($this->texyToolbar->getPreview());
+	}
+
+
 	/** @throws AttributeDetectionException|InvalidColumnException */
 	protected function createComponentDataGrid(): DataGrid
 	{
@@ -76,17 +88,31 @@ class ArticleControl extends BaseControl
 		$grid->addColumnText(ArticleEntity::ColumnSlug, 'Slug')
 			->setFilterText();
 
-		$grid->addColumnText(ArticleEntity::ColumnStatus, 'Status')
-			->setFilterSelect([
-				ArticleEntity::StatusDraft => 'Draft',
-				ArticleEntity::StatusPublished => 'Published',
-			]);
+		$categories = $this->categoryRepository->getNames();
+		$grid->addColumnText(
+			ArticleEntity::ColumnCategoryId,
+			'Category',
+			sortable: false,
+			formatter: fn(mixed $value): string => $categories[(int) $value] ?? '',
+		)->setFilterSelect($categories);
+
+		$statuses = [
+			ArticleEntity::StatusDraft => 'Draft',
+			ArticleEntity::StatusPublished => 'Published',
+		];
+		$grid->addColumnText(
+			ArticleEntity::ColumnStatus,
+			'Status',
+			formatter: fn(mixed $value): string => $this->translate($statuses[(string) $value] ?? (string) $value),
+		)->setFilterSelect($statuses);
 
 		$grid->addColumnDate(ArticleEntity::ColumnUpdatedAt, 'Updated at');
 
 		$user = $this->getPresenter()->getUser();
 
 		if ($user->isAllowed('Backend:Blog', 'blog-write')) {
+			// A click on the row opens the form, the Edit button is then hidden by the grid.
+			$grid->setRowClickAction('edit!');
 			$grid->addAction(
 				label: 'Edit',
 				signal: 'edit!',
@@ -118,11 +144,15 @@ class ArticleControl extends BaseControl
 			->setRequired('Please enter slug.')
 			->addRule($form::Pattern, 'Use lowercase letters, numbers and hyphens.', '[a-z0-9]+(?:-[a-z0-9]+)*');
 
-		$form->addTextAreaForm(ArticleValues::Perex, 'Perex')
-			->setHtmlAttribute('rows', 4);
+		$form->addSelect(ArticleValues::CategoryId, 'Category', $this->categoryRepository->getNames())
+			->setPrompt('No category');
 
-		$form->addTextAreaForm(ArticleValues::Content, 'Content')
-			->setHtmlAttribute('rows', 14);
+		$form->addTextAreaForm(ArticleValues::Perex, 'Perex')
+			->setNullable();
+
+		$form->addTextAreaForm(ArticleValues::Content, 'Content (Texy)')
+			->setNullable()
+			->setHtmlAttribute('data-texy-toolbar', $this->texyToolbar->getOptions($this->link('preview!')));
 
 		$form->addSelect(ArticleValues::Status, 'Status', [
 			ArticleEntity::StatusDraft => 'Draft',
@@ -131,10 +161,7 @@ class ArticleControl extends BaseControl
 			->setDefaultValue(ArticleEntity::StatusDraft)
 			->setRequired('Please select status.');
 
-		$form->addTextInput(ArticleValues::PublishedAt, 'Published at')
-			->setPlaceholder('YYYY-MM-DD HH:MM:SS')
-			->setAutocomplete(Autocomplete::Off)
-			->setNullable();
+		$form->addDateTime(ArticleValues::PublishedAt, 'Published at');
 
 		$form->addCheckbox(ArticleValues::CommentsEnabled, 'Allow comments')
 			->setDefaultValue(true);
@@ -178,6 +205,11 @@ class ArticleControl extends BaseControl
 	{
 		try {
 			$message = (int) $values->id > 0 ? 'Update successful.' : 'Insert successful.';
+
+			// the list is ordered by the publication date, so a published article always has one
+			if ($values->status === ArticleEntity::StatusPublished && $values->published_at === null) {
+				$values->published_at = new \DateTimeImmutable;
+			}
 
 			$this->articleRepository->save($values);
 			$this->addFlashMessage($message, Alert::Success);
