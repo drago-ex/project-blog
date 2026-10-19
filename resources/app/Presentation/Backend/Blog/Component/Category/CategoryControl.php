@@ -73,9 +73,7 @@ class CategoryControl extends BaseControl
 		$grid->addColumnText(CategoryEntity::ColumnSlug, 'Slug')
 			->setFilterText();
 
-		$user = $this->getPresenter()->getUser();
-
-		if ($user->isAllowed('Backend:Blog', 'blog-write')) {
+		if ($this->isWriteAllowed()) {
 			// A click on the row opens the form, the Edit button is then hidden by the grid.
 			$grid->setRowClickAction('edit');
 			$grid->addActionEdit(fn(int $id) => $this->handleEdit($id));
@@ -144,7 +142,6 @@ class CategoryControl extends BaseControl
 
 			$form->reset();
 			$this->closeComponent();
-			$this->redrawControl();
 			$this['dataGrid']->redrawDataGrid();
 
 		} catch (\Throwable $e) {

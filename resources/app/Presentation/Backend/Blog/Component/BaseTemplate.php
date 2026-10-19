@@ -12,4 +12,5 @@ class BaseTemplate extends ExtraTemplate
 	public string $offcanvasId;
 	public string $modalId;
 	public ?string $deleteTitle = null;
+	public bool $writeAllowed = false;
 }

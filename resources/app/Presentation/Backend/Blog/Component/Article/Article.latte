@@ -38,7 +38,7 @@
 	{/block}
 {/embed}
 
-{embed '../@datagrid-heading.latte', access: $user->isAllowed('Backend:Blog', 'blog-write')}
+{embed '../@datagrid-heading.latte', access: $writeAllowed}
 	{block title}
 		{_'Blog articles'}
 	{/block}

@@ -66,7 +66,7 @@ $builder->addSection('Content')
 	->setIcon('fa-regular fa-newspaper');
 ```
 
-The module uses the permission resource `Backend:Blog`. Write actions are checked with the `blog-write` privilege. The backend provider allows the administrator role.
+The module uses the permission resource `Backend:Blog`. Write actions are checked per component with the `articles-write`, `categories-write` and `comments-write` privileges, the same ones the `Authorization` trait requires for their signals. The backend provider allows the administrator role.
 
 ## Frontend
 

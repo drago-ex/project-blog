@@ -40,7 +40,19 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 		$template->offcanvasId = $this->getUniqueIdComponent(self::Offcanvas);
 		$template->modalId = $this->getUniqueIdComponent(self::Modal);
 		$template->deleteTitle = $this->deleteTitle;
+		$template->writeAllowed = $this->isWriteAllowed();
 		return $template;
+	}
+
+
+	/**
+	 * The privilege the Authorization trait requires for the signals of this control,
+	 * so the buttons are shown exactly to those who may use them.
+	 */
+	public function isWriteAllowed(): bool
+	{
+		$presenter = $this->getPresenter();
+		return $presenter->getUser()->isAllowed((string) $presenter->getName(), $this->getName() . '-write');
 	}
 
 
@@ -69,22 +81,22 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 
 		$this->deleteTitle = $title;
 		$this['delete']->setDefaults(['id' => $id]);
-		$this->redrawControl('content');
 		$this->redrawModal();
 	}
 
 
+	/** Opens the offcanvas and redraws only its form (snippet offcanvas). */
 	public function redrawOffCanvas(): void
 	{
 		$this->offCanvasComponent(self::Offcanvas);
-		$this->redrawControl();
 	}
 
 
+	/** Opens the modal and redraws its body (snippet content) and footer with the form (snippet modal). */
 	public function redrawModal(): void
 	{
 		$this->modalComponent(self::Modal);
-		$this->redrawControl();
+		$this->redrawControl('content');
 	}
 
 
@@ -117,7 +129,6 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 			$this->addRedraw($this->snippetMessage);
 
 			$this->closeComponent();
-			$this->redrawControl();
 
 			$dataGrid = $this->getComponent('dataGrid');
 

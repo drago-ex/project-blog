@@ -70,9 +70,7 @@ class CommentControl extends BaseControl
 			'1' => 'Approved',
 		]);
 
-		$user = $this->getPresenter()->getUser();
-
-		if ($user->isAllowed('Backend:Blog', 'blog-write')) {
+		if ($this->isWriteAllowed()) {
 			$grid->addAction(
 				name: 'approve',
 				label: 'Approve',
@@ -122,5 +120,6 @@ class CommentControl extends BaseControl
 		$this->commentRepository->approve($id);
 		$this->addFlashMessage('The comment has been approved.', Alert::Success);
 		$this->addRedraw($this->snippetMessage);
+		$this['dataGrid']->redrawDataGrid();
 	}
 }
