@@ -9,7 +9,6 @@ use App\Model\Blog\CategoryRepository;
 use App\Presentation\Backend\Blog\Component\BaseControl;
 use App\Presentation\Backend\Blog\Component\Factory;
 use Dibi\Exception;
-use Dibi\Result;
 use Drago\Application\UI\Alert;
 use Drago\Attr\AttributeDetectionException;
 use Drago\Datagrid\DataGrid;
@@ -78,20 +77,9 @@ class CategoryControl extends BaseControl
 
 		if ($user->isAllowed('Backend:Blog', 'blog-write')) {
 			// A click on the row opens the form, the Edit button is then hidden by the grid.
-			$grid->setRowClickAction('edit!');
-			$grid->addAction(
-				label: 'Edit',
-				signal: 'edit!',
-				class: 'ajax btn btn-xs btn-primary',
-				callback: fn(int $id) => $this->handleEdit($id),
-			);
-
-			$grid->addAction(
-				label: 'Delete',
-				signal: 'delete!',
-				class: 'ajax btn btn-xs btn-danger',
-				callback: fn(int $id) => $this->handleDelete($id),
-			);
+			$grid->setRowClickAction('edit');
+			$grid->addActionEdit(fn(int $id) => $this->handleEdit($id));
+			$grid->addActionDelete(fn(int $id) => $this->handleDelete($id));
 		}
 
 		return $grid;
@@ -110,7 +98,7 @@ class CategoryControl extends BaseControl
 			->setRequired('Please enter slug.')
 			->addRule($form::Pattern, 'Use lowercase letters, numbers and hyphens.', '[a-z0-9]+(?:-[a-z0-9]+)*');
 
-		$form->addHidden('id', $this->id)
+		$form->addHidden('id')
 			->setNullable()
 			->addRule($form::Integer);
 
@@ -124,9 +112,9 @@ class CategoryControl extends BaseControl
 	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 */
-	protected function getResultRepository(int $id): Result|int|null
+	protected function deleteItem(int $id): void
 	{
-		return $this->categoryRepository
+		$this->categoryRepository
 			->delete(CategoryEntity::PrimaryKey, $id)
 			->execute();
 	}
@@ -136,7 +124,7 @@ class CategoryControl extends BaseControl
 	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 */
-	protected function getItemRepository(int $id): string|null
+	protected function getItemTitle(int $id): ?string
 	{
 		return $this->categoryRepository
 			->get($id)

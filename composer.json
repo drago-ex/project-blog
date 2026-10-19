@@ -10,7 +10,7 @@
 		"drago-ex/application": "^3.0",
 		"drago-ex/component": "^2.0",
 		"drago-ex/database": "^3.0",
-		"drago-ex/datagrid": "^1.0",
+		"drago-ex/datagrid": "^2.0",
 		"drago-ex/form": "^2.0",
 		"drago-ex/migration": "^2.3",
 		"drago-ex/project-auth": "^2.0",

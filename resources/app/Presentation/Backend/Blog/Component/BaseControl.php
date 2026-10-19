@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Presentation\Backend\Blog\Component;
 
-use Dibi\Result;
 use Drago\Application\UI\Alert;
 use Drago\Application\UI\ExtraControl;
 use Drago\Component\Component;
 use Drago\Component\ModalHandle;
 use Drago\Component\OffcanvasHandle;
 use Drago\Datagrid\DataGrid;
-use Nette\Application\Attributes\Parameter;
 use Nette\Application\Attributes\Requires;
 use Nette\Application\UI\Form;
 use Nette\Application\UI\Template;
 use Nette\Forms\Controls\SubmitButton;
+use Tracy\Debugger;
+use Tracy\ILogger;
 
 
 /** @property-read BaseTemplate $template */
@@ -23,8 +23,6 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 {
 	use Component;
 
-	#[Parameter]
-	public ?int $id = null;
 	public ?string $deleteTitle = null;
 	protected string $snippetMessage = 'message';
 
@@ -60,14 +58,17 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 	}
 
 
+	/** Opens the confirmation dialog; its form posts the id to delete(). */
 	#[Requires(ajax: true)]
 	public function handleDelete(int $id): void
 	{
-		$this->id = $id;
-		$item = $this->getItemRepository($id);
-		$item ?: $this->error();
+		$title = $this->getItemTitle($id);
+		if ($title === null) {
+			$this->error();
+		}
 
-		$this->deleteTitle = $item;
+		$this->deleteTitle = $title;
+		$this['delete']->setDefaults(['id' => $id]);
 		$this->redrawControl('content');
 		$this->redrawModal();
 	}
@@ -87,15 +88,17 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 	}
 
 
-	abstract protected function getResultRepository(int $id): Result|int|null;
+	/** Deletes the record; an exception with code 1 shows its message to the user. */
+	abstract protected function deleteItem(int $id): void;
 
 
-	abstract protected function getItemRepository(int $id): string|null;
+	/** Title of the record shown in the confirmation dialog, null when it does not exist. */
+	abstract protected function getItemTitle(int $id): ?string;
 
 
 	protected function createComponentDelete(): Form
 	{
-		$form = $this->factory->createDelete($this->id);
+		$form = $this->factory->createDelete();
 		$form->addSubmit('confirm', 'Confirm')
 			->onClick[] = $this->delete(...);
 
@@ -108,11 +111,11 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 		$form = $button->getForm();
 
 		try {
-			$id = $form->getValues()['id'];
-			$this->getResultRepository($id);
+			$this->deleteItem($form->getValues()['id']);
 
 			$this->addFlashMessage('Delete successful.', Alert::Success);
 			$this->addRedraw($this->snippetMessage);
+
 			$this->closeComponent();
 			$this->redrawControl();
 
@@ -122,8 +125,16 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 				$dataGrid->redrawDataGrid();
 			}
 
-		} catch (\Throwable) {
-			$this->addFlashMessage('Unknown status code.', Alert::Warning);
+		} catch (\Throwable $e) {
+			// Code 1 marks a message meant for the user; anything else is unexpected and gets logged.
+			if ($e->getCode() === 1) {
+				$message = $e->getMessage();
+			} else {
+				Debugger::log($e, ILogger::EXCEPTION);
+				$message = 'Unknown status code.';
+			}
+
+			$this->addFlashMessage($message, Alert::Warning);
 			$this->addRedraw($this->snippetMessage);
 		}
 	}

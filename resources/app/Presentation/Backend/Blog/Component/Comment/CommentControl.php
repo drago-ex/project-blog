@@ -9,7 +9,6 @@ use App\Model\Blog\CommentRepository;
 use App\Presentation\Backend\Blog\Component\BaseControl;
 use App\Presentation\Backend\Blog\Component\Factory;
 use Dibi\Exception;
-use Dibi\Result;
 use Drago\Application\UI\Alert;
 use Drago\Attr\AttributeDetectionException;
 use Drago\Datagrid\DataGrid;
@@ -75,19 +74,14 @@ class CommentControl extends BaseControl
 
 		if ($user->isAllowed('Backend:Blog', 'blog-write')) {
 			$grid->addAction(
+				name: 'approve',
 				label: 'Approve',
-				signal: 'approve!',
-				class: 'ajax btn btn-xs btn-success',
 				callback: fn(int $id) => $this->approve($id),
+				class: 'ajax btn btn-xs btn-success',
 				condition: fn(array $row): bool => (int) $row[CommentEntity::ColumnApproved] === 0,
 			);
 
-			$grid->addAction(
-				label: 'Delete',
-				signal: 'delete!',
-				class: 'ajax btn btn-xs btn-danger',
-				callback: fn(int $id) => $this->handleDelete($id),
-			);
+			$grid->addActionDelete(fn(int $id) => $this->handleDelete($id));
 		}
 
 		return $grid;
@@ -98,9 +92,9 @@ class CommentControl extends BaseControl
 	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 */
-	protected function getResultRepository(int $id): Result|int|null
+	protected function deleteItem(int $id): void
 	{
-		return $this->commentRepository
+		$this->commentRepository
 			->delete(CommentEntity::PrimaryKey, $id)
 			->execute();
 	}
@@ -110,7 +104,7 @@ class CommentControl extends BaseControl
 	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 */
-	protected function getItemRepository(int $id): string|null
+	protected function getItemTitle(int $id): ?string
 	{
 		$comment = $this->commentRepository->get($id)->record();
 		return $comment === null

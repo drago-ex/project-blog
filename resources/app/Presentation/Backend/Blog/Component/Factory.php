@@ -11,11 +11,11 @@ use Nette\Application\UI\Form;
 /** @extends \Drago\Application\UI\Factory<Forms> */
 readonly class Factory extends \Drago\Application\UI\Factory
 {
-	public function createDelete(?int $id = null): Form
+	public function createDelete(): Form
 	{
 		$form = $this->create();
-		$form->addHidden('id', $id)
-			->setNullable()
+		$form->addHidden('id')
+			->setRequired()
 			->addRule($form::Integer);
 
 		return $form;
