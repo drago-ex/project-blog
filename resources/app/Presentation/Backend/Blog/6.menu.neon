@@ -6,7 +6,8 @@ parameters:
 				title: Blog
 				link: 'Blog:*'
 				icon: fa-regular fa-newspaper bell
+				allowAny: [Backend:Blog, default-read, categories-read, comments-read]
 				items:
-					- {title: Articles, link: 'Blog:'}
-					- {title: Categories, link: 'Blog:categories'}
-					- {title: Comments, link: 'Blog:comments'}
+					- {title: Articles, link: 'Blog:', allow: [Backend:Blog, default-read]}
+					- {title: Categories, link: 'Blog:categories', allow: [Backend:Blog, categories-read]}
+					- {title: Comments, link: 'Blog:comments', allow: [Backend:Blog, comments-read]}

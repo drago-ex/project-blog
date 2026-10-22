@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Presentation\Front\Blog;
 
+use Drago\Form\Forms;
 use Nette;
 use Nette\Application\Routers\RouteList;
 
@@ -16,15 +17,12 @@ final class BlogRouter
 {
 	use Nette\StaticClass;
 
-	private const string Slug = '[a-z0-9]+(?:-[a-z0-9]+)*';
-
-
 	public static function create(): RouteList
 	{
 		$router = new RouteList;
 		$router->withModule('Front')
-			->addRoute('[<lang=cs cs|en>/]blog/kategorie/<category ' . self::Slug . '>', 'Blog:category')
-			->addRoute('[<lang=cs cs|en>/]blog/<slug ' . self::Slug . '>', 'Blog:detail')
+			->addRoute('[<lang=cs cs|en>/]blog/kategorie/<category ' . Forms::SlugPattern . '>', 'Blog:category')
+			->addRoute('[<lang=cs cs|en>/]blog/<slug ' . Forms::SlugPattern . '>', 'Blog:detail')
 			->addRoute('[<lang=cs cs|en>/]blog', 'Blog:default');
 
 		return $router;

@@ -91,10 +91,8 @@ class CategoryControl extends BaseControl
 			->setAutocomplete(Autocomplete::Off)
 			->setRequired('Please enter title.');
 
-		$form->addTextInput(CategoryValues::Slug, 'Slug')
-			->setAutocomplete(Autocomplete::Off)
-			->setRequired('Please enter slug.')
-			->addRule($form::Pattern, 'Use lowercase letters, numbers and hyphens.', '[a-z0-9]+(?:-[a-z0-9]+)*');
+		$form->addSlugInput(CategoryValues::Slug, 'Slug')
+			->setRequired('Please enter slug.');
 
 		$form->addHidden('id')
 			->setNullable()

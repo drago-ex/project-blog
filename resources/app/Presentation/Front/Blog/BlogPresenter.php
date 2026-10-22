@@ -136,7 +136,7 @@ final class BlogPresenter extends BasePresenter
 			->addRule($form::Email, 'Please enter a valid email address.')
 			->addRule($form::MaxLength, 'The email can have at most %d characters.', 255);
 
-		$form->addTextAreaForm('content', 'Comment')
+		$form->addTextAreaInput('content', 'Comment')
 			->setHtmlAttribute('data-texy-toolbar', $this->texyToolbar->getBasicOptions($this->link('commentPreview!')))
 			->setRequired('Please write your comment.')
 			->addRule($form::MaxLength, 'The comment can have at most %d characters.', 2000);
