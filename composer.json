@@ -18,7 +18,8 @@
 		"drago-ex/project-settings": "^1.0",
 		"drago-ex/translator": "^4.0",
 		"drago-ex/utils": "^2.0",
-		"drago-ex/texy-toolbar": "dev-main"
+		"drago-ex/texy-toolbar": "dev-main",
+		"drago-ex/project-user": "^2.0"
 	},
 	"suggest": {
 		"drago-ex/permission": "Generates the access rules of the blog administration and the articles (permission.php).",

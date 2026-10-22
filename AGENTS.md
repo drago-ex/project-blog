@@ -7,7 +7,7 @@ Use this file as package-specific guidance when working in this repository. Keep
 - **Type**: drago-tools-resource
 - **Purpose**: Blog articles and comments for Drago Project.
 - **PHP**: >=8.3 <9
-- **Runtime dependencies**: nette/application (^3.2), nette/di (^3.2), drago-ex/application (^3.0), drago-ex/component (^2.0), drago-ex/database (^3.0), drago-ex/datagrid (^2.0), drago-ex/form (^3.0), drago-ex/migration (^2.0), drago-ex/permission (^2.0), drago-ex/project-auth (^2.0), drago-ex/project-backend (^2.0), drago-ex/project-settings (^1.0), drago-ex/translator (^4.0), drago-ex/utils (^2.0)
+- **Runtime dependencies**: nette/application (^3.2), nette/di (^3.2), drago-ex/application (^3.0), drago-ex/component (^2.0), drago-ex/database (^3.0), drago-ex/datagrid (^2.0), drago-ex/form (^3.0), drago-ex/migration (^2.0), drago-ex/permission (^2.0), drago-ex/project-auth (^2.0), drago-ex/project-backend (^2.0), drago-ex/project-settings (^1.0), drago-ex/translator (^4.0), drago-ex/utils (^2.0), drago-ex/project-user (^2.0)
 - **License**: MIT
 
 ## Repository Layout
@@ -16,6 +16,9 @@ Use this file as package-specific guidance when working in this repository. Keep
 - `resources/`: application resources contributed to the consuming Drago project.
 - `.github/`: CI workflows; keep their PHP versions and commands consistent with Composer and the package scripts.
 - `composer.json`: package metadata, dependency constraints, autoloading, and available Composer scripts.
+
+## Buttons and permissions
+- `Component\BaseControl::isWriteAllowed()` asks `CurrentUser::isPermitted(presenter, "{control}-write")` of drago-ex/project-user, the privilege the Authorization trait of drago-ex/permission checks for the control's signals; without drago-ex/permission everything is allowed, so the administration also works without it.
 
 ## Dependencies
 
