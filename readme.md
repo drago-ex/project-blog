@@ -53,44 +53,43 @@ generates a provider from it (set up as its README shows):
 php vendor/bin/create-permission --packages
 ```
 
-For dynamic permissions set in the administration, install [drago-ex/project-permission](https://github.com/drago-ex/project-permission)
-first and then:
+To show the add, edit and delete buttons only to roles with the privilege, add the `WriteAccess` trait of
+drago-ex/permission; its `isWriteAllowed()` asks for the `{component}-write` privilege. In
+`app/Presentation/Backend/Blog/Component/BaseControl.php` use the trait and pass the result to the template
+(with `public bool $writeAllowed = false;` in `BaseTemplate`):
 
-- import the privileges of the blog into its `resources` table, so roles can be given them (e.g. a moderator who only approves comments):
+```php
+use Drago\Permission\WriteAccess;
 
-  ```bash
-  php vendor/bin/migration db:migrate vendor/drago-ex/project-blog/migrations-permission
-  ```
+abstract class BaseControl extends ExtraControl implements OffcanvasHandle, ModalHandle
+{
+	use Component;
+	use WriteAccess;
 
-- to show the add, edit and delete buttons only to roles with the privilege, add the `WriteAccess` trait that
-  project-permission installs; its `isWriteAllowed()` asks for the `{component}-write` privilege. In
-  `app/Presentation/Backend/Blog/Component/BaseControl.php` use the trait and pass the result to the template
-  (with `public bool $writeAllowed = false;` in `BaseTemplate`):
+	public function createRender(): Template
+	{
+		// ...
+		$template->writeAllowed = $this->isWriteAllowed();
+```
 
-  ```php
-  use App\Presentation\Backend\Accessory\WriteAccess;
+then hide the grid actions by it and show the add button only when allowed:
 
-  abstract class BaseControl extends ExtraControl implements OffcanvasHandle, ModalHandle
-  {
-  	use Component;
-  	use WriteAccess;
+```php
+$grid->addActionEdit(fn(int $id) => $this->handleEdit($id))
+	->setVisible($this->isWriteAllowed());
+```
 
-  	public function createRender(): Template
-  	{
-  		// ...
-  		$template->writeAllowed = $this->isWriteAllowed();
-  ```
+```latte
+{embed '../@datagrid-heading.latte', addButton: $writeAllowed}
+```
 
-  then hide the grid actions by it and show the add button only when allowed:
+For dynamic permissions set in the administration, install
+[drago-ex/project-permission](https://github.com/drago-ex/project-permission) and import the privileges of the blog
+into its `resources` table by hand, so roles can be given them (e.g. a moderator who only approves comments):
 
-  ```php
-  $grid->addActionEdit(fn(int $id) => $this->handleEdit($id))
-  	->setVisible($this->isWriteAllowed());
-  ```
-
-  ```latte
-  {embed '../@datagrid-heading.latte', addButton: $writeAllowed}
-  ```
+```bash
+php vendor/bin/migration db:migrate vendor/drago-ex/project-blog/migrations-permission
+```
 
 In a project composed by [netis](https://github.com/netis-cms/netis), project-preset makes these changes for you.
 
