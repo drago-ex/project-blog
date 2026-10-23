@@ -62,3 +62,12 @@
 "This category already exists.": "Tato kategorie již existuje."
 "All": "Vše"
 "Comments: %d": "Komentáře: %d"
+
+# privileges for drago-ex/project-permission (migrations-permission)
+"View articles": "Zobrazit články"
+"Sort and filter articles": "Řadit a filtrovat články"
+"Manage articles": "Správa článků"
+"View categories": "Zobrazit kategorie"
+"Manage categories": "Správa kategorií"
+"View comments": "Zobrazit komentáře"
+"Approve and delete comments": "Schvalovat a mazat komentáře"

@@ -73,12 +73,10 @@ class CategoryControl extends BaseControl
 		$grid->addColumnText(CategoryEntity::ColumnSlug, 'Slug')
 			->setFilterText();
 
-		if ($this->isWriteAllowed()) {
-			// A click on the row opens the form, the Edit button is then hidden by the grid.
-			$grid->setRowClickAction('edit');
-			$grid->addActionEdit(fn(int $id) => $this->handleEdit($id));
-			$grid->addActionDelete(fn(int $id) => $this->handleDelete($id));
-		}
+		// A click on the row opens the form, the Edit button is then hidden by the grid.
+		$grid->setRowClickAction('edit');
+		$grid->addActionEdit(fn(int $id) => $this->handleEdit($id));
+		$grid->addActionDelete(fn(int $id) => $this->handleDelete($id));
 
 		return $grid;
 	}

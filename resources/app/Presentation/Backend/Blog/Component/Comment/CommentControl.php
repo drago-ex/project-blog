@@ -70,17 +70,15 @@ class CommentControl extends BaseControl
 			'1' => 'Approved',
 		]);
 
-		if ($this->isWriteAllowed()) {
-			$grid->addAction(
-				name: 'approve',
-				label: 'Approve',
-				callback: fn(int $id) => $this->approve($id),
-				class: 'ajax btn btn-xs btn-success',
-				condition: fn(array $row): bool => (int) $row[CommentEntity::ColumnApproved] === 0,
-			);
+		$grid->addAction(
+			name: 'approve',
+			label: 'Approve',
+			callback: fn(int $id) => $this->approve($id),
+			class: 'ajax btn btn-xs btn-success',
+			condition: fn(array $row): bool => (int) $row[CommentEntity::ColumnApproved] === 0,
+		);
 
-			$grid->addActionDelete(fn(int $id) => $this->handleDelete($id));
-		}
+		$grid->addActionDelete(fn(int $id) => $this->handleDelete($id));
 
 		return $grid;
 	}

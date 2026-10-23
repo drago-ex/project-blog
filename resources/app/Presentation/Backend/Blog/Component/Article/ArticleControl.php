@@ -109,12 +109,10 @@ class ArticleControl extends BaseControl
 
 		$grid->addColumnDate(ArticleEntity::ColumnUpdatedAt, 'Updated at');
 
-		if ($this->isWriteAllowed()) {
-			// A click on the row opens the form, the Edit button is then hidden by the grid.
-			$grid->setRowClickAction('edit');
-			$grid->addActionEdit(fn(int $id) => $this->handleEdit($id));
-			$grid->addActionDelete(fn(int $id) => $this->handleDelete($id));
-		}
+		// A click on the row opens the form, the Edit button is then hidden by the grid.
+		$grid->setRowClickAction('edit');
+		$grid->addActionEdit(fn(int $id) => $this->handleEdit($id));
+		$grid->addActionDelete(fn(int $id) => $this->handleDelete($id));
 
 		return $grid;
 	}
