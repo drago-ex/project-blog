@@ -102,6 +102,9 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 		$form->addSubmit('confirm', 'Confirm')
 			->onClick[] = $this->delete(...);
 
+		// an invalid id (e.g. a tampered hidden field) keeps the dialog open with the form error
+		$form->onError[] = fn() => $this->redrawModal();
+
 		return $form;
 	}
 

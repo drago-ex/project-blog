@@ -1,8 +1,23 @@
 --
+--  Blog categories, an article has at most one
+-- --------------------------------------------
+CREATE TABLE blog_category (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  slug VARCHAR(255) NOT NULL,
+  name VARCHAR(255) NOT NULL,
+
+  CONSTRAINT uq_blog_category_slug UNIQUE (slug)
+)
+  ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
+--
 --  Blog
 -- -----
 CREATE TABLE blog_article (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  category_id INT UNSIGNED NULL,
   slug VARCHAR(255) NOT NULL,
   title VARCHAR(255) NOT NULL,
   perex TEXT NULL,
@@ -14,7 +29,10 @@ CREATE TABLE blog_article (
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
   CONSTRAINT uq_blog_article_slug UNIQUE (slug),
-  CONSTRAINT chk_blog_article_status CHECK (status IN ('draft', 'published'))
+  CONSTRAINT chk_blog_article_status CHECK (status IN ('draft', 'published')),
+  CONSTRAINT fk_blog_article_category
+    FOREIGN KEY (category_id) REFERENCES blog_category(id)
+    ON DELETE SET NULL
 )
   ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4

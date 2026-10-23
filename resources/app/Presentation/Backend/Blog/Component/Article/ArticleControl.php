@@ -18,6 +18,7 @@ use Drago\Form\Autocomplete;
 use Drago\Texy\TexyToolbar;
 use Nette\Application\Attributes\Requires;
 use Nette\Application\UI\Form;
+use Nette\Utils\Html;
 
 
 class ArticleControl extends BaseControl
@@ -95,7 +96,7 @@ class ArticleControl extends BaseControl
 			'Category',
 			sortable: false,
 			formatter: fn(mixed $value): string => $categories[(int) $value] ?? '',
-		)->setFilterSelect($categories);
+		)->setFilterSelect($categories, translate: false);
 
 		$statuses = [
 			ArticleEntity::StatusDraft => 'Draft',
@@ -128,7 +129,9 @@ class ArticleControl extends BaseControl
 		$form->addSlugInput(ArticleValues::Slug, 'Slug')
 			->setRequired('Please enter slug.');
 
-		$form->addSelect(ArticleValues::CategoryId, 'Category', $this->categoryRepository->getNames())
+		// Category names are data, not texts: wrapped in Html they are not translated, the caption and prompt still are.
+		$categories = array_map(fn(string $name): Html => Html::el()->setText($name), $this->categoryRepository->getNames());
+		$form->addSelect(ArticleValues::CategoryId, 'Category', $categories)
 			->setPrompt('No category');
 
 		$form->addTextAreaInput(ArticleValues::Perex, 'Perex')
@@ -156,6 +159,8 @@ class ArticleControl extends BaseControl
 
 		$form->addSubmit('send', 'Send');
 		$form->onSuccess[] = $this->processArticleForm(...);
+		// errors found on the server (e.g. a reserved slug) are shown in the open offcanvas
+		$form->onError[] = fn() => $this->redrawOffCanvas();
 		return $form;
 	}
 
