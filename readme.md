@@ -34,8 +34,7 @@ in this package's `composer.json`. To skip this package, set `"skip": true` unde
 php vendor/bin/migration db:migrate --packages
 ```
 
-The migrations create the tables `blog_article`, `blog_category` and `blog_comment`, and the setting
-`blog.comments_enabled` of [drago-ex/project-settings](https://github.com/drago-ex/project-settings).
+The migrations create the tables `blog_article`, `blog_category` and `blog_comment`.
 
 ## Assets
 
@@ -130,7 +129,16 @@ The routes `/blog`, `/blog/kategorie/<slug>` and `/blog/<slug>` (and with `/en/`
 Article content is written in [Texy](https://texy.info/en/syntax) and printed safely by drago-ex/texy-toolbar;
 the perex is the meta description of the article.
 
+The list shows the articles as cards with a cover image, the author with a [Gravatar](https://gravatar.com) avatar
+(drago-ex/gravatar, registered in `Front/Blog/7.conf.neon`) and a relative date (`{$date|ago}`, e.g. "2 months ago").
+The card is `Front/Blog/@article-card.latte`, so other pages can show articles the same way. The author is the
+signed-in user who created the article.
+
+The cover image is uploaded in the article form. It is made smaller to fit 1600 × 1200 px and saved in
+`www/upload/blog/`; replacing or removing the image and deleting the article delete the file. Resizing needs the
+PHP extension GD (the Docker image of drago-ex/project-docker has it). Add `/www/upload/` to `.gitignore`.
+
 Anyone may write a comment; it is shown after an administrator approves it. Comments use basic Texy (no images,
-headings or HTML) and are allowed by the setting `blog.comments_enabled` together with the article's own switch.
+headings or HTML). Each article allows or disallows them by its own "Allow comments" switch.
 
 The frontend permission provider uses the resource `Front:Blog` and allows it to guests.

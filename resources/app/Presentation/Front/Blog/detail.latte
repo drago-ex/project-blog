@@ -12,6 +12,16 @@
 		<h1 n:block="title" class="display-6 fs-2 mb-3">{$article->title}</h1>
 		<p n:if="$article->perex" class="lead text-body-secondary">{$article->perex}</p>
 
+		<div n:if="$author" class="d-flex align-items-center gap-2 mb-4 small text-body-secondary">
+			<img src={$author[avatar]} alt="" width="40" height="40" class="rounded-circle">
+			<div>
+				<div class="fw-semibold text-body">{$author[name]}</div>
+				<time n:if="$article->published_at" datetime={$article->published_at|date:'c'}>{$article->published_at|ago}</time>
+			</div>
+		</div>
+
+		<img n:if="$article->image" src="{$basePath}/{App\Model\Blog\ArticleImages::Path}/{$article->image}" alt="" class="img-fluid w-100 rounded-3 mb-4">
+
 		<div class="content mt-4">
 			{$content|noescape}
 		</div>

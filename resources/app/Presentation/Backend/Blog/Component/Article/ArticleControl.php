@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Presentation\Backend\Blog\Component\Article;
 
 use App\Model\Blog\ArticleEntity;
+use App\Model\Blog\ArticleImages;
 use App\Model\Blog\ArticleRepository;
 use App\Model\Blog\CategoryRepository;
 use App\Presentation\Backend\Blog\Component\BaseControl;
@@ -23,9 +24,14 @@ use Nette\Utils\Html;
 
 class ArticleControl extends BaseControl
 {
+	/** Largest uploaded cover image (8 MB); it is made smaller by ArticleImages. */
+	private const int MaxImageSize = 8 * 1024 * 1024;
+
+
 	public function __construct(
 		public Factory $factory,
 		private readonly ArticleRepository $articleRepository,
+		private readonly ArticleImages $articleImages,
 		private readonly CategoryRepository $categoryRepository,
 		private readonly TexyToolbar $texyToolbar,
 	) {
@@ -110,6 +116,23 @@ class ArticleControl extends BaseControl
 
 		$grid->addColumnDate(ArticleEntity::ColumnUpdatedAt, 'Updated at');
 
+		// One click switches the comments of the article; the row shows the action for its current state.
+		$grid->addAction(
+			name: 'disableComments',
+			label: 'Disable comments',
+			callback: fn(int $id) => $this->setCommentsEnabled($id, false),
+			class: 'ajax btn btn-xs btn-outline-secondary',
+			condition: fn(array $row): bool => (int) $row[ArticleEntity::ColumnCommentsEnabled] === 1,
+		);
+
+		$grid->addAction(
+			name: 'enableComments',
+			label: 'Enable comments',
+			callback: fn(int $id) => $this->setCommentsEnabled($id, true),
+			class: 'ajax btn btn-xs btn-outline-success',
+			condition: fn(array $row): bool => (int) $row[ArticleEntity::ColumnCommentsEnabled] === 0,
+		);
+
 		// A click on the row opens the form, the Edit button is then hidden by the grid.
 		$grid->setRowClickAction('edit');
 		$grid->addActionEdit(fn(int $id) => $this->handleEdit($id));
@@ -136,6 +159,12 @@ class ArticleControl extends BaseControl
 
 		$form->addTextAreaInput(ArticleValues::Perex, 'Perex')
 			->setNullable();
+
+		$form->addUpload(ArticleValues::Upload, 'Image')
+			->addRule($form::Image, 'The image must be JPEG, PNG, GIF or WebP.')
+			->addRule($form::MaxFileSize, 'The image can have at most 8 MB.', self::MaxImageSize);
+
+		$form->addCheckbox(ArticleValues::RemoveImage, 'Remove the image');
 
 		$form->addTextAreaInput(ArticleValues::Content, 'Content (Texy)')
 			->setHtmlAttribute('data-texy-toolbar', $this->texyToolbar->getOptions($this->link('preview!')))
@@ -171,9 +200,12 @@ class ArticleControl extends BaseControl
 	 */
 	protected function deleteItem(int $id): void
 	{
+		$image = $this->articleRepository->get($id)->record()?->image;
 		$this->articleRepository
 			->delete(ArticleEntity::PrimaryKey, $id)
 			->execute();
+
+		$this->articleImages->delete($image);
 	}
 
 
@@ -190,8 +222,31 @@ class ArticleControl extends BaseControl
 	}
 
 
+	/**
+	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 */
+	private function setCommentsEnabled(int $id, bool $enabled): void
+	{
+		$this->articleRepository->setCommentsEnabled($id, $enabled);
+		$this->addFlashMessage($enabled ? 'Comments have been enabled.' : 'Comments have been disabled.', Alert::Success);
+		$this->addRedraw($this->snippetMessage);
+		$this['dataGrid']->redrawDataGrid();
+	}
+
+
 	private function processArticleForm(Form $form, ArticleValues $values): void
 	{
+		// the image fields are not columns, they decide the column image
+		$upload = $values->upload;
+		$removeImage = $values->remove_image;
+		unset($values->upload, $values->remove_image);
+
+		$oldImage = (int) $values->id > 0
+			? $this->articleRepository->get((int) $values->id)->record()?->image
+			: null;
+		$newImage = null;
+
 		try {
 			$message = (int) $values->id > 0 ? 'Update successful.' : 'Insert successful.';
 
@@ -200,7 +255,24 @@ class ArticleControl extends BaseControl
 				$values->published_at = new \DateTimeImmutable;
 			}
 
+			// the signed-in user who creates the article is its author
+			if ((int) $values->id === 0) {
+				$userId = $this->getPresenter()->getUser()->getId();
+				$values->author_id = is_numeric($userId) ? (int) $userId : null;
+			}
+
+			if ($upload?->isOk()) {
+				$values->image = $newImage = $this->articleImages->save($upload);
+			} elseif ($removeImage) {
+				$values->image = null;
+			}
+
 			$this->articleRepository->save($values);
+
+			if ($oldImage !== null && ($newImage !== null || $removeImage)) {
+				$this->articleImages->delete($oldImage);
+			}
+
 			$this->addFlashMessage($message, Alert::Success);
 			$this->addRedraw($this->snippetMessage);
 
@@ -209,6 +281,8 @@ class ArticleControl extends BaseControl
 			$this['dataGrid']->redrawDataGrid();
 
 		} catch (\Throwable $e) {
+			// the article was not saved, so a new image would stay unused
+			$this->articleImages->delete($newImage);
 			$message = match ($e->getCode()) {
 				1062 => 'This article already exists.',
 				default => 'Unknown status code.',

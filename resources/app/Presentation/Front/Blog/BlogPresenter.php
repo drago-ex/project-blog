@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Presentation\Front\Blog;
 
-use App\Core\Settings\SettingsRepository;
+use App\Model\Blog\ArticleAuthors;
 use App\Model\Blog\ArticleEntity;
 use App\Model\Blog\ArticleRepository;
 use App\Model\Blog\CategoryEntity;
@@ -39,9 +39,9 @@ final class BlogPresenter extends BasePresenter
 
 	public function __construct(
 		private readonly ArticleRepository $articleRepository,
+		private readonly ArticleAuthors $articleAuthors,
 		private readonly CategoryRepository $categoryRepository,
 		private readonly CommentRepository $commentRepository,
-		private readonly SettingsRepository $siteSettings,
 		private readonly TexyFormatter $texyFormatter,
 		private readonly TexyToolbar $texyToolbar,
 		private readonly RateLimiter $rateLimiter,
@@ -110,6 +110,7 @@ final class BlogPresenter extends BasePresenter
 			: $this->categoryRepository->get($article->category_id)->record();
 		$this->template->content = $this->texyFormatter->toHtml($article->content);
 		$this->template->description = $article->perex;
+		$this->template->author = $this->articleAuthors->forArticles([$article])[$article->author_id] ?? null;
 		$this->template->commentsEnabled = $this->areCommentsEnabled();
 		$this->template->comments = $comments = $this->template->commentsEnabled
 			? $this->commentRepository->getApprovedByArticle($article->id)->recordAll()
@@ -190,25 +191,15 @@ final class BlogPresenter extends BasePresenter
 			->getPublishedArticles($category?->id)
 			->recordAll();
 
-		$this->template->commentsAllowed = $this->areCommentsAllowed();
-		$this->template->commentCounts = $this->template->commentsAllowed
-			? $this->commentRepository->getApprovedCounts(array_column($articles, ArticleEntity::PrimaryKey))
-			: [];
+		$this->template->authors = $this->articleAuthors->forArticles($articles);
+		$this->template->commentCounts = $this->commentRepository->getApprovedCounts(array_column($articles, ArticleEntity::PrimaryKey));
 	}
 
 
-	/** Both switches: the setting blog.comments_enabled and the article field. */
+	/** Each article allows or disallows its comments (the field "Allow comments" in the administration). */
 	private function areCommentsEnabled(): bool
 	{
-		return $this->areCommentsAllowed() && (bool) $this->article->comments_enabled;
-	}
-
-
-	/** The setting blog.comments_enabled (drago-ex/project-settings) allows comments on the whole blog. */
-	private function areCommentsAllowed(): bool
-	{
-		$settings = $this->siteSettings->getSettings();
-		return ($settings['blog.comments_enabled'] ?? '0') === '1';
+		return (bool) $this->article->comments_enabled;
 	}
 
 

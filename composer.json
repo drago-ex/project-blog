@@ -15,12 +15,13 @@
 		"drago-ex/migration": "^2.3",
 		"drago-ex/project-auth": "^2.0",
 		"drago-ex/project-backend": "^2.0",
-		"drago-ex/project-settings": "^1.0",
 		"drago-ex/translator": "^4.0",
 		"drago-ex/utils": "^2.0",
-		"drago-ex/texy-toolbar": "dev-main"
+		"drago-ex/texy-toolbar": "^1.0",
+		"drago-ex/gravatar": "^2.2"
 	},
 	"suggest": {
+		"ext-gd": "Resizes the uploaded cover images of the articles; the Docker image of drago-ex/project-docker has it.",
 		"drago-ex/permission": "Generates the access rules of the blog administration and the articles (permission.php).",
 		"drago-ex/project-permission": "Role and permission management in the administration, which registers the generated providers.",
 		"drago-ex/project-backend-ui": "Administration layout; the blog administration uses its content widget."
@@ -38,8 +39,7 @@
 					"resources/app/Presentation/Backend": "app/Presentation/Backend",
 					"resources/app/Presentation/Front": "app/Presentation/Front"
 				}
-			},
-			"migration-priority": 110
+			}
 		},
 		"drago-permission": "permission.php",
 		"drago-translator": {

@@ -15,15 +15,18 @@ CREATE TABLE blog_category (
 --
 --  Blog
 -- -----
+-- image is the file name of the cover image in www/upload/blog/; author_id is the user who wrote the article.
 CREATE TABLE blog_article (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   category_id INT UNSIGNED NULL,
   slug VARCHAR(255) NOT NULL,
   title VARCHAR(255) NOT NULL,
   perex TEXT NULL,
+  image VARCHAR(255) NULL,
   content LONGTEXT NULL,
   status VARCHAR(20) NOT NULL DEFAULT 'draft',
   comments_enabled TINYINT(1) NOT NULL DEFAULT 1,
+  author_id INT UNSIGNED NULL,
   published_at DATETIME NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -32,6 +35,9 @@ CREATE TABLE blog_article (
   CONSTRAINT chk_blog_article_status CHECK (status IN ('draft', 'published')),
   CONSTRAINT fk_blog_article_category
     FOREIGN KEY (category_id) REFERENCES blog_category(id)
+    ON DELETE SET NULL,
+  CONSTRAINT fk_blog_article_author
+    FOREIGN KEY (author_id) REFERENCES users(id)
     ON DELETE SET NULL
 )
   ENGINE=InnoDB
@@ -54,9 +60,3 @@ CREATE TABLE blog_comment (
   ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;
-
-INSERT INTO settings (name, value)
-SELECT 'blog.comments_enabled', '1'
-WHERE NOT EXISTS (
-  SELECT 1 FROM settings WHERE name = 'blog.comments_enabled'
-);

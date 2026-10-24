@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Presentation\Backend\Blog\Component\Article;
 
 use Drago\Utils\ExtraArrayHash;
+use Nette\Http\FileUpload;
 
 
 class ArticleValues extends ExtraArrayHash
@@ -17,7 +18,9 @@ class ArticleValues extends ExtraArrayHash
 		Content = 'content',
 		Status = 'status',
 		CommentsEnabled = 'comments_enabled',
-		PublishedAt = 'published_at';
+		PublishedAt = 'published_at',
+		Upload = 'upload',
+		RemoveImage = 'remove_image';
 
 	public ?int $id = null;
 	public ?int $category_id = null;
@@ -28,4 +31,12 @@ class ArticleValues extends ExtraArrayHash
 	public string $status;
 	public bool $comments_enabled = true;
 	public ?\DateTimeImmutable $published_at = null;
+
+	/** Form fields that decide the column image; removed before saving. */
+	public ?FileUpload $upload = null;
+	public bool $remove_image = false;
+
+	/** Set only when they change: an uninitialized property is not saved, so an edit keeps the stored value. */
+	public ?string $image;
+	public ?int $author_id;
 }

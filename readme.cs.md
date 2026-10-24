@@ -34,8 +34,7 @@ v `composer.json` tohoto balíčku. Pro přeskočení balíčku nastavte `"skip"
 php vendor/bin/migration db:migrate --packages
 ```
 
-Migrace vytvoří tabulky `blog_article`, `blog_category` a `blog_comment` a nastavení
-`blog.comments_enabled` z [drago-ex/project-settings](https://github.com/drago-ex/project-settings).
+Migrace vytvoří tabulky `blog_article`, `blog_category` a `blog_comment`.
 
 ## Assety
 
@@ -130,7 +129,16 @@ Routy `/blog`, `/blog/kategorie/<slug>` a `/blog/<slug>` (i s `/en/`) přidává
 Obsah článku se píše v [Texy](https://texy.info/cs/syntax) a bezpečně ho vypisuje drago-ex/texy-toolbar;
 perex slouží jako meta popis článku.
 
+Výpis ukazuje články jako karty s úvodním obrázkem, autorem s avatarem z [Gravataru](https://gravatar.com)
+(drago-ex/gravatar, zaregistrovaný v `Front/Blog/7.conf.neon`) a relativním datem (`{$date|ago}`, např. „před 2 měsíci“).
+Karta je `Front/Blog/@article-card.latte`, takže i jiné stránky mohou články zobrazit stejně. Autorem je
+přihlášený uživatel, který článek vytvořil.
+
+Úvodní obrázek se nahrává ve formuláři článku. Zmenší se, aby se vešel do 1600 × 1200 px, a uloží do
+`www/upload/blog/`; výměna nebo odebrání obrázku a smazání článku soubor smažou. Zmenšování potřebuje
+rozšíření PHP GD (Docker obraz z drago-ex/project-docker ho má). Přidejte `/www/upload/` do `.gitignore`.
+
 Komentář může napsat kdokoli; zobrazí se po schválení administrátorem. Komentáře používají základní Texy (bez obrázků,
-nadpisů a HTML) a povoluje je nastavení `blog.comments_enabled` spolu s přepínačem u článku.
+nadpisů a HTML). Každý článek je povoluje nebo zakazuje vlastním přepínačem „Povolit komentáře“.
 
 Provider oprávnění veřejné části používá zdroj `Front:Blog` a povoluje ho návštěvníkům.

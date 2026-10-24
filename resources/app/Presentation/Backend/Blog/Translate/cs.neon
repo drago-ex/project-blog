@@ -40,6 +40,10 @@
 "Waiting": "Čeká na schválení"
 "Approve": "Schválit"
 "The comment has been approved.": "Komentář byl schválen."
+"Disable comments": "Vypnout komentáře"
+"Enable comments": "Zapnout komentáře"
+"Comments have been disabled.": "Komentáře byly vypnuty."
+"Comments have been enabled.": "Komentáře byly zapnuty."
 "Name": "Jméno"
 "Email (not published)": "E-mail (nezveřejní se)"
 "Website": "Web"
@@ -72,3 +76,22 @@
 "Manage categories": "Správa kategorií"
 "View comments": "Zobrazit komentáře"
 "Approve and delete comments": "Schvalovat a mazat komentáře"
+
+# cover image of an article
+"Image": "Obrázek"
+"Remove the image": "Odebrat obrázek"
+"The image must be JPEG, PNG, GIF or WebP.": "Obrázek musí být JPEG, PNG, GIF nebo WebP."
+"The image can have at most 8 MB.": "Obrázek může mít nejvýše 8 MB."
+
+# relative dates of articles (filter |ago)
+"just now": "právě teď"
+"a minute ago": "před minutou"
+"%d minutes ago": "před %d minutami"
+"an hour ago": "před hodinou"
+"%d hours ago": "před %d hodinami"
+"a day ago": "před dnem"
+"%d days ago": "před %d dny"
+"a month ago": "před měsícem"
+"%d months ago": "před %d měsíci"
+"a year ago": "před rokem"
+"%d years ago": "před %d lety"

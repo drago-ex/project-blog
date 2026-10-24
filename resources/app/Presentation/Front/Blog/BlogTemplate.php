@@ -28,13 +28,16 @@ class BlogTemplate extends BaseTemplate
 	/** Printed as <meta name="description"> by the front layout. */
 	public ?string $description = null;
 
-	/** The setting blog.comments_enabled allows comments (the list shows their numbers). */
-	public bool $commentsAllowed = false;
+	/** @var array<int, array{name: string, avatar: string}> authors of the listed articles by the user id */
+	public array $authors = [];
+
+	/** @var array{name: string, avatar: string}|null the author of the article (detail) */
+	public ?array $author = null;
 
 	/** @var array<int, int> numbers of approved comments by article id, missing for none */
 	public array $commentCounts = [];
 
-	/** Both the setting blog.comments_enabled and the article allow comments. */
+	/** The article allows comments. */
 	public bool $commentsEnabled = false;
 
 	/** @var CommentEntity[] */
