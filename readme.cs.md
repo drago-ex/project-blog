@@ -115,13 +115,13 @@ Presenter administrace je dostupný jako:
 {link :Backend:Blog:}
 ```
 
-S [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui) se v postranním menu objeví položka „Blog“
-v sekci „Obsah“ (`Backend/Blog/6.menu.neon`). Novou kategorii napíšete přímo ve formuláři článku
+S [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui) se v postranním menu objeví
+položka „Blog“ v sekci „Obsah“ (`Backend/Blog/6.menu.neon`). Novou kategorii napíšete přímo ve formuláři článku
 („+ Nová kategorie“); tlačítko „Kategorie“ nad články otevře jejich seznam pro přejmenování a mazání. Slug nové
-kategorie se vytvoří z názvu pomocí rozšíření PHP intl. Komentáře se spravují u svého
-článku: seznam článků ukazuje, zda jsou povolené (kliknutím na stav se přepne), jejich počet i ty, které čekají na
-schválení, a otevřený článek má záložku „Komentáře“ pro jejich schválení nebo smazání. Počet všech komentářů čekajících
-na schválení je vidět u položky „Blog“ v menu a u zvonku v navbaru (`CommentBadge`).
+kategorie se vytvoří z názvu pomocí rozšíření PHP intl. Komentáře se spravují u svého článku: seznam článků
+ukazuje, zda jsou povolené (kliknutím na stav se přepne), jejich počet i ty, které čekají na schválení, a otevřený
+článek má záložku „Komentáře“ pro jejich schválení nebo smazání. Počet všech komentářů čekajících na schválení je
+vidět u položky „Blog“ v menu a u zvonku v navbaru (`CommentBadge`).
 
 Modul používá zdroj oprávnění `Backend:Blog`. Provider administrace povoluje roli administrátora.
 
@@ -142,8 +142,7 @@ Výpis ukazuje články jako karty vedle sebe: široký obrázek, relativní dat
 s kategorií, titulek, perex a autor s avatarem z [Gravataru](https://gravatar.com) (drago-ex/gravatar, zaregistrovaný
 v `Front/Blog/7.conf.neon`). Nejnovější článek je přes celý řádek s velkým obrázkem vedle textu
 (`Front/Blog/@article-featured.latte`). Karta je `Front/Blog/@article-item.latte`, takže i jiné stránky mohou
-články zobrazit stejně; detail ukazuje autora, datum a kategorii pomocí `Front/Blog/@article-meta.latte`. Autorem je
-přihlášený uživatel, který článek vytvořil.
+články zobrazit stejně. Autorem je přihlášený uživatel, který článek vytvořil.
 
 Úvodní obrázek se nahrává ve formuláři článku. Zmenší se, aby se vešel do 1600 × 1200 px, a uloží do
 `www/upload/blog/`; výměna nebo odebrání obrázku a smazání článku soubor smažou. Zmenšování potřebuje

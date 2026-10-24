@@ -6,8 +6,20 @@
 		<h1 n:block="title" class="display-6 fw-semibold mb-3">{$article->title}</h1>
 		<p n:if="$article->perex" class="lead text-body-secondary">{$article->perex}</p>
 
-		<div class="mb-4">
-			{include '@article-meta.latte', article: $article, author: $author, category: $category}
+		{* author, date and category, separated by dots *}
+		<div class="d-flex flex-wrap align-items-center gap-2 mb-4 small text-body-secondary">
+			{if $author}
+				<img src={$author[avatar]} alt="" width="24" height="24" class="rounded-circle">
+				<span class="fw-semibold text-body">{$author[name]}</span>
+			{/if}
+			{if $article->published_at}
+				<span n:if="$author" aria-hidden="true">&middot;</span>
+				<time datetime={$article->published_at|date:'c'} title={$article->published_at|date:'j. n. Y'}>{$article->published_at|ago}</time>
+			{/if}
+			{if $category}
+				<span n:if="$author || $article->published_at" aria-hidden="true">&middot;</span>
+				<a n:href="category, category: $category->slug" class="link-secondary">{$category->name}</a>
+			{/if}
 		</div>
 
 		<div n:if="$article->image" class="ratio ratio-21x9 rounded-3 overflow-hidden mb-4">

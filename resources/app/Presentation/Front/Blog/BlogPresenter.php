@@ -197,7 +197,7 @@ final class BlogPresenter extends BasePresenter
 
 
 	/**
-	 * Articles of the list, the categories that have some (for the meta line) and the selected category.
+	 * Articles of the list, the categories that have some (for the pills and the cards) and the selected category.
 	 * @throws AttributeDetectionException
 	 */
 	private function setArticleList(?CategoryEntity $category): void

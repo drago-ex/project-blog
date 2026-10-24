@@ -23,6 +23,8 @@ use Drago\Texy\TexyToolbar;
 use Nette\Application\Attributes\Requires;
 use Nette\Application\UI\Form;
 use Nette\Utils\Html;
+use Tracy\Debugger;
+use Tracy\ILogger;
 
 
 class ArticleControl extends BaseControl
@@ -73,6 +75,7 @@ class ArticleControl extends BaseControl
 			// basic Texy like on the website, made safe by TexyFormatter
 			$template->commentHtml[$comment->id] = $this->texyFormatter->toBasicHtml($comment->content);
 		}
+
 		$template->confirmDeleteComment = $this->confirmDeleteComment;
 
 		$template->setFile(__DIR__ . '/Article.latte');
@@ -420,7 +423,7 @@ class ArticleControl extends BaseControl
 
 	private function processArticleForm(Form $form, ArticleValues $values): void
 	{
-		// the image fields are not columns, they decide the column image
+		// the image fields and the new category are not columns, they decide the columns image and category_id
 		$upload = $values->upload;
 		$removeImage = $values->remove_image;
 		$newCategory = trim((string) $values->new_category);
@@ -471,6 +474,11 @@ class ArticleControl extends BaseControl
 		} catch (\Throwable $e) {
 			// the article was not saved, so a new image would stay unused
 			$this->articleImages->delete($newImage);
+			if ($e->getCode() !== 1062) {
+				// unexpected (e.g. a missing PHP extension): the user sees a general message, the log the cause
+				Debugger::log($e, ILogger::EXCEPTION);
+			}
+
 			$message = match ($e->getCode()) {
 				1062 => 'This article already exists.',
 				default => 'Unknown status code.',

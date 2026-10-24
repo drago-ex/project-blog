@@ -50,7 +50,7 @@ class CategoryRepository
 
 
 	/**
-	 * Categories that have a published article, for the category names of the front lists.
+	 * Categories that have a published article, for the category pills and the article cards of the front.
 	 * @return CategoryEntity[]
 	 * @throws AttributeDetectionException
 	 */
