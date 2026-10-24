@@ -23,8 +23,6 @@ use Drago\Texy\TexyToolbar;
 use Nette\Application\Attributes\Requires;
 use Nette\Application\UI\Form;
 use Nette\Utils\Html;
-use Tracy\Debugger;
-use Tracy\ILogger;
 
 
 class ArticleControl extends BaseControl
@@ -275,7 +273,8 @@ class ArticleControl extends BaseControl
 
 		$form->addUpload(ArticleValues::Upload, 'Upload a main image')
 			->addRule($form::Image, 'The image must be JPEG, PNG, GIF or WebP.')
-			->addRule($form::MaxFileSize, 'The image can have at most 8 MB.', self::MaxImageSize);
+			->addRule($form::MaxFileSize, 'The image can have at most 8 MB.', self::MaxImageSize)
+			->addRule(ArticleImages::validatePixels(...), 'The image can have at most %d megapixels.', ArticleImages::MaxPixels / 1_000_000);
 
 		$form->addCheckbox(ArticleValues::RemoveImage, 'Remove the main image');
 
@@ -433,21 +432,22 @@ class ArticleControl extends BaseControl
 			? $this->articleRepository->get((int) $values->id)->record()?->image
 			: null;
 		$newImage = null;
+		$message = (int) $values->id > 0 ? 'Update successful.' : 'Insert successful.';
 
+		// the list is ordered by the publication date, so a published article always has one
+		if ($values->status === ArticleEntity::StatusPublished && $values->published_at === null) {
+			$values->published_at = new \DateTimeImmutable;
+		}
+
+		// the signed-in user who creates the article is its author
+		if ((int) $values->id === 0) {
+			$userId = $this->getPresenter()->getUser()->getId();
+			$values->author_id = is_numeric($userId) ? (int) $userId : null;
+		}
+
+		// a new category is saved together with the article, so a failed save leaves no category behind
+		$this->articleRepository->beginTransaction();
 		try {
-			$message = (int) $values->id > 0 ? 'Update successful.' : 'Insert successful.';
-
-			// the list is ordered by the publication date, so a published article always has one
-			if ($values->status === ArticleEntity::StatusPublished && $values->published_at === null) {
-				$values->published_at = new \DateTimeImmutable;
-			}
-
-			// the signed-in user who creates the article is its author
-			if ((int) $values->id === 0) {
-				$userId = $this->getPresenter()->getUser()->getId();
-				$values->author_id = is_numeric($userId) ? (int) $userId : null;
-			}
-
 			if ($newCategory !== '') {
 				$values->category_id = $this->categoryRepository->getOrCreate($newCategory);
 			}
@@ -459,33 +459,29 @@ class ArticleControl extends BaseControl
 			}
 
 			$this->articleRepository->save($values);
-
-			if ($oldImage !== null && ($newImage !== null || $removeImage)) {
-				$this->articleImages->delete($oldImage);
-			}
-
-			$this->addFlashMessage($message, Alert::Success);
-			$this->addRedraw($this->snippetMessage);
-
-			$form->reset();
-			$this->closeComponent();
-			$this['dataGrid']->redrawDataGrid();
+			$this->articleRepository->commit();
 
 		} catch (\Throwable $e) {
-			// the article was not saved, so a new image would stay unused
+			// the article was not saved, so a new image would stay unused (errors show in the offcanvas by onError)
+			$this->articleRepository->rollBack();
 			$this->articleImages->delete($newImage);
-			if ($e->getCode() !== 1062) {
-				// unexpected (e.g. a missing PHP extension): the user sees a general message, the log the cause
-				Debugger::log($e, ILogger::EXCEPTION);
-			}
-
-			$message = match ($e->getCode()) {
+			$form->addError(match ($e->getCode()) {
 				1062 => 'This article already exists.',
-				default => 'Unknown status code.',
-			};
-
-			$form->addError($message);
-			$this->redrawOffCanvas();
+				default => $this->logUnexpected($e),
+			});
+			return;
 		}
+
+		// the article is saved: the replaced image goes away (a file that cannot be deleted is only logged)
+		if ($oldImage !== null && ($newImage !== null || $removeImage)) {
+			$this->articleImages->delete($oldImage);
+		}
+
+		$this->addFlashMessage($message, Alert::Success);
+		$this->addRedraw($this->snippetMessage);
+
+		$form->reset();
+		$this->closeComponent();
+		$this['dataGrid']->redrawDataGrid();
 	}
 }

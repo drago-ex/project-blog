@@ -58,3 +58,38 @@ test('the author name is escaped', function () {
 		$references->link('<p>#1</p>', 2),
 	);
 });
+
+
+test('a longer name is not taken for a shorter one it starts with', function () {
+	$references = new CommentReferences([1 => 'Jana', 2 => 'Jana Nová']);
+	Assert::same(
+		'<p><a href="#comment-2" class="comment-ref">#2 Jana Nová</a> thanks</p>',
+		$references->link('<p>#2 Jana Nová thanks</p>', 3),
+	);
+});
+
+
+test('a name is matched only as a whole word', function () {
+	$references = new CommentReferences([1 => 'Jan']);
+	Assert::same(
+		'<p><a href="#comment-1" class="comment-ref">#1 Jan</a> Janička said</p>',
+		$references->link('<p>#1 Janička said</p>', 2),
+	);
+});
+
+
+test('a name typeset by Texy (no-break space, en dash, typographic apostrophe) is still the name', function () {
+	$references = new CommentReferences([1 => 'Jana z Brna', 2 => 'Pavel - Novák', 3 => "O'Brien"]);
+	Assert::same(
+		'<p><a href="#comment-1" class="comment-ref">#1 Jana z Brna</a> thanks</p>',
+		$references->link("<p>#1 Jana z\u{a0}Brna thanks</p>", 4),
+	);
+	Assert::same(
+		'<p><a href="#comment-2" class="comment-ref">#2 Pavel - Novák</a> yes</p>',
+		$references->link("<p>#2 Pavel \u{2013} Novák yes</p>", 4),
+	);
+	Assert::same(
+		'<p><a href="#comment-3" class="comment-ref">#3 O&#039;Brien</a> ok</p>',
+		$references->link("<p>#3 O\u{2019}Brien ok</p>", 4),
+	);
+});

@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace App\Model\Blog;
 
+use Nette\Forms\Control;
 use Nette\Http\FileUpload;
+use Nette\IOException;
 use Nette\Utils\FileSystem;
 use Nette\Utils\Image;
 use Nette\Utils\ImageException;
 use Nette\Utils\Random;
+use Tracy\Debugger;
+use Tracy\ILogger;
 
 
 /**
@@ -19,6 +23,9 @@ class ArticleImages
 {
 	/** Web path of the images, relative to the base path. */
 	public const string Path = 'upload/blog';
+
+	/** Largest upload in pixels; decoding takes about 4 bytes of memory per pixel. */
+	public const int MaxPixels = 40_000_000;
 
 	private const int MaxWidth = 1600;
 	private const int MaxHeight = 1200;
@@ -46,11 +53,36 @@ class ArticleImages
 	}
 
 
-	/** Deletes an image; a name with a path is ignored, so nothing outside the directory can be deleted. */
+	/**
+	 * Form rule: the image has at most MaxPixels, read from its header before it is decoded, so a huge image
+	 * gets a form error instead of exhausting the memory.
+	 */
+	public static function validatePixels(Control $control): bool
+	{
+		$upload = $control->getValue();
+		if (!$upload instanceof FileUpload || !$upload->isOk()) {
+			return true;
+		}
+
+		$size = @getimagesize($upload->getTemporaryFile()); // @ - not an image is reported by the Image rule
+		return $size === false || $size[0] * $size[1] <= self::MaxPixels;
+	}
+
+
+	/**
+	 * Deletes an image; a name with a path is ignored, so nothing outside the directory can be deleted.
+	 * A file that cannot be deleted (locked, permissions) is only logged: the article is saved or deleted anyway.
+	 */
 	public function delete(?string $name): void
 	{
-		if ($name !== null && $name !== '' && basename($name) === $name) {
+		if ($name === null || $name === '' || basename($name) !== $name) {
+			return;
+		}
+
+		try {
 			FileSystem::delete($this->getDir() . '/' . $name);
+		} catch (IOException $e) {
+			Debugger::log($e, ILogger::WARNING);
 		}
 	}
 

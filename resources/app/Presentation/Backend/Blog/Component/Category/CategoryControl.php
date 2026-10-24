@@ -16,8 +16,6 @@ use Drago\Datagrid\Exception\InvalidColumnException;
 use Drago\Form\Autocomplete;
 use Nette\Application\Attributes\Requires;
 use Nette\Application\UI\Form;
-use Tracy\Debugger;
-use Tracy\ILogger;
 
 
 /** Categories of the articles; deleting one leaves its articles without a category. */
@@ -145,18 +143,11 @@ class CategoryControl extends BaseControl
 			$this['dataGrid']->redrawDataGrid();
 
 		} catch (\Throwable $e) {
-			if ($e->getCode() !== 1062) {
-				// unexpected: the user sees a general message, the log the cause
-				Debugger::log($e, ILogger::EXCEPTION);
-			}
-
-			$message = match ($e->getCode()) {
+			// shown in the open offcanvas by onError
+			$form->addError(match ($e->getCode()) {
 				1062 => 'This category already exists.',
-				default => 'Unknown status code.',
-			};
-
-			$form->addError($message);
-			$this->redrawOffCanvas();
+				default => $this->logUnexpected($e),
+			});
 		}
 	}
 }

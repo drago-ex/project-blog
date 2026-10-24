@@ -129,16 +129,18 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 
 		} catch (\Throwable $e) {
 			// Code 1 marks a message meant for the user; anything else is unexpected and gets logged.
-			if ($e->getCode() === 1) {
-				$message = $e->getMessage();
-			} else {
-				Debugger::log($e, ILogger::EXCEPTION);
-				$message = 'Unknown status code.';
-			}
-
+			$message = $e->getCode() === 1 ? $e->getMessage() : $this->logUnexpected($e);
 			$this->addFlashMessage($message, Alert::Warning);
 			$this->addRedraw($this->snippetMessage);
 		}
+	}
+
+
+	/** Logs an exception the user cannot fix (e.g. a missing PHP extension) and returns the general message. */
+	protected function logUnexpected(\Throwable $e): string
+	{
+		Debugger::log($e, ILogger::EXCEPTION);
+		return 'Unknown status code.';
 	}
 
 

@@ -87,6 +87,7 @@
 "JPEG, PNG, GIF or WebP, at most 8 MB.": "JPEG, PNG, GIF nebo WebP, nejvýše 8 MB."
 "The image must be JPEG, PNG, GIF or WebP.": "Obrázek musí být JPEG, PNG, GIF nebo WebP."
 "The image can have at most 8 MB.": "Obrázek může mít nejvýše 8 MB."
+"The image can have at most %d megapixels.": "Obrázek může mít nejvýše %d megapixelů."
 
 # relative dates of articles (filter |ago)
 "just now": "právě teď"

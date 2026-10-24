@@ -43,6 +43,7 @@ class ArticleRepository
 
 
 	/**
+	 * Published articles of the front, the newest first; an article with a future date waits for it.
 	 * @return ExtraFluent<ArticleEntity>
 	 * @throws AttributeDetectionException
 	 */
@@ -50,6 +51,7 @@ class ArticleRepository
 	{
 		$fluent = $this->read('*')
 			->where('%n = ?', ArticleEntity::ColumnStatus, ArticleEntity::StatusPublished)
+			->where('%n <= ?', ArticleEntity::ColumnPublishedAt, new \DateTimeImmutable)
 			->orderBy(ArticleEntity::ColumnPublishedAt, 'DESC')
 			->orderBy(ArticleEntity::PrimaryKey, 'DESC');
 
@@ -69,6 +71,7 @@ class ArticleRepository
 		return $this->read('*')
 			->where('%n = ?', ArticleEntity::ColumnSlug, $slug)
 			->where('%n = ?', ArticleEntity::ColumnStatus, ArticleEntity::StatusPublished)
+			->where('%n <= ?', ArticleEntity::ColumnPublishedAt, new \DateTimeImmutable)
 			->record();
 	}
 

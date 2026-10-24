@@ -58,12 +58,14 @@ class CategoryRepository
 	{
 		return $this->getCategoriesFluent()
 			->where(
-				'%n IN (SELECT %n FROM %n WHERE %n = ?)',
+				'%n IN (SELECT %n FROM %n WHERE %n = ? AND %n <= ?)',
 				CategoryEntity::PrimaryKey,
 				ArticleEntity::ColumnCategoryId,
 				ArticleEntity::Table,
 				ArticleEntity::ColumnStatus,
 				ArticleEntity::StatusPublished,
+				ArticleEntity::ColumnPublishedAt,
+				new \DateTimeImmutable,
 			)
 			->recordAll();
 	}
