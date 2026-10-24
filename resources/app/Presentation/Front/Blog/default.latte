@@ -5,9 +5,9 @@
 	<h1 n:block="title" class="display-6 fs-2 mb-4">{if $category}{$category->name}{else}{_'Blog'}{/if}</h1>
 
 	<nav n:if="$categories" class="d-flex flex-wrap gap-2 mb-4" aria-label="{_'Categories'}">
-		<a n:href="default" n:class="'btn btn-sm', $category ? 'btn-outline-secondary' : 'btn-secondary'">{_'All'}</a>
+		<a n:href="default" n:class="'btn btn-sm', $category ? 'btn-secondary' : 'btn-primary'">{_'All'}</a>
 		{foreach $categories as $item}
-			<a n:href="category, category: $item->slug" n:class="'btn btn-sm', $category?->id === $item->id ? 'btn-secondary' : 'btn-outline-secondary'">
+			<a n:href="category, category: $item->slug" n:class="'btn btn-sm', $category?->id === $item->id ? 'btn-primary' : 'btn-secondary'">
 				{$item->name}
 			</a>
 		{/foreach}

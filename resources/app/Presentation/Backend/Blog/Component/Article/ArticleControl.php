@@ -118,18 +118,18 @@ class ArticleControl extends BaseControl
 
 		// One click switches the comments of the article; the row shows the action for its current state.
 		$grid->addAction(
-			name: 'disableComments',
-			label: 'Disable comments',
+			name: 'disallowComments',
+			label: 'Disallow comments',
 			callback: fn(int $id) => $this->setCommentsEnabled($id, false),
-			class: 'ajax btn btn-xs btn-outline-secondary',
+			class: 'ajax btn btn-xs btn-secondary',
 			condition: fn(array $row): bool => (int) $row[ArticleEntity::ColumnCommentsEnabled] === 1,
 		);
 
 		$grid->addAction(
-			name: 'enableComments',
-			label: 'Enable comments',
+			name: 'allowComments',
+			label: 'Allow comments',
 			callback: fn(int $id) => $this->setCommentsEnabled($id, true),
-			class: 'ajax btn btn-xs btn-outline-success',
+			class: 'ajax btn btn-xs btn-success',
 			condition: fn(array $row): bool => (int) $row[ArticleEntity::ColumnCommentsEnabled] === 0,
 		);
 
@@ -229,7 +229,7 @@ class ArticleControl extends BaseControl
 	private function setCommentsEnabled(int $id, bool $enabled): void
 	{
 		$this->articleRepository->setCommentsEnabled($id, $enabled);
-		$this->addFlashMessage($enabled ? 'Comments have been enabled.' : 'Comments have been disabled.', Alert::Success);
+		$this->addFlashMessage($enabled ? 'Comments have been allowed.' : 'Comments have been disallowed.', Alert::Success);
 		$this->addRedraw($this->snippetMessage);
 		$this['dataGrid']->redrawDataGrid();
 	}
