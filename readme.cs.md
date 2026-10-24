@@ -4,7 +4,7 @@
 
 Články, kategorie a komentáře blogu pro Drago Project.
 
-Balíček přidává modul administrace pro psaní článků, správu kategorií a schvalování komentářů a
+Balíček přidává modul administrace pro psaní článků, správu kategorií a schvalování komentářů u jejich článku a
 veřejnou část se seznamem článků, kategoriemi a detailem článku s komentáři.
 
 [![PHP version](https://badge.fury.io/ph/drago-ex%2Fproject-blog.svg)](https://badge.fury.io/ph/drago-ex%2Fproject-blog)
@@ -84,9 +84,13 @@ $grid->addActionEdit(fn(int $id) => $this->handleEdit($id))
 {embed '../@datagrid-heading.latte', addButton: $writeAllowed}
 ```
 
+V článku zobrazte tlačítka schválení a smazání v záložce komentářů (`<div class="article-comment-actions …">`)
+jen s `n:if="$writeAllowed"` a nechte `ArticleControl::getToggleCommentsLink()` bez oprávnění vracet null, aby
+stav komentářů v gridu nebyl klikací.
+
 Pro dynamická oprávnění nastavovaná v administraci nainstalujte
 [drago-ex/project-permission](https://github.com/drago-ex/project-permission) a ručně naimportujte privilegia blogu
-do jeho tabulky `resources`, aby je bylo možné přidělovat rolím (např. moderátor, který jen schvaluje komentáře):
+do jeho tabulky `resources`, aby je bylo možné přidělovat rolím (např. redaktor, který články jen prohlíží):
 
 ```bash
 php vendor/bin/migration db:migrate vendor/drago-ex/project-blog/migrations-permission
@@ -111,8 +115,13 @@ Presenter administrace je dostupný jako:
 {link :Backend:Blog:}
 ```
 
-S [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui) se v postranním menu objeví položka „Blog“ s články,
-kategoriemi a komentáři v sekci „Obsah“ (`Backend/Blog/6.menu.neon`).
+S [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui) se v postranním menu objeví položka „Blog“
+v sekci „Obsah“ (`Backend/Blog/6.menu.neon`). Novou kategorii napíšete přímo ve formuláři článku
+(„+ Nová kategorie“); tlačítko „Kategorie“ nad články otevře jejich seznam pro přejmenování a mazání. Slug nové
+kategorie se vytvoří z názvu pomocí rozšíření PHP intl. Komentáře se spravují u svého
+článku: seznam článků ukazuje, zda jsou povolené (kliknutím na stav se přepne), jejich počet i ty, které čekají na
+schválení, a otevřený článek má záložku „Komentáře“ pro jejich schválení nebo smazání. Počet všech komentářů čekajících
+na schválení je vidět u položky „Blog“ v menu a u zvonku v navbaru (`CommentBadge`).
 
 Modul používá zdroj oprávnění `Backend:Blog`. Provider administrace povoluje roli administrátora.
 

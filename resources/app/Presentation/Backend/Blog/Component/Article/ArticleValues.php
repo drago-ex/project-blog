@@ -20,7 +20,8 @@ class ArticleValues extends ExtraArrayHash
 		CommentsEnabled = 'comments_enabled',
 		PublishedAt = 'published_at',
 		Upload = 'upload',
-		RemoveImage = 'remove_image';
+		RemoveImage = 'remove_image',
+		NewCategory = 'new_category';
 
 	public ?int $id = null;
 	public ?int $category_id = null;
@@ -35,6 +36,9 @@ class ArticleValues extends ExtraArrayHash
 	/** Form fields that decide the column image; removed before saving. */
 	public ?FileUpload $upload = null;
 	public bool $remove_image = false;
+
+	/** A category written in the form instead of choosing one; it decides the column category_id, removed before saving. */
+	public ?string $new_category = null;
 
 	/** Set only when they change: an uninitialized property is not saved, so an edit keeps the stored value. */
 	public ?string $image;

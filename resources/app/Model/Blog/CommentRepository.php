@@ -6,7 +6,6 @@ namespace App\Model\Blog;
 
 use Dibi\Connection;
 use Dibi\Exception;
-use Dibi\Fluent;
 use Drago\Attr\AttributeDetectionException;
 use Drago\Attr\Table;
 use Drago\Database\Database;
@@ -39,6 +38,31 @@ class CommentRepository
 
 
 	/**
+	 * The number of comments waiting for approval, for the badge of the administration menu.
+	 * @throws AttributeDetectionException
+	 */
+	public function countPending(): int
+	{
+		return (int) $this->read('COUNT(*)')
+			->where('%n = ?', CommentEntity::ColumnApproved, 0)
+			->fetchSingle();
+	}
+
+
+	/**
+	 * All comments of an article, approved or not, in their order; for the article in the administration.
+	 * @return ExtraFluent<CommentEntity>
+	 * @throws AttributeDetectionException
+	 */
+	public function getByArticle(int $articleId): ExtraFluent
+	{
+		return $this->read('*')
+			->where('%n = ?', CommentEntity::ColumnArticleId, $articleId)
+			->orderBy(CommentEntity::ColumnCreatedAt, 'ASC');
+	}
+
+
+	/**
 	 * Numbers of approved comments by article id; articles without one are missing.
 	 * @param int[] $articleIds
 	 * @return array<int, int>
@@ -56,26 +80,6 @@ class CommentRepository
 			->where('%n = ?', CommentEntity::ColumnApproved, 1)
 			->groupBy(CommentEntity::ColumnArticleId)
 			->fetchPairs(CommentEntity::ColumnArticleId, 'count');
-	}
-
-
-	/**
-	 * All comments with the title of their article (column article_title), the newest first. A subquery,
-	 * so the datagrid can filter and sort by plain column names.
-	 */
-	public function getCommentsFluent(): Fluent
-	{
-		return $this->connection
-			->select('*')
-			->from(
-				'(SELECT c.*, a.%n AS article_title FROM %n c JOIN %n a ON a.%n = c.%n) AS comments',
-				ArticleEntity::ColumnTitle,
-				CommentEntity::Table,
-				ArticleEntity::Table,
-				ArticleEntity::PrimaryKey,
-				CommentEntity::ColumnArticleId,
-			)
-			->orderBy(CommentEntity::PrimaryKey, 'DESC');
 	}
 
 

@@ -8,6 +8,4 @@ INSERT IGNORE INTO resources (resource, privilege, description) VALUES
     ('Backend:Blog', 'articles-read', 'Sort and filter articles'),
     ('Backend:Blog', 'articles-write', 'Manage articles'),
     ('Backend:Blog', 'categories-read', 'View categories'),
-    ('Backend:Blog', 'categories-write', 'Manage categories'),
-    ('Backend:Blog', 'comments-read', 'View comments'),
-    ('Backend:Blog', 'comments-write', 'Approve and delete comments');
+    ('Backend:Blog', 'categories-write', 'Manage categories');

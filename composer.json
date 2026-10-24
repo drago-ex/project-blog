@@ -22,6 +22,7 @@
 	},
 	"suggest": {
 		"ext-gd": "Resizes the uploaded cover images of the articles; the Docker image of drago-ex/project-docker has it.",
+		"ext-intl": "Makes the slug of a category created in the article form from its name; the Docker image of drago-ex/project-docker has it.",
 		"drago-ex/permission": "Generates the access rules of the blog administration and the articles (permission.php).",
 		"drago-ex/project-permission": "Role and permission management in the administration, which registers the generated providers.",
 		"drago-ex/project-backend-ui": "Administration layout; the blog administration uses its content widget."

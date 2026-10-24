@@ -31,7 +31,13 @@ class ArticleRepository
 	 */
 	public function getArticlesFluent(): ExtraFluent
 	{
-		return $this->read('*')
+		// numbers of all and of the not yet approved comments, for the column of the administration grid
+		$comments = '(SELECT COUNT(*) FROM %n c WHERE c.%n = %n.%n';
+		$args = [CommentEntity::Table, CommentEntity::ColumnArticleId, ArticleEntity::Table, ArticleEntity::PrimaryKey];
+		return $this->read(
+			"*, $comments) AS comments_total, $comments AND c.%n = 0) AS comments_pending",
+			...[...$args, ...$args, CommentEntity::ColumnApproved],
+		)
 			->orderBy(ArticleEntity::PrimaryKey, 'DESC');
 	}
 

@@ -1,9 +1,26 @@
 {templateType App\Presentation\Backend\Blog\Component\Article\ArticleTemplate}
-{embed '../../../../Accessory/Widget/@offcanvas.latte', offcanvasId: $offcanvasId, size: '100vw', mainImage: $mainImage}
+{embed '../../../../Accessory/Widget/@offcanvas.latte', offcanvasId: $offcanvasId, size: '100vw', mainImage: $mainImage, newCategory: $newCategory,
+	articleId: $articleId, comments: $comments, commentHtml: $commentHtml, confirmDeleteComment: $confirmDeleteComment}
 	{block title}{_'Manage article'}{/block}
 	{block body}
 		{snippet offcanvas}
-			{embed '../../../../Accessory/Widget/@form.latte', class: 'ajax', name: 'article', najaHistory: 'off', mainImage: $mainImage}
+			{* an edited article has its comments in a second tab; they are not in the form, so no error is hidden *}
+			<ul n:if="$articleId" class="nav nav-pills gap-2 mb-3" role="tablist">
+				<li class="nav-item" role="presentation">
+					<button class="nav-link active" type="button" role="tab" data-bs-toggle="pill" data-bs-target="#article-tab-form" aria-controls="article-tab-form" aria-selected="true">
+						{_'Article'}
+					</button>
+				</li>
+				<li class="nav-item" role="presentation">
+					<button class="nav-link" type="button" role="tab" data-bs-toggle="pill" data-bs-target="#article-tab-comments" aria-controls="article-tab-comments" aria-selected="false">
+						{_'Comments'} <span n:snippet="commentCount" class="opacity-75">({count($comments)})</span>
+					</button>
+				</li>
+			</ul>
+
+			<div class="tab-content">
+			<div class="tab-pane fade show active" id="article-tab-form" role="tabpanel">
+			{embed '../../../../Accessory/Widget/@form.latte', class: 'ajax', name: 'article', najaHistory: 'off', mainImage: $mainImage, newCategory: $newCategory}
 				{import '../../../../Accessory/Widget/@dismiss-button.latte'}
 				{block form}
 					{* the text of the article on the left, its settings in cards on the right; nothing is hidden,
@@ -27,6 +44,17 @@
 										{include input, type: 'select', name: 'status'}
 										{include input, name: 'published_at'}
 										{include input, type: 'select', name: 'category_id'}
+										{* a category is written right here; filled in, it is used instead of the select *}
+										<div class="col-12 mt-1">
+											<a href="#article-new-category" class="small text-decoration-none" data-bs-toggle="collapse" role="button" aria-controls="article-new-category" aria-expanded="{$newCategory ? 'true' : 'false'}">
+												+ {_'New category'}
+											</a>
+											<div n:class="collapse, $newCategory ? show" id="article-new-category">
+												<div class="pt-2 form-error">
+													{input new_category, class => 'form-control'}
+												</div>
+											</div>
+										</div>
 										{include checkbox, name: 'comments_enabled'}
 									</div>
 								</div>
@@ -65,6 +93,40 @@
 					</div>
 				{/block}
 			{/embed}
+			</div>
+
+			<div n:if="$articleId" class="tab-pane fade" id="article-tab-comments" role="tabpanel">
+				{* the comment signals redraw only this snippet, so unsaved changes of the form stay *}
+				{snippet comments}
+					<div class="vstack gap-3" style="max-width: 60rem">
+						{foreach $comments as $comment}
+							<article class="p-3 bg-body-tertiary rounded-3">
+								<div class="d-flex flex-wrap align-items-center column-gap-2 small mb-2">
+									<span class="fw-semibold">{$comment->author_name}</span>
+									<span n:if="$comment->author_email" class="text-body-secondary">{$comment->author_email}</span>
+									<span class="text-body-secondary">&middot; {$comment->created_at|date:'j. n. Y H:i'}</span>
+									<span n:if="!$comment->approved" class="badge text-bg-warning">{_'Waiting for approval'}</span>
+								</div>
+								<div class="mb-2">{$commentHtml[$comment->id]|noescape}</div>
+
+								<div class="article-comment-actions d-flex flex-wrap align-items-center gap-2">
+									{if $confirmDeleteComment === $comment->id}
+										<span class="small fw-semibold text-danger">{_'Are you sure you want to delete the item?'}</span>
+										<a n:href="deleteComment!, id: $comment->id" class="ajax btn btn-xs btn-danger" data-naja-history="off">{_'Delete'}</a>
+										<a n:href="cancelDeleteComment!, id: $comment->id" class="ajax btn btn-xs btn-secondary" data-naja-history="off">{_'Cancel'}</a>
+									{else}
+										<a n:if="!$comment->approved" n:href="approveComment!, id: $comment->id" class="ajax btn btn-xs btn-success" data-naja-history="off">{_'Approve'}</a>
+										<a n:href="confirmDeleteComment!, id: $comment->id" class="ajax btn btn-xs btn-danger" data-naja-history="off">{_'Delete'}</a>
+									{/if}
+								</div>
+							</article>
+						{else}
+							<p class="text-body-secondary mb-0">{_'No comments yet.'}</p>
+						{/foreach}
+					</div>
+				{/snippet}
+			</div>
+			</div>
 		{/snippet}
 	{/block}
 {/embed}
@@ -86,6 +148,10 @@
 {embed '../@datagrid-heading.latte', addButton: true}
 	{block title}
 		{_'Blog articles'}
+	{/block}
+	{block buttons}
+		{* categories are created in the article form; their page is for renaming and deleting them *}
+		<a href="{plink :Backend:Blog:categories}" class="btn btn-secondary btn-xs">{_'Categories'}</a>
 	{/block}
 {/embed}
 

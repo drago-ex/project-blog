@@ -1,7 +1,9 @@
 {default bool $addButton = false}
-<h5 class="border-bottom pb-2 position-relative">
-	<span n:class="$addButton ? 'd-block me-5 pe-4'">{block title}{/block}</span>
-	<a n:if="$addButton" n:href="openOffcanvas!" class="btn btn-primary btn-xs ajax position-absolute top-0 end-0" data-naja-history="off">
+<h5 class="border-bottom pb-2 d-flex align-items-center gap-2">
+	<span class="me-auto">{block title}{/block}</span>
+	{* links of the page, e.g. to the categories *}
+	{block buttons}{/block}
+	<a n:if="$addButton" n:href="openOffcanvas!" class="btn btn-primary btn-xs ajax" data-naja-history="off">
 		{_'Add item'}
 	</a>
 </h5>
