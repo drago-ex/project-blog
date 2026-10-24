@@ -102,8 +102,8 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 		$form->addSubmit('confirm', 'Confirm')
 			->onClick[] = $this->delete(...);
 
-		// an invalid id (e.g. a tampered hidden field) keeps the dialog open with the form error
-		$form->onError[] = fn() => $this->redrawModal();
+		// an invalid id (e.g. a tampered hidden field) cannot be fixed in the dialog: close it with a warning
+		$form->onError[] = $this->deleteFailed(...);
 
 		return $form;
 	}
@@ -139,5 +139,13 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 			$this->addFlashMessage($message, Alert::Warning);
 			$this->addRedraw($this->snippetMessage);
 		}
+	}
+
+
+	private function deleteFailed(): void
+	{
+		$this->addFlashMessage('The item could not be deleted.', Alert::Warning);
+		$this->addRedraw($this->snippetMessage);
+		$this->closeComponent();
 	}
 }

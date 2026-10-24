@@ -138,8 +138,8 @@ class ArticleControl extends BaseControl
 			->setNullable();
 
 		$form->addTextAreaInput(ArticleValues::Content, 'Content (Texy)')
-			->setNullable()
-			->setHtmlAttribute('data-texy-toolbar', $this->texyToolbar->getOptions($this->link('preview!')));
+			->setHtmlAttribute('data-texy-toolbar', $this->texyToolbar->getOptions($this->link('preview!')))
+			->setNullable();
 
 		$form->addSelect(ArticleValues::Status, 'Status', [
 			ArticleEntity::StatusDraft => 'Draft',

@@ -93,7 +93,8 @@ into its `resources` table by hand, so roles can be given them (e.g. a moderator
 php vendor/bin/migration db:migrate vendor/drago-ex/project-blog/migrations-permission
 ```
 
-In a project composed by [netis](https://github.com/netis-cms/netis), project-preset makes these changes for you.
+In a project composed by [netis](https://github.com/netis-cms/netis), project-preset makes these changes for you
+and the web installer of project-install imports the privileges.
 
 ## Installed Files
 
