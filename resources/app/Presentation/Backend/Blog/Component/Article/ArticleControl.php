@@ -39,9 +39,19 @@ class ArticleControl extends BaseControl
 	}
 
 
+	/**
+	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 */
 	public function render(): void
 	{
 		$template = $this->createRender();
+		assert($template instanceof ArticleTemplate);
+
+		// the edited article (also when the form is shown again with errors) shows its main image
+		$id = (int) $this->getComponent('article')->getComponent('id')->getValue();
+		$template->mainImage = $id > 0 ? $this->articleRepository->get($id)->record()?->image : null;
+
 		$template->setFile(__DIR__ . '/Article.latte');
 		$template->render();
 	}
@@ -160,11 +170,11 @@ class ArticleControl extends BaseControl
 		$form->addTextAreaInput(ArticleValues::Perex, 'Perex')
 			->setNullable();
 
-		$form->addUpload(ArticleValues::Upload, 'Image')
+		$form->addUpload(ArticleValues::Upload, 'Upload a main image')
 			->addRule($form::Image, 'The image must be JPEG, PNG, GIF or WebP.')
 			->addRule($form::MaxFileSize, 'The image can have at most 8 MB.', self::MaxImageSize);
 
-		$form->addCheckbox(ArticleValues::RemoveImage, 'Remove the image');
+		$form->addCheckbox(ArticleValues::RemoveImage, 'Remove the main image');
 
 		$form->addTextAreaInput(ArticleValues::Content, 'Content (Texy)')
 			->setHtmlAttribute('data-texy-toolbar', $this->texyToolbar->getOptions($this->link('preview!')))

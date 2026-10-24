@@ -76,9 +76,10 @@
 "View comments": "Zobrazit komentáře"
 "Approve and delete comments": "Schvalovat a mazat komentáře"
 
-# cover image of an article
-"Image": "Obrázek"
-"Remove the image": "Odebrat obrázek"
+# main image of an article
+"Upload a main image": "Nahrát hlavní obrázek"
+"Remove the main image": "Odstranit hlavní obrázek"
+"JPEG, PNG, GIF or WebP, at most 8 MB.": "JPEG, PNG, GIF nebo WebP, nejvýše 8 MB."
 "The image must be JPEG, PNG, GIF or WebP.": "Obrázek musí být JPEG, PNG, GIF nebo WebP."
 "The image can have at most 8 MB.": "Obrázek může mít nejvýše 8 MB."
 
