@@ -40,9 +40,21 @@ class BlogTemplate extends BaseTemplate
 	/** The article allows comments. */
 	public bool $commentsEnabled = false;
 
+	/** Name of the signed-in user, who comments without the name and email fields. */
+	public ?string $commentAuthor = null;
+
 	/** @var CommentEntity[] */
 	public array $comments = [];
 
-	/** @var array<int, string> HTML of the basic Texy of the comments by id, made safe by TexyFormatter */
+	/** @var array<int, string> HTML of the basic Texy of the comments by id, made safe by TexyFormatter, "#N" linked */
 	public array $commentHtml = [];
+
+	/** @var array<int, int> numbers of the comments (from 1) by id */
+	public array $commentNumbers = [];
+
+	/** @var array<int, string> authors of the comments by number */
+	public array $commentNames = [];
+
+	/** @var array<int, int[]> numbers of the comments that replied to a comment, by its number */
+	public array $commentReplies = [];
 }

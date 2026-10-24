@@ -129,9 +129,12 @@ The routes `/blog`, `/blog/kategorie/<slug>` and `/blog/<slug>` (and with `/en/`
 Article content is written in [Texy](https://texy.info/en/syntax) and printed safely by drago-ex/texy-toolbar;
 the perex is the meta description of the article.
 
-The list shows the articles as cards with a cover image, the author with a [Gravatar](https://gravatar.com) avatar
-(drago-ex/gravatar, registered in `Front/Blog/7.conf.neon`) and a relative date (`{$date|ago}`, e.g. "2 months ago").
-The card is `Front/Blog/@article-card.latte`, so other pages can show articles the same way. The author is the
+The list shows the articles as cards side by side: a wide image, a relative date (`{$date|ago}`, e.g. "2 months
+ago") with the category, the title, the perex and the author with a [Gravatar](https://gravatar.com) avatar
+(drago-ex/gravatar, registered in `Front/Blog/7.conf.neon`). The newest article is shown over the whole row with a large image beside the text
+(`Front/Blog/@article-featured.latte`). The card is `Front/Blog/@article-item.latte`, so other pages can show
+articles the same way; the detail shows the author, date and category with
+`Front/Blog/@article-meta.latte`. The author is the
 signed-in user who created the article.
 
 The cover image is uploaded in the article form. It is made smaller to fit 1600 × 1200 px and saved in
@@ -139,6 +142,9 @@ The cover image is uploaded in the article form. It is made smaller to fit 1600 
 PHP extension GD (the Docker image of drago-ex/project-docker has it). Add `/www/upload/` to `.gitignore`.
 
 Anyone may write a comment; it is shown after an administrator approves it. Comments use basic Texy (no images,
-headings or HTML). Each article allows or disallows them by its own "Allow comments" switch.
+headings or HTML). Each article allows or disallows them by its own "Allow comments" switch. A signed-in user does
+not fill in the name and email, the comment gets those of the account. Approved comments are numbered (`#1`, `#2`,
+…) and "Reply" puts `#2 Name` into the form; such a number in a comment links the comment, which lists its replies.
+The reply link needs `front.js` of drago-ex/project-preset (without it the link only goes to the form).
 
 The frontend permission provider uses the resource `Front:Blog` and allows it to guests.

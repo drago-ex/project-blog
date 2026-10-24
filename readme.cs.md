@@ -129,9 +129,11 @@ Routy `/blog`, `/blog/kategorie/<slug>` a `/blog/<slug>` (i s `/en/`) přidává
 Obsah článku se píše v [Texy](https://texy.info/cs/syntax) a bezpečně ho vypisuje drago-ex/texy-toolbar;
 perex slouží jako meta popis článku.
 
-Výpis ukazuje články jako karty s úvodním obrázkem, autorem s avatarem z [Gravataru](https://gravatar.com)
-(drago-ex/gravatar, zaregistrovaný v `Front/Blog/7.conf.neon`) a relativním datem (`{$date|ago}`, např. „před 2 měsíci“).
-Karta je `Front/Blog/@article-card.latte`, takže i jiné stránky mohou články zobrazit stejně. Autorem je
+Výpis ukazuje články jako karty vedle sebe: široký obrázek, relativní datum (`{$date|ago}`, např. „před 2 měsíci“)
+s kategorií, titulek, perex a autor s avatarem z [Gravataru](https://gravatar.com) (drago-ex/gravatar, zaregistrovaný
+v `Front/Blog/7.conf.neon`). Nejnovější článek je přes celý řádek s velkým obrázkem vedle textu
+(`Front/Blog/@article-featured.latte`). Karta je `Front/Blog/@article-item.latte`, takže i jiné stránky mohou
+články zobrazit stejně; detail ukazuje autora, datum a kategorii pomocí `Front/Blog/@article-meta.latte`. Autorem je
 přihlášený uživatel, který článek vytvořil.
 
 Úvodní obrázek se nahrává ve formuláři článku. Zmenší se, aby se vešel do 1600 × 1200 px, a uloží do
@@ -139,6 +141,9 @@ přihlášený uživatel, který článek vytvořil.
 rozšíření PHP GD (Docker obraz z drago-ex/project-docker ho má). Přidejte `/www/upload/` do `.gitignore`.
 
 Komentář může napsat kdokoli; zobrazí se po schválení administrátorem. Komentáře používají základní Texy (bez obrázků,
-nadpisů a HTML). Každý článek je povoluje nebo zakazuje vlastním přepínačem „Povolit komentáře“.
+nadpisů a HTML). Každý článek je povoluje nebo zakazuje vlastním přepínačem „Povolit komentáře“. Přihlášený
+uživatel jméno a e-mail nevyplňuje, komentář dostane ty z jeho účtu. Schválené komentáře jsou očíslované (`#1`,
+`#2`, …) a „Odpovědět“ vloží do formuláře `#2 Jméno`; takové číslo v komentáři odkazuje na komentář, který vypisuje
+své odpovědi. Odkaz pro odpověď potřebuje `front.js` z drago-ex/project-preset (bez něj jen vede k formuláři).
 
 Provider oprávnění veřejné části používá zdroj `Front:Blog` a povoluje ho návštěvníkům.

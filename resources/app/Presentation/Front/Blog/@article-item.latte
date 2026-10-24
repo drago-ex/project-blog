@@ -1,0 +1,33 @@
+{* An article in a list: a card with a wide image, date and category, title, perex and author; the whole card is a link. *}
+{* Also used by the home page of drago-ex/project-preset. *}
+{varType App\Model\Blog\ArticleEntity $article}
+{default ?array $author = null}
+{default ?App\Model\Blog\CategoryEntity $category = null}
+{default ?int $commentCount = null}
+
+<article class="blog-card position-relative d-flex flex-column h-100 p-4 rounded-4">
+	<div n:if="$article->image" class="ratio rounded-3 overflow-hidden mb-3" style="--bs-aspect-ratio: 50%">
+		<img src="{$basePath}/{App\Model\Blog\ArticleImages::Path}/{$article->image}" alt="" class="object-fit-cover" style="object-position: top" loading="lazy">
+	</div>
+
+	<div class="d-flex flex-wrap align-items-center column-gap-2 mb-2 small text-body-secondary">
+		<time n:if="$article->published_at" datetime={$article->published_at|date:'c'} title={$article->published_at|date:'j. n. Y'}>{$article->published_at|ago}</time>
+		{if $category}
+			<span n:if="$article->published_at" aria-hidden="true">&middot;</span>
+			<a n:href=":Front:Blog:category, category: $category->slug" class="blog-card-over link-secondary">{$category->name}</a>
+		{/if}
+	</div>
+
+	<h2 class="h5 fw-semibold mb-2">
+		<a n:href=":Front:Blog:detail, slug: $article->slug" class="blog-card-title stretched-link text-decoration-none text-body-emphasis">{$article->title}</a>
+	</h2>
+	<p n:if="$article->perex" class="blog-card-lede text-body-secondary mb-0">{$article->perex}</p>
+
+	<div n:if="$author || $commentCount !== null" class="d-flex align-items-center gap-2 mt-auto pt-3 small text-body-secondary">
+		{if $author}
+			<img src={$author[avatar]} alt="" width="24" height="24" class="rounded-circle" loading="lazy">
+			<span>{$author[name]}</span>
+		{/if}
+		<a n:if="$commentCount !== null" n:href=":Front:Blog:detail#comments, slug: $article->slug" class="blog-card-over link-secondary ms-auto">{_'Comments: %d', $commentCount}</a>
+	</div>
+</article>

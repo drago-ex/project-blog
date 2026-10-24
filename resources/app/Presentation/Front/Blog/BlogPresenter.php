@@ -112,13 +112,26 @@ final class BlogPresenter extends BasePresenter
 		$this->template->description = $article->perex;
 		$this->template->author = $this->articleAuthors->forArticles([$article])[$article->author_id] ?? null;
 		$this->template->commentsEnabled = $this->areCommentsEnabled();
+		$this->template->commentAuthor = $this->getSignedInAuthor()['name'] ?? null;
 		$this->template->comments = $comments = $this->template->commentsEnabled
 			? $this->commentRepository->getApprovedByArticle($article->id)->recordAll()
 			: [];
 
-		foreach ($comments as $comment) {
-			$this->template->commentHtml[$comment->id] = $this->texyFormatter->toBasicHtml($comment->content);
+		// approved comments are numbered from 1 in their order; "#2" in a comment links the second one
+		$names = [];
+		foreach ($comments as $i => $comment) {
+			$this->template->commentNumbers[$comment->id] = $i + 1;
+			$names[$i + 1] = $comment->author_name;
 		}
+
+		$references = new CommentReferences($names);
+		foreach ($comments as $comment) {
+			$html = $this->texyFormatter->toBasicHtml($comment->content);
+			$this->template->commentHtml[$comment->id] = $references->link($html, $this->template->commentNumbers[$comment->id]);
+		}
+
+		$this->template->commentNames = $names;
+		$this->template->commentReplies = $references->getReplies();
 	}
 
 
@@ -126,16 +139,20 @@ final class BlogPresenter extends BasePresenter
 	{
 		$form = new Forms;
 		$form->setTranslator($this->getTranslator());
-		$form->addTextInput('name', 'Name')
-			->setAutocomplete(Autocomplete::Name)
-			->setRequired('Please enter your name.')
-			->addRule($form::MaxLength, 'The name can have at most %d characters.', 100);
 
-		$form->addEmailInput('email', 'Email (not published)')
-			->setAutocomplete(Autocomplete::Email)
-			->setNullable()
-			->addRule($form::Email, 'Please enter a valid email address.')
-			->addRule($form::MaxLength, 'The email can have at most %d characters.', 255);
+		// a signed-in user comments under the name of the account
+		if ($this->getSignedInAuthor() === null) {
+			$form->addTextInput('name', 'Name')
+				->setAutocomplete(Autocomplete::Name)
+				->setRequired('Please enter your name.')
+				->addRule($form::MaxLength, 'The name can have at most %d characters.', 100);
+
+			$form->addEmailInput('email', 'Email (not published)')
+				->setAutocomplete(Autocomplete::Email)
+				->setNullable()
+				->addRule($form::Email, 'Please enter a valid email address.')
+				->addRule($form::MaxLength, 'The email can have at most %d characters.', 255);
+		}
 
 		$form->addTextAreaInput('content', 'Comment')
 			->setHtmlAttribute('data-texy-toolbar', $this->texyToolbar->getBasicOptions($this->link('commentPreview!')))
@@ -148,13 +165,12 @@ final class BlogPresenter extends BasePresenter
 			->setHtmlAttribute('tabindex', '-1');
 
 		$form->addSubmit('send', 'Send comment');
-		$form->setDefaults($this->getAuthorDefaults());
 		$form->onSuccess[] = $this->processCommentForm(...);
 		return $form;
 	}
 
 
-	/** @param array{name: string, email: ?string, content: string, website: string} $values */
+	/** @param array{name?: string, email?: ?string, content: string, website: string} $values */
 	private function processCommentForm(Form $form, array $values): void
 	{
 		if (!$this->areCommentsEnabled()) {
@@ -169,7 +185,9 @@ final class BlogPresenter extends BasePresenter
 
 		$this->rateLimiter->hit('blog.comment', $ip, self::CommentWindow);
 		if ($values['website'] === '') {
-			$this->commentRepository->addComment($this->article->id, $values['name'], $values['email'], $values['content']);
+			// the name and email of a signed-in user come from the identity, never from the request
+			$author = $this->getSignedInAuthor() ?? ['name' => $values['name'] ?? '', 'email' => $values['email'] ?? null];
+			$this->commentRepository->addComment($this->article->id, $author['name'], $author['email'], $values['content']);
 		}
 
 		// a bot gets the same answer, so it does not learn that the comment was dropped
@@ -179,7 +197,7 @@ final class BlogPresenter extends BasePresenter
 
 
 	/**
-	 * Articles of the list, the categories that have some (for the filter) and the selected category.
+	 * Articles of the list, the categories that have some (for the meta line) and the selected category.
 	 * @throws AttributeDetectionException
 	 */
 	private function setArticleList(?CategoryEntity $category): void
@@ -204,15 +222,23 @@ final class BlogPresenter extends BasePresenter
 
 
 	/**
-	 * A signed-in user does not have to fill in the name and email (identity data of drago-ex/project-auth).
-	 * @return array<string, string>
+	 * Name and email of the signed-in user (identity data of drago-ex/project-auth), who does not fill them in;
+	 * null for a guest.
+	 * @return array{name: string, email: ?string}|null
 	 */
-	private function getAuthorDefaults(): array
+	private function getSignedInAuthor(): ?array
 	{
+		if (!$this->getUser()->isLoggedIn()) {
+			return null;
+		}
+
 		$data = $this->getUser()->getIdentity()?->getData() ?? [];
-		return array_filter([
-			'name' => is_string($data['username'] ?? null) ? $data['username'] : '',
-			'email' => is_string($data['email'] ?? null) ? $data['email'] : '',
-		]);
+		$name = $data['username'] ?? null;
+		if (!is_string($name) || $name === '') {
+			return null;
+		}
+
+		$email = $data['email'] ?? null;
+		return ['name' => $name, 'email' => is_string($email) && $email !== '' ? $email : null];
 	}
 }

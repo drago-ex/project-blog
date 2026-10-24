@@ -1,0 +1,37 @@
+{* The newest article of a list over the whole row: a large image beside the title, perex and author; the whole block is a link. *}
+{* Also used by the home page of drago-ex/project-preset. *}
+{varType App\Model\Blog\ArticleEntity $article}
+{default ?array $author = null}
+{default ?App\Model\Blog\CategoryEntity $category = null}
+{default ?int $commentCount = null}
+
+<article class="blog-featured position-relative row g-4 g-lg-5 align-items-center">
+	<div n:if="$article->image" class="col-lg-7">
+		<div class="ratio ratio-16x9 rounded-4 overflow-hidden">
+			<img src="{$basePath}/{App\Model\Blog\ArticleImages::Path}/{$article->image}" alt="" class="object-fit-cover" style="object-position: top">
+		</div>
+	</div>
+
+	<div n:class="$article->image ? col-lg-5 : col-12">
+		<div class="d-flex flex-wrap align-items-center column-gap-2 mb-2 small text-body-secondary">
+			<a n:if="$category" n:href=":Front:Blog:category, category: $category->slug" class="blog-card-over link-secondary">{$category->name}</a>
+			{if $commentCount !== null}
+				<span n:if="$category" aria-hidden="true">&middot;</span>
+				<a n:href=":Front:Blog:detail#comments, slug: $article->slug" class="blog-card-over link-secondary">{_'Comments: %d', $commentCount}</a>
+			{/if}
+		</div>
+
+		<h2 class="display-6 fw-semibold mb-3">
+			<a n:href=":Front:Blog:detail, slug: $article->slug" class="blog-card-title stretched-link text-decoration-none text-body-emphasis">{$article->title}</a>
+		</h2>
+		<p n:if="$article->perex" class="fs-5 text-body-secondary mb-4">{$article->perex}</p>
+
+		<div class="d-flex align-items-center gap-3">
+			<img n:if="$author" src={$author[avatar]} alt="" width="56" height="56" class="rounded-circle">
+			<div class="small">
+				<div n:if="$author" class="fw-semibold text-body">{$author[name]}</div>
+				<time n:if="$article->published_at" datetime={$article->published_at|date:'c'} title={$article->published_at|date:'j. n. Y'} class="text-body-secondary">{$article->published_at|ago}</time>
+			</div>
+		</div>
+	</div>
+</article>

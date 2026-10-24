@@ -1,0 +1,24 @@
+{* The meta line of the article detail: author with avatar, date, category and comments. *}
+{varType App\Model\Blog\ArticleEntity $article}
+{default ?array $author = null}
+{default ?App\Model\Blog\CategoryEntity $category = null}
+{default ?int $commentCount = null}
+
+<div class="d-flex flex-wrap align-items-center gap-2 small text-body-secondary">
+	{if $author}
+		<img src={$author[avatar]} alt="" width="24" height="24" class="rounded-circle" loading="lazy">
+		<span class="fw-semibold text-body">{$author[name]}</span>
+	{/if}
+	{if $article->published_at}
+		<span n:if="$author" aria-hidden="true">&middot;</span>
+		<time datetime={$article->published_at|date:'c'} title={$article->published_at|date:'j. n. Y'}>{$article->published_at|ago}</time>
+	{/if}
+	{if $category}
+		<span aria-hidden="true">&middot;</span>
+		<a n:href=":Front:Blog:category, category: $category->slug" class="link-secondary">{$category->name}</a>
+	{/if}
+	{if $commentCount !== null}
+		<span aria-hidden="true">&middot;</span>
+		<a n:href=":Front:Blog:detail#comments, slug: $article->slug" class="link-secondary">{_'Comments: %d', $commentCount}</a>
+	{/if}
+</div>

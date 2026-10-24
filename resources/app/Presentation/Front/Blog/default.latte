@@ -1,26 +1,31 @@
 {templateType App\Presentation\Front\Blog\BlogTemplate}
 
-{* the list of all articles (default) and of one category (category) *}
+{* the list of all articles (default) and of one category (category), with the categories as pills *}
 {block content}
-	<h1 n:block="title" class="display-6 fs-2 mb-4">{if $category}{$category->name}{else}{_'Blog'}{/if}</h1>
+	<h1 n:block="title" class="display-6 fw-semibold mb-4">{if $category}{$category->name}{else}{_'Blog'}{/if}</h1>
 
-	<nav n:if="$categories" class="d-flex flex-wrap gap-2 mb-4" aria-label="{_'Categories'}">
-		<a n:href="default" n:class="'btn btn-sm', $category ? 'btn-secondary' : 'btn-primary'">{_'All'}</a>
-		{foreach $categories as $item}
-			<a n:href="category, category: $item->slug" n:class="'btn btn-sm', $category?->id === $item->id ? 'btn-primary' : 'btn-secondary'">
-				{$item->name}
-			</a>
-		{/foreach}
+	<nav n:if="$categories" class="nav nav-pills gap-2 mb-5 small" aria-label="{_'Categories'}">
+		<a n:href="default" n:class="nav-link, rounded-pill, $category ? blog-pill : active" n:attr="aria-current: $category ? null : page">{_'All'}</a>
+		<a n:foreach="$categories as $item" n:href="category, category: $item->slug" n:class="nav-link, rounded-pill, $category?->id === $item->id ? active : blog-pill" n:attr="aria-current: $category?->id === $item->id ? page : null">{$item->name}</a>
 	</nav>
 
-	<div n:if="$articles" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-		<div n:foreach="$articles as $article" class="col">
-			{include '@article-card.latte',
-				article: $article,
-				author: $authors[$article->author_id] ?? null,
-				category: $categories[$article->category_id] ?? null,
-				commentCount: $article->comments_enabled ? ($commentCounts[$article->id] ?? 0) : null,
-			}
+	{* the newest article over the whole row, the others as cards *}
+	{define article, string $file, App\Model\Blog\ArticleEntity $article}
+		{include $file,
+			article: $article,
+			author: $authors[$article->author_id] ?? null,
+			category: $categories[$article->category_id] ?? null,
+			commentCount: $article->comments_enabled ? ($commentCounts[$article->id] ?? 0) : null,
+		}
+	{/define}
+
+	<div n:if="$articles" class="mb-5">
+		{include article, file: '@article-featured.latte', article: $articles[array_key_first($articles)]}
+	</div>
+
+	<div n:if="count($articles) > 1" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+		<div n:foreach="array_slice($articles, 1) as $article" class="col">
+			{include article, file: '@article-item.latte', article: $article}
 		</div>
 	</div>
 
