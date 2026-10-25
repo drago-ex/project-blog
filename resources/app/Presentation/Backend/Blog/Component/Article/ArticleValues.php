@@ -8,7 +8,7 @@ use Drago\Utils\ExtraArrayHash;
 use Nette\Http\FileUpload;
 
 
-class ArticleValues extends ExtraArrayHash
+final class ArticleValues extends ExtraArrayHash
 {
 	public const string
 		CategoryId = 'category_id',

@@ -146,7 +146,8 @@ v `Front/Blog/7.conf.neon`). Nejnovější článek je přes celý řádek s vel
 
 Úvodní obrázek se nahrává ve formuláři článku. Zmenší se, aby se vešel do 1600 × 1200 px, a uloží do
 `www/upload/blog/`; výměna nebo odebrání obrázku a smazání článku soubor smažou. Zmenšování potřebuje
-rozšíření PHP GD (Docker obraz z drago-ex/project-docker ho má). Přidejte `/www/upload/` do `.gitignore`.
+rozšíření PHP GD (Docker obraz z drago-ex/project-docker ho má); bez něj formulář nahrávání nenabízí.
+Přidejte `/www/upload/` do `.gitignore`.
 
 Komentář může napsat kdokoli; zobrazí se po schválení administrátorem. Komentáře používají základní Texy (bez obrázků,
 nadpisů a HTML). Každý článek je povoluje nebo zakazuje vlastním přepínačem „Povolit komentáře“. Přihlášený

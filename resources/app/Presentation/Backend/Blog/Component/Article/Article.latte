@@ -66,8 +66,12 @@
 												<div n:if="$mainImage" class="col-12">
 													<img src="{$basePath}/{App\Model\Blog\ArticleImages::Path}/{$mainImage}" alt="" class="w-100 rounded object-fit-cover" style="max-height: 10rem; object-position: top">
 												</div>
-												{include input, name: 'upload'}
-												<div class="col-12 form-text mt-1">{_'JPEG, PNG, GIF or WebP, at most 8 MB.'}</div>
+												{if App\Model\Blog\ArticleImages::isSupported()}
+													{include input, name: 'upload'}
+													<div class="col-12 form-text mt-1">{_'JPEG, PNG, GIF or WebP, at most 8 MB.'}</div>
+												{else}
+													<div class="col-12 form-text">{_'Uploading images needs the PHP extension GD.'}</div>
+												{/if}
 												{if $mainImage}
 													{include checkbox, name: 'remove_image'}
 												{/if}

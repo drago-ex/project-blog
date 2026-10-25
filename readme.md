@@ -146,7 +146,8 @@ other pages can show articles the same way. The author is the signed-in user who
 
 The cover image is uploaded in the article form. It is made smaller to fit 1600 × 1200 px and saved in
 `www/upload/blog/`; replacing or removing the image and deleting the article delete the file. Resizing needs the
-PHP extension GD (the Docker image of drago-ex/project-docker has it). Add `/www/upload/` to `.gitignore`.
+PHP extension GD (the Docker image of drago-ex/project-docker has it); without it the form offers no upload.
+Add `/www/upload/` to `.gitignore`.
 
 Anyone may write a comment; it is shown after an administrator approves it. Comments use basic Texy (no images,
 headings or HTML). Each article allows or disallows them by its own "Allow comments" switch. A signed-in user does

@@ -271,10 +271,13 @@ class ArticleControl extends BaseControl
 		$form->addTextAreaInput(ArticleValues::Perex, 'Perex')
 			->setNullable();
 
-		$form->addUpload(ArticleValues::Upload, 'Upload a main image')
-			->addRule($form::Image, 'The image must be JPEG, PNG, GIF or WebP.')
-			->addRule($form::MaxFileSize, 'The image can have at most 8 MB.', self::MaxImageSize)
-			->addRule(ArticleImages::validatePixels(...), 'The image can have at most %d megapixels.', ArticleImages::MaxPixels / 1_000_000);
+		// the Image rule and the resizing need GD (only suggested); without it the form has no upload, so it still works
+		if (ArticleImages::isSupported()) {
+			$form->addUpload(ArticleValues::Upload, 'Upload a main image')
+				->addRule($form::Image, 'The image must be JPEG, PNG, GIF or WebP.')
+				->addRule($form::MaxFileSize, 'The image can have at most 8 MB.', self::MaxImageSize)
+				->addRule(ArticleImages::validatePixels(...), 'The image can have at most %d megapixels.', ArticleImages::MaxPixels / 1_000_000);
+		}
 
 		$form->addCheckbox(ArticleValues::RemoveImage, 'Remove the main image');
 

@@ -53,6 +53,13 @@ class ArticleImages
 	}
 
 
+	/** GD (only suggested by the package) resizes the uploads; without it no image can be uploaded. */
+	public static function isSupported(): bool
+	{
+		return extension_loaded('gd');
+	}
+
+
 	/**
 	 * Form rule: the image has at most MaxPixels, read from its header before it is decoded, so a huge image
 	 * gets a form error instead of exhausting the memory.
