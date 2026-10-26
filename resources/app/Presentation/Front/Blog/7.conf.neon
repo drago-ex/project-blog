@@ -18,6 +18,7 @@ services:
 	router: {setup: {add(@router.blog)}}
 	router.blog: {factory: App\Presentation\Front\Blog\BlogRouter::create, autowired: no}
 
-	# cover images in www/upload/blog/ and the authors of articles
+	# cover images in www/upload/blog/, the authors of articles and the article lists of the front
 	- App\Model\Blog\ArticleImages(%appDir%/../www)
 	- App\Model\Blog\ArticleAuthors
+	- App\Model\Blog\ArticleListFactory

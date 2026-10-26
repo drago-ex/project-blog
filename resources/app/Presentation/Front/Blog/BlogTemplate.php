@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Presentation\Front\Blog;
 
 use App\Model\Blog\ArticleEntity;
+use App\Model\Blog\ArticleList;
 use App\Model\Blog\CategoryEntity;
 use App\Model\Blog\CommentEntity;
 use App\Presentation\BaseTemplate;
@@ -12,11 +13,8 @@ use App\Presentation\BaseTemplate;
 
 class BlogTemplate extends BaseTemplate
 {
-	/** @var ArticleEntity[] */
-	public array $articles = [];
-
-	/** @var array<int, CategoryEntity> categories with a published article, by id */
-	public array $categories = [];
+	/** The articles of the list (default, category); its categories with a published article are also the pills. */
+	public ArticleList $list;
 
 	/** The selected category of the list, or the category of the article. */
 	public ?CategoryEntity $category = null;
@@ -28,14 +26,8 @@ class BlogTemplate extends BaseTemplate
 	/** Printed as <meta name="description"> by the front layout. */
 	public ?string $description = null;
 
-	/** @var array<int, array{name: string, avatar: string}> authors of the listed articles by the user id */
-	public array $authors = [];
-
 	/** @var array{name: string, avatar: string}|null the author of the article (detail) */
 	public ?array $author = null;
-
-	/** @var array<int, int> numbers of approved comments by article id, missing for none */
-	public array $commentCounts = [];
 
 	/** The article allows comments. */
 	public bool $commentsEnabled = false;

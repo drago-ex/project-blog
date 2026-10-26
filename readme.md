@@ -141,8 +141,9 @@ the perex is the meta description of the article.
 The list shows the articles as cards side by side: a wide image, a relative date (`{$date|ago}`, e.g. "2 months
 ago") with the category, the title, the perex and the author with a [Gravatar](https://gravatar.com) avatar
 (drago-ex/gravatar, registered in `Front/Blog/7.conf.neon`). The newest article is shown over the whole row with a
-large image beside the text (`Front/Blog/@article-featured.latte`). The card is `Front/Blog/@article-item.latte`, so
-other pages can show articles the same way. The author is the signed-in user who created the article.
+large image beside the text (`Front/Blog/@article-featured.latte`), the others are cards
+(`Front/Blog/@article-item.latte`). Other pages show articles the same way with `ArticleListFactory::create()` and
+`Front/Blog/@article-list.latte`. The author is the signed-in user who created the article.
 
 The cover image is uploaded in the article form. It is made smaller to fit 1600 × 1200 px and saved in
 `www/upload/blog/`; replacing or removing the image and deleting the article delete the file. Resizing needs the

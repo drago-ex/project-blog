@@ -1,0 +1,26 @@
+{* published articles of App\Model\Blog\ArticleListFactory: the newest over the whole row, the others as cards;
+   used by the blog list and the home page of project-preset *}
+{parameters App\Model\Blog\ArticleList $list}
+
+{define article, string $file, App\Model\Blog\ArticleEntity $article}
+	{include $file,
+		article: $article,
+		author: $list->authors[$article->author_id] ?? null,
+		category: $list->categories[$article->category_id] ?? null,
+		commentCount: $article->comments_enabled ? ($list->commentCounts[$article->id] ?? 0) : null,
+	}
+{/define}
+
+{var $articles = $list->articles}
+
+<div n:if="$articles" class="mb-5">
+	{include article, file: '@article-featured.latte', article: $articles[array_key_first($articles)]}
+</div>
+
+<div n:if="count($articles) > 1" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+	<div n:foreach="array_slice($articles, 1) as $article" class="col">
+		{include article, file: '@article-item.latte', article: $article}
+	</div>
+</div>
+
+<p n:if="!$articles" class="text-body-secondary">{_'No published articles yet.'}</p>

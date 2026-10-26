@@ -141,8 +141,8 @@ perex slouží jako meta popis článku.
 Výpis ukazuje články jako karty vedle sebe: široký obrázek, relativní datum (`{$date|ago}`, např. „před 2 měsíci“)
 s kategorií, titulek, perex a autor s avatarem z [Gravataru](https://gravatar.com) (drago-ex/gravatar, zaregistrovaný
 v `Front/Blog/7.conf.neon`). Nejnovější článek je přes celý řádek s velkým obrázkem vedle textu
-(`Front/Blog/@article-featured.latte`). Karta je `Front/Blog/@article-item.latte`, takže i jiné stránky mohou
-články zobrazit stejně. Autorem je přihlášený uživatel, který článek vytvořil.
+(`Front/Blog/@article-featured.latte`), ostatní jsou karty (`Front/Blog/@article-item.latte`). Jiné stránky
+zobrazí články stejně pomocí `ArticleListFactory::create()` a `Front/Blog/@article-list.latte`. Autorem je přihlášený uživatel, který článek vytvořil.
 
 Úvodní obrázek se nahrává ve formuláři článku. Zmenší se, aby se vešel do 1600 × 1200 px, a uloží do
 `www/upload/blog/`; výměna nebo odebrání obrázku a smazání článku soubor smažou. Zmenšování potřebuje

@@ -7,6 +7,7 @@ namespace App\Model\Blog;
 use App\Model\User\UserEntity;
 use Dibi\Connection;
 use Dibi\Exception;
+use Dibi\Expression;
 use Drago\Attr\AttributeDetectionException;
 use Drago\Attr\Table;
 use Drago\Database\Database;
@@ -43,15 +44,30 @@ class ArticleRepository
 
 
 	/**
-	 * Published articles of the front, the newest first; an article with a future date waits for it.
+	 * What the front shows: a published article whose date has come (a future date waits for it).
+	 * One condition for the list, the detail and the used categories, so they always agree.
+	 */
+	public static function publishedCondition(): Expression
+	{
+		return new Expression(
+			'%n = ? AND %n <= ?',
+			ArticleEntity::ColumnStatus,
+			ArticleEntity::StatusPublished,
+			ArticleEntity::ColumnPublishedAt,
+			new \DateTimeImmutable,
+		);
+	}
+
+
+	/**
+	 * Published articles of the front, the newest first.
 	 * @return ExtraFluent<ArticleEntity>
 	 * @throws AttributeDetectionException
 	 */
 	public function getPublishedArticles(?int $categoryId = null): ExtraFluent
 	{
 		$fluent = $this->read('*')
-			->where('%n = ?', ArticleEntity::ColumnStatus, ArticleEntity::StatusPublished)
-			->where('%n <= ?', ArticleEntity::ColumnPublishedAt, new \DateTimeImmutable)
+			->where(self::publishedCondition())
 			->orderBy(ArticleEntity::ColumnPublishedAt, 'DESC')
 			->orderBy(ArticleEntity::PrimaryKey, 'DESC');
 
@@ -70,8 +86,7 @@ class ArticleRepository
 	{
 		return $this->read('*')
 			->where('%n = ?', ArticleEntity::ColumnSlug, $slug)
-			->where('%n = ?', ArticleEntity::ColumnStatus, ArticleEntity::StatusPublished)
-			->where('%n <= ?', ArticleEntity::ColumnPublishedAt, new \DateTimeImmutable)
+			->where(self::publishedCondition())
 			->record();
 	}
 

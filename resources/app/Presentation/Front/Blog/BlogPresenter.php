@@ -6,6 +6,7 @@ namespace App\Presentation\Front\Blog;
 
 use App\Model\Blog\ArticleAuthors;
 use App\Model\Blog\ArticleEntity;
+use App\Model\Blog\ArticleListFactory;
 use App\Model\Blog\ArticleRepository;
 use App\Model\Blog\CategoryEntity;
 use App\Model\Blog\CategoryRepository;
@@ -42,6 +43,7 @@ final class BlogPresenter extends BasePresenter
 		private readonly ArticleAuthors $articleAuthors,
 		private readonly CategoryRepository $categoryRepository,
 		private readonly CommentRepository $commentRepository,
+		private readonly ArticleListFactory $articleListFactory,
 		private readonly TexyFormatter $texyFormatter,
 		private readonly TexyToolbar $texyToolbar,
 		private readonly RateLimiter $rateLimiter,
@@ -197,20 +199,13 @@ final class BlogPresenter extends BasePresenter
 
 
 	/**
-	 * Articles of the list, the categories that have some (for the pills and the cards) and the selected category.
+	 * The article list (its categories are also the pills) and the selected category.
 	 * @throws AttributeDetectionException
 	 */
 	private function setArticleList(?CategoryEntity $category): void
 	{
-		$categories = $this->categoryRepository->getUsedCategories();
-		$this->template->categories = array_column($categories, null, CategoryEntity::PrimaryKey);
+		$this->template->list = $this->articleListFactory->create($category?->id);
 		$this->template->category = $category;
-		$this->template->articles = $articles = $this->articleRepository
-			->getPublishedArticles($category?->id)
-			->recordAll();
-
-		$this->template->authors = $this->articleAuthors->forArticles($articles);
-		$this->template->commentCounts = $this->commentRepository->getApprovedCounts(array_column($articles, ArticleEntity::PrimaryKey));
 	}
 
 
