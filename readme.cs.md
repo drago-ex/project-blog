@@ -19,12 +19,10 @@ veřejnou část se seznamem článků, kategoriemi a detailem článku s koment
 composer require drago-ex/project-blog
 ```
 
-## Soubory projektu
+## Soubory kopírované do projektu
 
-Kopírování souborů obstarává automaticky [drago-ex/project-tools](https://github.com/drago-ex/project-tools),
-který musí být v projektu nainstalovaný. Bez něj zkopírujte soubory ručně podle sekce `copy`
-v `composer.json` tohoto balíčku. Pro přeskočení balíčku nastavte `"skip": true` v
-`extra.drago-tools.packages.<package-name>` v kořenovém `composer.json`.
+Soubory do projektu kopíruje [drago-ex/project-tools](https://github.com/drago-ex/project-tools)
+podle nastavení v `extra.drago-tools` v `composer.json` tohoto balíčku.
 
 ## Migrace databáze
 
@@ -39,14 +37,6 @@ Migrace vytvoří tabulky `blog_article`, `blog_category` a `blog_comment`.
 Lišta pole s obsahem a tlačítko pro kopírování bloků kódu pocházejí z
 [drago-ex/texy-toolbar](https://github.com/drago-ex/texy-toolbar); nastavte je podle jeho README (`admin.js` pro
 lištu, `front.js` pro lištu komentářů a tlačítko kopírování). Blog funguje i bez nich.
-
-## Instalované soubory
-
-Balíček kopíruje:
-
-- `resources/app/Model` do `app/Model`
-- `resources/app/Presentation/Backend` do `app/Presentation/Backend`
-- `resources/app/Presentation/Front` do `app/Presentation/Front`
 
 ## Administrace
 
