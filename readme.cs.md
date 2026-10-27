@@ -40,63 +40,6 @@ Lišta pole s obsahem a tlačítko pro kopírování bloků kódu pocházejí z
 [drago-ex/texy-toolbar](https://github.com/drago-ex/texy-toolbar); nastavte je podle jeho README (`admin.js` pro
 lištu, `front.js` pro lištu komentářů a tlačítko kopírování). Blog funguje i bez nich.
 
-## Oprávnění
-
-Blog funguje bez oprávnění i bez [drago-ex/permission](https://github.com/drago-ex/permission):
-administrace pak zobrazuje všechna svá tlačítka.
-
-Pro statická oprávnění jsou pravidla přístupu připravená v [`permission.php`](permission.php); drago-ex/permission
-z nich vygeneruje provider (nastavení popisuje jeho README):
-
-```bash
-php vendor/bin/create-permission --packages
-```
-
-Aby tlačítka pro přidání, úpravu a mazání viděly jen role s privilegiem, přidejte trait `WriteAccess` z
-drago-ex/permission; jeho `isWriteAllowed()` se ptá na privilegium `{component}-write`. V
-`app/Presentation/Backend/Blog/Component/BaseControl.php` trait použijte a výsledek předejte do šablony
-(s `public bool $writeAllowed = false;` v `BaseTemplate`):
-
-```php
-use Drago\Permission\WriteAccess;
-
-abstract class BaseControl extends ExtraControl implements OffcanvasHandle, ModalHandle
-{
-	use Component;
-	use WriteAccess;
-
-	public function createRender(): Template
-	{
-		// ...
-		$template->writeAllowed = $this->isWriteAllowed();
-```
-
-potom podle něj skryjte akce gridu a tlačítko pro přidání zobrazte jen s oprávněním:
-
-```php
-$grid->addActionEdit(fn(int $id) => $this->handleEdit($id))
-	->setVisible($this->isWriteAllowed());
-```
-
-```latte
-{embed '../@datagrid-heading.latte', addButton: $writeAllowed}
-```
-
-V článku zobrazte tlačítka schválení a smazání v záložce komentářů (`<div class="article-comment-actions …">`)
-jen s `n:if="$writeAllowed"` a nechte `ArticleControl::getToggleCommentsLink()` bez oprávnění vracet null, aby
-stav komentářů v gridu nebyl klikací.
-
-Pro dynamická oprávnění nastavovaná v administraci nainstalujte
-[drago-ex/project-permission](https://github.com/drago-ex/project-permission) a ručně naimportujte privilegia blogu
-do jeho tabulky `resources`, aby je bylo možné přidělovat rolím (např. redaktor, který články jen prohlíží):
-
-```bash
-php vendor/bin/migration db:migrate vendor/drago-ex/project-blog/migrations-permission
-```
-
-V projektu sestaveném přes [netis](https://github.com/netis-cms/netis) tyto změny udělá project-preset
-a privilegia naimportuje webový instalátor z project-install.
-
 ## Instalované soubory
 
 Balíček kopíruje:
@@ -154,3 +97,60 @@ uživatel jméno a e-mail nevyplňuje, komentář dostane ty z jeho účtu. Schv
 své odpovědi. Odkaz pro odpověď potřebuje `front.js` z drago-ex/project-preset (bez něj jen vede k formuláři).
 
 Provider oprávnění veřejné části používá zdroj `Front:Blog` a povoluje ho návštěvníkům.
+
+## Oprávnění
+
+Blog funguje bez oprávnění i bez [drago-ex/permission](https://github.com/drago-ex/permission):
+administrace pak zobrazuje všechna svá tlačítka.
+
+Pro statická oprávnění jsou pravidla přístupu připravená v [`permission.php`](permission.php); drago-ex/permission
+z nich vygeneruje provider (nastavení popisuje jeho README):
+
+```bash
+php vendor/bin/create-permission --packages
+```
+
+Aby tlačítka pro přidání, úpravu a mazání viděly jen role s privilegiem, přidejte trait `WriteAccess` z
+drago-ex/permission; jeho `isWriteAllowed()` se ptá na privilegium `{component}-write`. V
+`app/Presentation/Backend/Blog/Component/BaseControl.php` trait použijte a výsledek předejte do šablony
+(s `public bool $writeAllowed = false;` v `BaseTemplate`):
+
+```php
+use Drago\Permission\WriteAccess;
+
+abstract class BaseControl extends ExtraControl implements OffcanvasHandle, ModalHandle
+{
+	use Component;
+	use WriteAccess;
+
+	public function createRender(): Template
+	{
+		// ...
+		$template->writeAllowed = $this->isWriteAllowed();
+```
+
+potom podle něj skryjte akce gridu a tlačítko pro přidání zobrazte jen s oprávněním:
+
+```php
+$grid->addActionEdit(fn(int $id) => $this->handleEdit($id))
+	->setVisible($this->isWriteAllowed());
+```
+
+```latte
+{embed '../@datagrid-heading.latte', addButton: $writeAllowed}
+```
+
+V článku zobrazte tlačítka schválení a smazání v záložce komentářů (`<div class="article-comment-actions …">`)
+jen s `n:if="$writeAllowed"` a nechte `ArticleControl::getToggleCommentsLink()` bez oprávnění vracet null, aby
+stav komentářů v gridu nebyl klikací.
+
+Pro dynamická oprávnění nastavovaná v administraci nainstalujte
+[drago-ex/project-permission](https://github.com/drago-ex/project-permission) a ručně naimportujte privilegia blogu
+do jeho tabulky `resources`, aby je bylo možné přidělovat rolím (např. redaktor, který články jen prohlíží):
+
+```bash
+php vendor/bin/migration db:migrate vendor/drago-ex/project-blog/migrations-permission
+```
+
+V projektu sestaveném přes [netis](https://github.com/netis-cms/netis) tyto změny udělá project-preset
+a privilegia naimportuje webový instalátor z project-install.
