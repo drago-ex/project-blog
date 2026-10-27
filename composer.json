@@ -18,7 +18,7 @@
 		"drago-ex/translator": "^4.0",
 		"drago-ex/utils": "^2.0",
 		"drago-ex/texy-toolbar": "^1.0",
-		"drago-ex/gravatar": "^2.2"
+		"drago-ex/gravatar": "^2.1"
 	},
 	"suggest": {
 		"ext-gd": "Resizes the uploaded cover images of the articles; the Docker image of drago-ex/project-docker has it.",
