@@ -150,5 +150,5 @@ do jeho tabulky `resources`, aby je bylo možné přidělovat rolím (např. red
 php vendor/bin/migration db:migrate vendor/drago-ex/project-blog/migrations-permission
 ```
 
-V projektu sestaveném přes [netis](https://github.com/netis-cms/netis) tyto změny udělá project-preset
-a privilegia naimportuje webový instalátor z project-install.
+V projektu sestaveném přes [netis](https://github.com/netis-cms/netis) s `--permission` tyto změny udělá [drago-ex/project-preset-permission](https://github.com/drago-ex/project-preset-permission)
+a privilegia naimportuje jeho webový instalátor.
