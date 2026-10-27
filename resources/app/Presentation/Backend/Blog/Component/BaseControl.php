@@ -109,6 +109,14 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 	}
 
 
+	/** Logs an exception the user cannot fix (e.g. a missing PHP extension) and returns the general message. */
+	protected function logUnexpected(\Throwable $e): string
+	{
+		Debugger::log($e, ILogger::EXCEPTION);
+		return 'Unknown status code.';
+	}
+
+
 	private function delete(SubmitButton $button): void
 	{
 		$form = $button->getForm();
@@ -133,14 +141,6 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 			$this->addFlashMessage($message, Alert::Warning);
 			$this->addRedraw($this->snippetMessage);
 		}
-	}
-
-
-	/** Logs an exception the user cannot fix (e.g. a missing PHP extension) and returns the general message. */
-	protected function logUnexpected(\Throwable $e): string
-	{
-		Debugger::log($e, ILogger::EXCEPTION);
-		return 'Unknown status code.';
 	}
 
 
