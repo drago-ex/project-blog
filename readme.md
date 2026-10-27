@@ -47,7 +47,7 @@ The backend presenter is available as:
 {link :Backend:Blog:categories}  {* categories *}
 ```
 
-With [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui), add the links to its menu (see its README); [drago-ex/project-preset](https://github.com/drago-ex/project-preset) adds them for you.
+With [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui), add the links to its menu (see its README).
 
 A new category is written right in
 the article form ("+ New category"); the button "Categories" above the articles opens their list for renaming and
@@ -88,7 +88,7 @@ Anyone may write a comment; it is shown after an administrator approves it. Comm
 headings or HTML). Each article allows or disallows them by its own "Allow comments" switch. A signed-in user does
 not fill in the name and email, the comment gets those of the account. Approved comments are numbered (`#1`, `#2`,
 …) and "Reply" puts `#2 Name` into the form; such a number in a comment links the comment, which lists its replies.
-The reply link needs `front.js` of drago-ex/project-preset (without it the link only goes to the form).
+Putting the text into the form needs a small script of the project (without it the link only goes to the form).
 
 The frontend permission provider uses the resource `Front:Blog` and allows it to guests.
 
@@ -151,6 +151,3 @@ into its `resources` table by hand, so roles can be given them (e.g. an editor w
 ```bash
 php vendor/bin/migration db:migrate vendor/drago-ex/project-blog/migrations-permission
 ```
-
-In a project composed by [netis](https://github.com/netis-cms/netis) with `--permission`, [drago-ex/project-preset-permission](https://github.com/drago-ex/project-preset-permission)
-makes these changes for you and its web installer imports the privileges.

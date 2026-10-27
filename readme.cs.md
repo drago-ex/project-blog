@@ -47,7 +47,7 @@ Presenter administrace je dostupný jako:
 {link :Backend:Blog:categories}  {* categories *}
 ```
 
-S [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui) přidejte odkazy do jeho menu (viz jeho README); [drago-ex/project-preset](https://github.com/drago-ex/project-preset) je přidá za vás.
+S [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui) přidejte odkazy do jeho menu (viz jeho README).
 
 Novou kategorii napíšete přímo ve formuláři článku
 („+ Nová kategorie“); tlačítko „Kategorie“ nad články otevře jejich seznam pro přejmenování a mazání. Slug nové
@@ -86,7 +86,7 @@ Komentář může napsat kdokoli; zobrazí se po schválení administrátorem. K
 nadpisů a HTML). Každý článek je povoluje nebo zakazuje vlastním přepínačem „Povolit komentáře“. Přihlášený
 uživatel jméno a e-mail nevyplňuje, komentář dostane ty z jeho účtu. Schválené komentáře jsou očíslované (`#1`,
 `#2`, …) a „Odpovědět“ vloží do formuláře `#2 Jméno`; takové číslo v komentáři odkazuje na komentář, který vypisuje
-své odpovědi. Odkaz pro odpověď potřebuje `front.js` z drago-ex/project-preset (bez něj jen vede k formuláři).
+své odpovědi. Vložení textu do formuláře potřebuje malý skript projektu (bez něj odkaz jen vede k formuláři).
 
 Provider oprávnění veřejné části používá zdroj `Front:Blog` a povoluje ho návštěvníkům.
 
@@ -149,6 +149,3 @@ do jeho tabulky `resources`, aby je bylo možné přidělovat rolím (např. red
 ```bash
 php vendor/bin/migration db:migrate vendor/drago-ex/project-blog/migrations-permission
 ```
-
-V projektu sestaveném přes [netis](https://github.com/netis-cms/netis) s `--permission` tyto změny udělá [drago-ex/project-preset-permission](https://github.com/drago-ex/project-preset-permission)
-a privilegia naimportuje jeho webový instalátor.
