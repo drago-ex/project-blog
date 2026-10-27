@@ -88,16 +88,22 @@ své odpovědi. Odkaz pro odpověď potřebuje `front.js` z drago-ex/project-pre
 
 Provider oprávnění veřejné části používá zdroj `Front:Blog` a povoluje ho návštěvníkům.
 
-## Oprávnění
+---
+
+## Volitelné doplňky
+
+Balíček funguje i bez nich. Pokud je projekt potřebuje, nastavte je ručně podle popisu níže.
+
+### Oprávnění
 
 Blog funguje bez oprávnění i bez [drago-ex/permission](https://github.com/drago-ex/permission):
 administrace pak zobrazuje všechna svá tlačítka.
 
-Pro statická oprávnění jsou pravidla přístupu připravená v [`permission.php`](permission.php); drago-ex/permission
+Pro statická oprávnění jsou pravidla přístupu připravená v [`bin/create-blog-permission`](bin/create-blog-permission); drago-ex/permission
 z nich vygeneruje provider (nastavení popisuje jeho README):
 
 ```bash
-php vendor/bin/create-permission --packages
+php vendor/bin/drago-commands
 ```
 
 Aby tlačítka pro přidání, úpravu a mazání viděly jen role s privilegiem, přidejte trait `WriteAccess` z

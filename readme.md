@@ -89,16 +89,22 @@ The reply link needs `front.js` of drago-ex/project-preset (without it the link 
 
 The frontend permission provider uses the resource `Front:Blog` and allows it to guests.
 
-## Permissions
+---
+
+## Optional add-ons
+
+The package works without them. Set them up by hand as described below when the project needs them.
+
+### Permissions
 
 The blog works without permissions and without [drago-ex/permission](https://github.com/drago-ex/permission):
 the administration shows all its buttons.
 
-For static permissions, the access rules are prepared in [`permission.php`](permission.php); drago-ex/permission
+For static permissions, the access rules are prepared in [`bin/create-blog-permission`](bin/create-blog-permission); drago-ex/permission
 generates a provider from it (set up as its README shows):
 
 ```bash
-php vendor/bin/create-permission --packages
+php vendor/bin/drago-commands
 ```
 
 To show the add, edit and delete buttons only to roles with the privilege, add the `WriteAccess` trait of
