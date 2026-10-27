@@ -43,16 +43,18 @@ lištu, `front.js` pro lištu komentářů a tlačítko kopírování). Blog fun
 Presenter administrace je dostupný jako:
 
 ```latte
-{link :Backend:Blog:}
+{link :Backend:Blog:}            {* articles with their comments *}
+{link :Backend:Blog:categories}  {* categories *}
 ```
 
-S [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui) se v postranním menu objeví
-položka „Blog“ v sekci „Obsah“ (`Backend/Blog/6.menu.neon`). Novou kategorii napíšete přímo ve formuláři článku
+S [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui) přidejte odkazy do jeho menu (viz jeho README); [drago-ex/project-preset](https://github.com/drago-ex/project-preset) je přidá za vás.
+
+Novou kategorii napíšete přímo ve formuláři článku
 („+ Nová kategorie“); tlačítko „Kategorie“ nad články otevře jejich seznam pro přejmenování a mazání. Slug nové
 kategorie se vytvoří z názvu pomocí rozšíření PHP intl. Komentáře se spravují u svého článku: seznam článků
 ukazuje, zda jsou povolené (kliknutím na stav se přepne), jejich počet i ty, které čekají na schválení, a otevřený
-článek má záložku „Komentáře“ pro jejich schválení nebo smazání. Počet všech komentářů čekajících na schválení je
-vidět u položky „Blog“ v menu a u zvonku v navbaru (`CommentBadge`).
+článek má záložku „Komentáře“ pro jejich schválení nebo smazání. Počet všech komentářů čekajících na schválení
+dodává `CommentBadge`, služba pro čísla v menu a zvonek v navbaru project-backend-ui; zaregistrujte ji podle jeho README.
 
 Modul používá zdroj oprávnění `Backend:Blog`. Provider administrace povoluje roli administrátora.
 

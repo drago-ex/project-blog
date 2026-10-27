@@ -43,16 +43,19 @@ the toolbar, `front.js` for the toolbar of comments and the copy button). Withou
 The backend presenter is available as:
 
 ```latte
-{link :Backend:Blog:}
+{link :Backend:Blog:}            {* articles with their comments *}
+{link :Backend:Blog:categories}  {* categories *}
 ```
 
-With [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui), the item "Blog" appears in the sidebar
-under "Content" (`Backend/Blog/6.menu.neon`). A new category is written right in
+With [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui), add the links to its menu (see its README); [drago-ex/project-preset](https://github.com/drago-ex/project-preset) adds them for you.
+
+A new category is written right in
 the article form ("+ New category"); the button "Categories" above the articles opens their list for renaming and
 deleting. The slug of a new category is made from its name with the PHP extension intl. Comments are managed with their
 article: the article list shows whether they are allowed (a click on the state switches it), their number and those
 waiting for approval, and an opened article has the tab "Comments" to approve or delete them. The number of all
-comments waiting for approval is shown next to "Blog" in the menu and in the bell of the navbar (`CommentBadge`).
+comments waiting for approval comes from `CommentBadge`, a service for the menu numbers and the navbar bell of
+project-backend-ui; register it as its README shows.
 
 The module uses the permission resource `Backend:Blog`. The backend provider allows the administrator role.
 
