@@ -1,7 +1,5 @@
 # Drago Project Blog
 
-[English](readme.md) | Čeština
-
 Články, kategorie a komentáře blogu pro Drago Project.
 
 Balíček přidává modul administrace pro psaní článků, správu kategorií a schvalování komentářů u jejich článku a

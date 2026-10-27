@@ -1,7 +1,5 @@
 # Drago Project Blog
 
-English | [Čeština](readme.cs.md)
-
 Blog articles, categories and comments for Drago Project.
 
 The package adds a backend module for writing articles, managing categories and approving comments with their article, and a
