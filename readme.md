@@ -11,7 +11,7 @@ frontend with the article list, categories and article details with comments.
 ## Requirements
 
 - PHP >= 8.3, < 9
-- Composer
+- [Drago Project](https://github.com/drago-ex/project)
 
 ## Installation
 

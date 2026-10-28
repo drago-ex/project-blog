@@ -11,7 +11,7 @@ veřejnou část se seznamem článků, kategoriemi a detailem článku s koment
 ## Požadavky
 
 - PHP >= 8.3, < 9
-- Composer
+- [Drago Project](https://github.com/drago-ex/project)
 
 ## Instalace
 
