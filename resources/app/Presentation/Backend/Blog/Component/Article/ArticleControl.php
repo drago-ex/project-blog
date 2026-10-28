@@ -394,7 +394,7 @@ class ArticleControl extends BaseControl
 	 */
 	private function formatComments(int $id, bool $enabled, int $total, int $pending): Html
 	{
-		$badge = Html::el('span', ['class' => 'badge ' . ($enabled ? 'text-bg-success' : 'text-bg-secondary')])
+		$badge = Html::el('span', ['class' => 'badge rounded-pill ' . ($enabled ? 'text-bg-success' : 'text-bg-secondary')])
 			->setText($this->translate($enabled ? 'Allowed' : 'Disallowed'));
 
 		$link = $this->getToggleCommentsLink($id);
@@ -415,7 +415,7 @@ class ArticleControl extends BaseControl
 
 		if ($pending > 0) {
 			$cell->addHtml(' ')->addHtml(
-				Html::el('span', ['class' => 'badge text-bg-warning'])->setText($this->translate('%d pending', $pending)),
+				Html::el('span', ['class' => 'badge rounded-pill text-bg-warning'])->setText($this->translate('%d pending', $pending)),
 			);
 		}
 

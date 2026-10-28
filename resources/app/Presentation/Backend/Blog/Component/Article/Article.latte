@@ -109,7 +109,7 @@
 										<span class="fw-semibold">{$comment->author_name}</span>
 										<span n:if="$comment->author_email" class="text-body-secondary">{$comment->author_email}</span>
 										<span class="text-body-secondary">&middot; {$comment->created_at|date:'j. n. Y H:i'}</span>
-										<span n:if="!$comment->approved" class="badge text-bg-warning">{_'Waiting for approval'}</span>
+										<span n:if="!$comment->approved" class="badge rounded-pill text-bg-warning">{_'Waiting for approval'}</span>
 									</div>
 									<div class="mb-2">{$commentHtml[$comment->id]|noescape}</div>
 
