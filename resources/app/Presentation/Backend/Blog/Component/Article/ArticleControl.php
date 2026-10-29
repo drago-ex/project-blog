@@ -92,7 +92,7 @@ class ArticleControl extends BaseControl
 			$this->error();
 		}
 
-		$this->setCommentsEnabled($id, !$article->comments_enabled);
+		$this->setCommentsEnabled($id, !$article->commentsEnabled);
 	}
 
 
@@ -108,7 +108,7 @@ class ArticleControl extends BaseControl
 		$this->commentRepository->approve($id);
 		$this->addFlashMessage('The comment has been approved.', Alert::Success);
 		$this->addRedraw($this->snippetMessage);
-		$this->redrawComments($comment->article_id, gridChanged: true);
+		$this->redrawComments($comment->articleId, gridChanged: true);
 	}
 
 
@@ -121,7 +121,7 @@ class ArticleControl extends BaseControl
 	{
 		$comment = $this->getComment($id);
 		$this->confirmDeleteComment = $id;
-		$this->redrawComments($comment->article_id);
+		$this->redrawComments($comment->articleId);
 	}
 
 
@@ -132,7 +132,7 @@ class ArticleControl extends BaseControl
 	#[Requires(ajax: true)]
 	public function handleCancelDeleteComment(int $id): void
 	{
-		$this->redrawComments($this->getComment($id)->article_id);
+		$this->redrawComments($this->getComment($id)->articleId);
 	}
 
 
@@ -151,7 +151,7 @@ class ArticleControl extends BaseControl
 
 		$this->addFlashMessage('Delete successful.', Alert::Success);
 		$this->addRedraw($this->snippetMessage);
-		$this->redrawComments($comment->article_id, gridChanged: true);
+		$this->redrawComments($comment->articleId, gridChanged: true);
 	}
 
 
@@ -170,7 +170,7 @@ class ArticleControl extends BaseControl
 
 		$form = $this->getComponent('article');
 		$defaults = (array) $item;
-		$defaults[ArticleEntity::ColumnCommentsEnabled] = (bool) $item->comments_enabled;
+		$defaults[ArticleValues::CommentsEnabled] = (bool) $item->commentsEnabled;
 		$form->setDefaults($defaults);
 
 		$sendControl = $this->getFormComponent($form, 'send');
@@ -429,9 +429,9 @@ class ArticleControl extends BaseControl
 	{
 		// the image fields and the new category are not columns, they decide the columns image and category_id
 		$upload = $values->upload;
-		$removeImage = $values->remove_image;
-		$newCategory = trim((string) $values->new_category);
-		unset($values->upload, $values->remove_image, $values->new_category);
+		$removeImage = $values->removeImage;
+		$newCategory = trim((string) $values->newCategory);
+		unset($values->upload, $values->removeImage, $values->newCategory);
 
 		$oldImage = (int) $values->id > 0
 			? $this->articleRepository->get((int) $values->id)->record()?->image
@@ -440,21 +440,21 @@ class ArticleControl extends BaseControl
 		$message = (int) $values->id > 0 ? 'Update successful.' : 'Insert successful.';
 
 		// the list is ordered by the publication date, so a published article always has one
-		if ($values->status === ArticleEntity::StatusPublished && $values->published_at === null) {
-			$values->published_at = new \DateTimeImmutable;
+		if ($values->status === ArticleEntity::StatusPublished && $values->publishedAt === null) {
+			$values->publishedAt = new \DateTimeImmutable;
 		}
 
 		// the signed-in user who creates the article is its author
 		if ((int) $values->id === 0) {
 			$userId = $this->getPresenter()->getUser()->getId();
-			$values->author_id = is_numeric($userId) ? (int) $userId : null;
+			$values->authorId = is_numeric($userId) ? (int) $userId : null;
 		}
 
 		// a new category is saved together with the article, so a failed save leaves no category behind
 		$this->articleRepository->beginTransaction();
 		try {
 			if ($newCategory !== '') {
-				$values->category_id = $this->categoryRepository->getOrCreate($newCategory);
+				$values->categoryId = $this->categoryRepository->getOrCreate($newCategory);
 			}
 
 			if ($upload?->isOk()) {

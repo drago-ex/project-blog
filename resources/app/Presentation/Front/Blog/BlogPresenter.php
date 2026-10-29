@@ -106,14 +106,14 @@ final class BlogPresenter extends BasePresenter
 	{
 		$article = $this->article;
 		$this->template->article = $article;
-		$this->template->category = $article->category_id === null
+		$this->template->category = $article->categoryId === null
 			? null
-			: $this->categoryRepository->get($article->category_id)->record();
+			: $this->categoryRepository->get($article->categoryId)->record();
 		$this->template->content = $this->texyFormatter->toHtml($article->content);
 		$this->template->description = $article->perex;
-		$this->template->author = $article->author_id === null
+		$this->template->author = $article->authorId === null
 			? null
-			: $this->articleAuthors->forArticles([$article])[$article->author_id] ?? null;
+			: $this->articleAuthors->forArticles([$article])[$article->authorId] ?? null;
 		$this->template->commentsEnabled = $this->areCommentsEnabled();
 		$this->template->commentAuthor = $this->getSignedInAuthor()['name'] ?? null;
 		$this->template->comments = $comments = $this->template->commentsEnabled
@@ -124,7 +124,7 @@ final class BlogPresenter extends BasePresenter
 		$names = [];
 		foreach ($comments as $i => $comment) {
 			$this->template->commentNumbers[$comment->id] = $i + 1;
-			$names[$i + 1] = $comment->author_name;
+			$names[$i + 1] = $comment->authorName;
 		}
 
 		$references = new CommentReferences($names);
@@ -213,7 +213,7 @@ final class BlogPresenter extends BasePresenter
 	/** Each article allows or disallows its comments (the field "Allow comments" in the administration). */
 	private function areCommentsEnabled(): bool
 	{
-		return (bool) $this->article->comments_enabled;
+		return (bool) $this->article->commentsEnabled;
 	}
 
 

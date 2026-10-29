@@ -12,12 +12,12 @@
 				<img src={$author[avatar]} alt="" width="24" height="24" class="rounded-circle">
 				<span class="fw-semibold text-body">{$author[name]}</span>
 			{/if}
-			{if $article->published_at}
+			{if $article->publishedAt}
 				<span n:if="$author" aria-hidden="true">&middot;</span>
-				<time datetime={$article->published_at|date:'c'} title={$article->published_at|date:'j. n. Y'}>{$article->published_at|ago}</time>
+				<time datetime={$article->publishedAt|date:'c'} title={$article->publishedAt|date:'j. n. Y'}>{$article->publishedAt|ago}</time>
 			{/if}
 			{if $category}
-				<span n:if="$author || $article->published_at" aria-hidden="true">&middot;</span>
+				<span n:if="$author || $article->publishedAt" aria-hidden="true">&middot;</span>
 				<a n:href="category, category: $category->slug" class="link-secondary">{$category->name}</a>
 			{/if}
 		</div>
@@ -37,14 +37,14 @@
 					{var int $number = $commentNumbers[$comment->id]}
 					<article id="comment-{$number}" class="comment p-4 bg-body-tertiary rounded-4">
 						<div class="small mb-2">
-							<span class="fw-semibold">{$comment->author_name}</span>
+							<span class="fw-semibold">{$comment->authorName}</span>
 							<a href="#comment-{$number}" class="link-secondary text-decoration-none">#{$number}</a>
-							<span class="text-body-secondary">&middot; {$comment->created_at|date:'j. n. Y H:i'}</span>
+							<span class="text-body-secondary">&middot; {$comment->createdAt|date:'j. n. Y H:i'}</span>
 						</div>
 						<div class="comment-content">{$commentHtml[$comment->id]|noescape}</div>
 						<div class="d-flex flex-wrap column-gap-2 mt-2 small text-body-secondary">
 							{* front.js inserts "#2 Name " into the comment form; without JavaScript the link only goes to the form *}
-							<a href="#comment-form" class="link-secondary" data-comment-reply="#{$number} {$comment->author_name} ">{_'Reply'}</a>
+							<a href="#comment-form" class="link-secondary" data-comment-reply="#{$number} {$comment->authorName} ">{_'Reply'}</a>
 							{if isset($commentReplies[$number])}
 								<span aria-hidden="true">&middot;</span>
 								<span>

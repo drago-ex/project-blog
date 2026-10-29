@@ -5,9 +5,9 @@
 {define article, string $file, App\Model\Blog\ArticleEntity $article}
 	{include $file,
 		article: $article,
-		author: $list->authors[$article->author_id] ?? null,
-		category: $list->categories[$article->category_id] ?? null,
-		commentCount: $article->comments_enabled ? ($list->commentCounts[$article->id] ?? 0) : null,
+		author: $list->authors[$article->authorId] ?? null,
+		category: $list->categories[$article->categoryId] ?? null,
+		commentCount: $article->commentsEnabled ? ($list->commentCounts[$article->id] ?? 0) : null,
 	}
 {/define}
 

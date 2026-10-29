@@ -42,8 +42,8 @@
 										<div class="card-body">
 											<div class="row g-3">
 												{include input, type: 'select', name: 'status'}
-												{include input, name: 'published_at'}
-												{include input, type: 'select', name: 'category_id'}
+												{include input, name: 'publishedAt'}
+												{include input, type: 'select', name: 'categoryId'}
 												{* a category is written right here; filled in, it is used instead of the select *}
 												<div class="col-12 mt-1">
 													<a href="#article-new-category" class="small text-decoration-none" data-bs-toggle="collapse" role="button" aria-controls="article-new-category" aria-expanded="{$newCategory ? 'true' : 'false'}">
@@ -51,11 +51,11 @@
 													</a>
 													<div n:class="collapse, $newCategory ? show" id="article-new-category">
 														<div class="pt-2 form-error">
-															{input new_category, class => 'form-control'}
+															{input newCategory, class => 'form-control'}
 														</div>
 													</div>
 												</div>
-												{include checkbox, name: 'comments_enabled'}
+												{include checkbox, name: 'commentsEnabled'}
 											</div>
 										</div>
 									</section>
@@ -73,7 +73,7 @@
 													<div class="col-12 form-text">{_'Uploading images needs the PHP extension GD.'}</div>
 												{/if}
 												{if $mainImage}
-													{include checkbox, name: 'remove_image'}
+													{include checkbox, name: 'removeImage'}
 												{/if}
 											</div>
 										</div>
@@ -106,9 +106,9 @@
 							{foreach $comments as $comment}
 								<article class="p-3 bg-body-tertiary rounded-3">
 									<div class="d-flex flex-wrap align-items-center column-gap-2 small mb-2">
-										<span class="fw-semibold">{$comment->author_name}</span>
-										<span n:if="$comment->author_email" class="text-body-secondary">{$comment->author_email}</span>
-										<span class="text-body-secondary">&middot; {$comment->created_at|date:'j. n. Y H:i'}</span>
+										<span class="fw-semibold">{$comment->authorName}</span>
+										<span n:if="$comment->authorEmail" class="text-body-secondary">{$comment->authorEmail}</span>
+										<span class="text-body-secondary">&middot; {$comment->createdAt|date:'j. n. Y H:i'}</span>
 										<span n:if="!$comment->approved" class="badge rounded-pill text-bg-warning">{_'Waiting for approval'}</span>
 									</div>
 									<div class="mb-2">{$commentHtml[$comment->id]|noescape}</div>

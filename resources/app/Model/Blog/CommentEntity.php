@@ -17,10 +17,10 @@ class CommentEntity extends Entity
 		ColumnCreatedAt = 'created_at';
 
 	public int $id;
-	public int $article_id;
-	public string $author_name;
-	public ?string $author_email = null;
+	public int $articleId;
+	public string $authorName;
+	public ?string $authorEmail = null;
 	public string $content;
 	public int $approved;
-	public \DateTimeInterface $created_at;
+	public \DateTimeInterface $createdAt;
 }

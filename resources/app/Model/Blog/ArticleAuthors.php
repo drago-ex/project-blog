@@ -24,7 +24,7 @@ class ArticleAuthors
 	 */
 	public function forArticles(array $articles): array
 	{
-		$ids = array_values(array_unique(array_filter(array_map(fn(ArticleEntity $article): ?int => $article->author_id, $articles))));
+		$ids = array_values(array_unique(array_filter(array_map(fn(ArticleEntity $article): ?int => $article->authorId, $articles))));
 
 		$authors = [];
 		foreach ($this->articleRepository->getAuthors($ids) as $id => $author) {

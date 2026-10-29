@@ -25,7 +25,7 @@ class ArticleEntity extends Entity
 		StatusPublished = 'published';
 
 	public int $id;
-	public ?int $category_id = null;
+	public ?int $categoryId = null;
 	public string $slug;
 	public string $title;
 
@@ -38,11 +38,11 @@ class ArticleEntity extends Entity
 	/** Texy markup, converted by Drago\Texy\TexyFormatter. */
 	public ?string $content = null;
 	public string $status;
-	public int $comments_enabled;
+	public int $commentsEnabled;
 
 	/** The user who wrote the article; null when the account was deleted. */
-	public ?int $author_id = null;
-	public ?\DateTimeInterface $published_at = null;
-	public \DateTimeInterface $created_at;
-	public \DateTimeInterface $updated_at;
+	public ?int $authorId = null;
+	public ?\DateTimeInterface $publishedAt = null;
+	public \DateTimeInterface $createdAt;
+	public \DateTimeInterface $updatedAt;
 }

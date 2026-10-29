@@ -30,7 +30,7 @@
 			<img n:if="$author" src={$author[avatar]} alt="" width="56" height="56" class="rounded-circle">
 			<div class="small">
 				<div n:if="$author" class="fw-semibold text-body">{$author[name]}</div>
-				<time n:if="$article->published_at" datetime={$article->published_at|date:'c'} title={$article->published_at|date:'j. n. Y'} class="text-body-secondary">{$article->published_at|ago}</time>
+				<time n:if="$article->publishedAt" datetime={$article->publishedAt|date:'c'} title={$article->publishedAt|date:'j. n. Y'} class="text-body-secondary">{$article->publishedAt|ago}</time>
 			</div>
 		</div>
 	</div>

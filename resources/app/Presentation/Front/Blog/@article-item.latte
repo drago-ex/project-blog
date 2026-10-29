@@ -11,9 +11,9 @@
 	</div>
 
 	<div class="d-flex flex-wrap align-items-center column-gap-2 mb-2 small text-body-secondary">
-		<time n:if="$article->published_at" datetime={$article->published_at|date:'c'} title={$article->published_at|date:'j. n. Y'}>{$article->published_at|ago}</time>
+		<time n:if="$article->publishedAt" datetime={$article->publishedAt|date:'c'} title={$article->publishedAt|date:'j. n. Y'}>{$article->publishedAt|ago}</time>
 		{if $category}
-			<span n:if="$article->published_at" aria-hidden="true">&middot;</span>
+			<span n:if="$article->publishedAt" aria-hidden="true">&middot;</span>
 			<a n:href=":Front:Blog:category, category: $category->slug" class="blog-card-over link-secondary">{$category->name}</a>
 		{/if}
 	</div>
