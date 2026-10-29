@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\Model\Blog;
 
@@ -13,6 +11,7 @@ use Nette\Utils\ImageException;
 use Nette\Utils\Random;
 use Tracy\Debugger;
 use Tracy\ILogger;
+use function extension_loaded;
 
 
 /**

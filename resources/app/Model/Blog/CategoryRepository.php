@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\Model\Blog;
 
@@ -11,6 +9,7 @@ use Drago\Attr\Table;
 use Drago\Database\Database;
 use Drago\Database\ExtraFluent;
 use Nette\Utils\Strings;
+use function extension_loaded;
 
 
 #[Table(CategoryEntity::Table, CategoryEntity::PrimaryKey, entity: CategoryEntity::class)]

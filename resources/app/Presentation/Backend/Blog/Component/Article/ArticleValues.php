@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\Presentation\Backend\Blog\Component\Article;
 
@@ -10,8 +8,7 @@ use Nette\Http\FileUpload;
 
 final class ArticleValues extends ExtraArrayHash
 {
-	public const string
-		CategoryId = 'category_id',
+	public const string CategoryId = 'category_id',
 		Title = 'title',
 		Slug = 'slug',
 		Perex = 'perex',

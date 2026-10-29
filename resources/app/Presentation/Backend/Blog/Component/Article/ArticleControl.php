@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\Presentation\Backend\Blog\Component\Article;
 
@@ -276,7 +274,11 @@ class ArticleControl extends BaseControl
 			$form->addUpload(ArticleValues::Upload, 'Upload a main image')
 				->addRule($form::Image, 'The image must be JPEG, PNG, GIF or WebP.')
 				->addRule($form::MaxFileSize, 'The image can have at most 8 MB.', self::MaxImageSize)
-				->addRule(ArticleImages::validatePixels(...), 'The image can have at most %d megapixels.', ArticleImages::MaxPixels / 1_000_000);
+				->addRule(
+					ArticleImages::validatePixels(...),
+					'The image can have at most %d megapixels.',
+					ArticleImages::MaxPixels / 1_000_000,
+				);
 		}
 
 		$form->addCheckbox(ArticleValues::RemoveImage, 'Remove the main image');

@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\Presentation\Front\Blog;
 
@@ -22,6 +20,7 @@ use Drago\Texy\TexyToolbar;
 use Nette\Application\Attributes\Requires;
 use Nette\Application\UI\Form;
 use Nette\Http\IRequest;
+use function is_string;
 
 
 /**
@@ -112,7 +111,9 @@ final class BlogPresenter extends BasePresenter
 			: $this->categoryRepository->get($article->category_id)->record();
 		$this->template->content = $this->texyFormatter->toHtml($article->content);
 		$this->template->description = $article->perex;
-		$this->template->author = $this->articleAuthors->forArticles([$article])[$article->author_id] ?? null;
+		$this->template->author = $article->author_id === null
+			? null
+			: $this->articleAuthors->forArticles([$article])[$article->author_id] ?? null;
 		$this->template->commentsEnabled = $this->areCommentsEnabled();
 		$this->template->commentAuthor = $this->getSignedInAuthor()['name'] ?? null;
 		$this->template->comments = $comments = $this->template->commentsEnabled

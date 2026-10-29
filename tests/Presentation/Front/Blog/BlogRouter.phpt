@@ -1,10 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * Test: App\Presentation\Front\Blog\BlogRouter
  */
-
-declare(strict_types=1);
 
 use App\Presentation\Front\Blog\BlogRouter;
 use Nette\Http\Request;
@@ -44,7 +42,10 @@ test('Articles of a category', function () {
 	$url = new UrlScript('https://example.com/', '/');
 	Assert::same(
 		'https://example.com/en/blog/kategorie/nette',
-		BlogRouter::create()->constructUrl(['presenter' => 'Front:Blog', 'action' => 'category', 'category' => 'nette', 'lang' => 'en'], $url),
+		BlogRouter::create()->constructUrl(
+			['presenter' => 'Front:Blog', 'action' => 'category', 'category' => 'nette', 'lang' => 'en'],
+			$url,
+		),
 	);
 });
 

@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\Model\Blog;
 
@@ -9,8 +7,7 @@ use Drago\Database\Entity;
 
 class CategoryEntity extends Entity
 {
-	public const string
-		Table = 'blog_category',
+	public const string Table = 'blog_category',
 		PrimaryKey = 'id',
 		ColumnSlug = 'slug',
 		ColumnName = 'name';

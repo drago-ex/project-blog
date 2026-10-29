@@ -1,8 +1,8 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\Presentation\Front\Blog;
+
+use function strlen;
 
 
 /**
@@ -25,10 +25,8 @@ final class CommentReferences
 	private readonly string $pattern;
 
 
-	/**
-	 * @param array<int, string> $names authors of the approved comments by their number, from 1
-	 */
 	public function __construct(
+		/** @var array<int, string> authors of the approved comments by their number, from 1 */
 		private readonly array $names,
 	) {
 		// the longest names first, so "Jana Nová" is not matched as "Jana" followed by text

@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\Presentation\Backend\Blog;
 
@@ -13,10 +11,10 @@ use Drago\Attr\AttributeDetectionException;
  * the article list shows them by article. A service tagged sidebar.badge for drago-ex/project-backend-ui, which calls it;
  * no class of that package is needed.
  */
-final class CommentBadge
+final readonly class CommentBadge
 {
 	public function __construct(
-		private readonly CommentRepository $commentRepository,
+		private CommentRepository $commentRepository,
 	) {
 	}
 
