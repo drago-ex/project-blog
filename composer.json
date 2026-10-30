@@ -9,7 +9,7 @@
 		"nette/di": "^3.2",
 		"drago-ex/application": "^4.0",
 		"drago-ex/component": "^3.0",
-		"drago-ex/database": "^4.0",
+		"drago-ex/database": "^4.1",
 		"drago-ex/datagrid": "^1.0",
 		"drago-ex/form": "^3.0",
 		"drago-ex/migration": "^1.0",
