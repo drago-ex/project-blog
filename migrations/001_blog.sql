@@ -47,8 +47,8 @@ CREATE TABLE blog_article (
 CREATE TABLE blog_comment (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   article_id INT UNSIGNED NOT NULL,
-  author_name VARCHAR(255) NOT NULL,
-  author_email VARCHAR(255) NULL,
+  author_name VARCHAR(100) NOT NULL,
+  author_email VARCHAR(254) NULL,
   content TEXT NOT NULL,
   approved TINYINT(1) NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

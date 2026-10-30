@@ -12,6 +12,8 @@ class CategoryEntity extends Entity
 		ColumnSlug = 'slug',
 		ColumnName = 'name';
 
+	public const int ColumnNameSize = 255;
+
 	public int $id;
 	public string $slug;
 	public string $name;

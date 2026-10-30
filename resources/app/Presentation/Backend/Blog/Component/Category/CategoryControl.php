@@ -89,7 +89,8 @@ class CategoryControl extends BaseControl
 		$form = $this->factory->create();
 		$form->addTextInput(CategoryValues::Name, 'Title')
 			->setAutocomplete(Autocomplete::Off)
-			->setRequired('Please enter title.');
+			->setRequired('Please enter title.')
+			->addRule($form::MaxLength, 'The title can have at most %d characters.', CategoryEntity::ColumnNameSize);
 
 		$form->addSlugInput(CategoryValues::Slug, 'Slug')
 			->setRequired('Please enter slug.');

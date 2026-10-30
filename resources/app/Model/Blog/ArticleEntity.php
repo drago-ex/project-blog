@@ -24,6 +24,8 @@ class ArticleEntity extends Entity
 		StatusDraft = 'draft',
 		StatusPublished = 'published';
 
+	public const int ColumnTitleSize = 255;
+
 	public int $id;
 	public ?int $categoryId = null;
 	public string $slug;

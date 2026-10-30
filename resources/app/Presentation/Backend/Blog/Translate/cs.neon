@@ -65,6 +65,7 @@
 "New category": "Nová kategorie"
 "Name of the new category": "Název nové kategorie"
 "The category name can have at most %d characters.": "Název kategorie může mít nejvýše %d znaků."
+"The title can have at most %d characters.": "Název může mít nejvýše %d znaků."
 "Categories": "Kategorie"
 "Category": "Kategorie"
 "No category": "Bez kategorie"

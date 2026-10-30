@@ -8,6 +8,7 @@ use App\Model\Blog\ArticleListFactory;
 use App\Model\Blog\ArticleRepository;
 use App\Model\Blog\CategoryEntity;
 use App\Model\Blog\CategoryRepository;
+use App\Model\Blog\CommentEntity;
 use App\Model\Blog\CommentRepository;
 use App\Presentation\BasePresenter;
 use App\Presentation\Sign\RateLimiter;
@@ -163,13 +164,13 @@ final class BlogPresenter extends BasePresenter
 			$form->addTextInput('name', 'Name')
 				->setAutocomplete(Autocomplete::Name)
 				->setRequired('Please enter your name.')
-				->addRule($form::MaxLength, 'The name can have at most %d characters.', 100);
+				->addRule($form::MaxLength, 'The name can have at most %d characters.', CommentEntity::ColumnAuthorNameSize);
 
 			$form->addEmailInput('email', 'Email (not published)')
 				->setAutocomplete(Autocomplete::Email)
 				->setNullable()
 				->addRule($form::Email, 'Please enter a valid email address.')
-				->addRule($form::MaxLength, 'The email can have at most %d characters.', 255);
+				->addRule($form::MaxLength, 'The email can have at most %d characters.', CommentEntity::ColumnAuthorEmailSize);
 		}
 
 		$form->addTextAreaInput('content', 'Comment')

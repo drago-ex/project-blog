@@ -5,6 +5,7 @@ namespace App\Presentation\Backend\Blog\Component\Article;
 use App\Model\Blog\ArticleEntity;
 use App\Model\Blog\ArticleImages;
 use App\Model\Blog\ArticleRepository;
+use App\Model\Blog\CategoryEntity;
 use App\Model\Blog\CategoryRepository;
 use App\Model\Blog\CommentEntity;
 use App\Model\Blog\CommentRepository;
@@ -265,7 +266,8 @@ class ArticleControl extends BaseControl
 		$form = $this->factory->create();
 		$form->addTextInput(ArticleValues::Title, 'Title')
 			->setAutocomplete(Autocomplete::Off)
-			->setRequired('Please enter title.');
+			->setRequired('Please enter title.')
+			->addRule($form::MaxLength, 'The title can have at most %d characters.', ArticleEntity::ColumnTitleSize);
 
 		$form->addSlugInput(ArticleValues::Slug, 'Slug')
 			->setRequired('Please enter slug.');
@@ -280,7 +282,7 @@ class ArticleControl extends BaseControl
 			->setAutocomplete(Autocomplete::Off)
 			->setHtmlAttribute('placeholder', 'Name of the new category')
 			->setNullable()
-			->addRule($form::MaxLength, 'The category name can have at most %d characters.', 255);
+			->addRule($form::MaxLength, 'The category name can have at most %d characters.', CategoryEntity::ColumnNameSize);
 
 		$form->addTextAreaInput(ArticleValues::Perex, 'Perex')
 			->setNullable();

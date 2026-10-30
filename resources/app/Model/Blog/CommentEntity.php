@@ -16,6 +16,9 @@ class CommentEntity extends Entity
 		ColumnApproved = 'approved',
 		ColumnCreatedAt = 'created_at';
 
+	public const int ColumnAuthorNameSize = 100,
+		ColumnAuthorEmailSize = 254;
+
 	public int $id;
 	public int $articleId;
 	public string $authorName;
