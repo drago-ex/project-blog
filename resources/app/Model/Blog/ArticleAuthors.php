@@ -2,18 +2,20 @@
 
 namespace App\Model\Blog;
 
+use Drago\Gravatar\EmailException;
 use Drago\Gravatar\Gravatar;
+use Drago\Gravatar\SizeException;
 
 
 /** Names and Gravatar avatars of the authors of articles; their email addresses do not reach the templates. */
-class ArticleAuthors
+readonly class ArticleAuthors
 {
 	private const int AvatarSize = 80;
 
 
 	public function __construct(
-		private readonly ArticleRepository $articleRepository,
-		private readonly Gravatar $gravatar,
+		private ArticleRepository $articleRepository,
+		private Gravatar $gravatar,
 	) {
 	}
 
@@ -21,6 +23,8 @@ class ArticleAuthors
 	/**
 	 * @param ArticleEntity[] $articles
 	 * @return array<int, array{name: string, avatar: string}> by the author id
+	 * @throws EmailException
+	 * @throws SizeException
 	 */
 	public function forArticles(array $articles): array
 	{

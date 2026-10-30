@@ -19,7 +19,7 @@ class ArticleRepository
 	use Database;
 
 	public function __construct(
-		protected readonly Connection $connection,
+		private readonly Connection $connection,
 	) {
 	}
 
@@ -79,6 +79,7 @@ class ArticleRepository
 
 	/**
 	 * @throws AttributeDetectionException
+	 * @throws Exception
 	 */
 	public function getPublishedBySlug(string $slug): ?ArticleEntity
 	{

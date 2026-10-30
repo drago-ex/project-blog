@@ -15,11 +15,13 @@ use Drago\Application\UI\Alert;
 use Drago\Attr\AttributeDetectionException;
 use Drago\Datagrid\DataGrid;
 use Drago\Datagrid\Exception\InvalidColumnException;
+use Drago\Datagrid\Exception\InvalidConfigurationException;
 use Drago\Form\Autocomplete;
 use Drago\Texy\TexyFormatter;
 use Drago\Texy\TexyToolbar;
 use Nette\Application\Attributes\Requires;
 use Nette\Application\UI\Form;
+use Nette\Application\UI\InvalidLinkException;
 use Nette\Utils\Html;
 
 
@@ -83,6 +85,7 @@ class ArticleControl extends BaseControl
 	 * Allows or disallows the comments of an article by a click on their state in the grid.
 	 * @throws AttributeDetectionException
 	 * @throws Exception
+	 * @throws InvalidLinkException
 	 */
 	#[Requires(ajax: true)]
 	public function handleToggleComments(int $id): void
@@ -100,6 +103,7 @@ class ArticleControl extends BaseControl
 	 * Approves a comment in the tab of the article.
 	 * @throws AttributeDetectionException
 	 * @throws Exception
+	 * @throws InvalidLinkException
 	 */
 	#[Requires(ajax: true)]
 	public function handleApproveComment(int $id): void
@@ -115,6 +119,8 @@ class ArticleControl extends BaseControl
 	/**
 	 * Asks in the tab of the article whether to delete a comment.
 	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 * @throws InvalidLinkException
 	 */
 	#[Requires(ajax: true)]
 	public function handleConfirmDeleteComment(int $id): void
@@ -128,6 +134,8 @@ class ArticleControl extends BaseControl
 	/**
 	 * Hides the confirmation of a delete.
 	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 * @throws InvalidLinkException
 	 */
 	#[Requires(ajax: true)]
 	public function handleCancelDeleteComment(int $id): void
@@ -140,6 +148,7 @@ class ArticleControl extends BaseControl
 	 * Deletes a comment in the tab of the article.
 	 * @throws AttributeDetectionException
 	 * @throws Exception
+	 * @throws InvalidLinkException
 	 */
 	#[Requires(ajax: true)]
 	public function handleDeleteComment(int $id): void
@@ -188,7 +197,10 @@ class ArticleControl extends BaseControl
 	}
 
 
-	/** @throws AttributeDetectionException|InvalidColumnException */
+	/**
+	 * @throws AttributeDetectionException|InvalidColumnException
+	 * @throws InvalidConfigurationException
+	 */
 	protected function createComponentDataGrid(): DataGrid
 	{
 		$grid = new DataGrid;
@@ -244,6 +256,10 @@ class ArticleControl extends BaseControl
 	}
 
 
+	/**
+	 * @throws AttributeDetectionException
+	 * @throws InvalidLinkException
+	 */
 	protected function createComponentArticle(): Form
 	{
 		$form = $this->factory->create();
@@ -342,6 +358,7 @@ class ArticleControl extends BaseControl
 	/**
 	 * The link of the state badge that switches the comments of an article, null when it is not clickable
 	 * (the permission steps of the README return null without the write privilege).
+	 * @throws InvalidLinkException
 	 * @phpstan-ignore return.unusedType
 	 */
 	private function getToggleCommentsLink(int $id): ?string
@@ -353,6 +370,7 @@ class ArticleControl extends BaseControl
 	/**
 	 * @throws AttributeDetectionException
 	 * @throws Exception
+	 * @throws InvalidLinkException
 	 */
 	private function setCommentsEnabled(int $id, bool $enabled): void
 	{
@@ -363,7 +381,10 @@ class ArticleControl extends BaseControl
 	}
 
 
-	/** @throws AttributeDetectionException */
+	/**
+	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 */
 	private function getComment(int $id): CommentEntity
 	{
 		$comment = $this->commentRepository->get($id)->record();
@@ -378,6 +399,7 @@ class ArticleControl extends BaseControl
 	/**
 	 * Redraws only the tab of the comments (and its count), so unsaved changes of the article form stay.
 	 * The grid shows the numbers of comments, so it is redrawn after a change.
+	 * @throws InvalidLinkException
 	 */
 	private function redrawComments(int $articleId, bool $gridChanged = false): void
 	{
@@ -393,6 +415,7 @@ class ArticleControl extends BaseControl
 	/**
 	 * Whether the article allows comments, their number and the ones waiting for approval, for the grid.
 	 * A click on the state switches it, so the switch is right next to what it changes.
+	 * @throws InvalidLinkException
 	 */
 	private function formatComments(int $id, bool $enabled, int $total, int $pending): Html
 	{
@@ -425,6 +448,11 @@ class ArticleControl extends BaseControl
 	}
 
 
+	/**
+	 * @throws Exception
+	 * @throws AttributeDetectionException
+	 * @throws InvalidLinkException
+	 */
 	private function processArticleForm(Form $form, ArticleValues $values): void
 	{
 		// the image fields and the new category are not columns, they decide the columns image and category_id

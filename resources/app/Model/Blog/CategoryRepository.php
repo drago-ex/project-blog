@@ -19,7 +19,7 @@ class CategoryRepository
 	use Database;
 
 	public function __construct(
-		protected readonly Connection $connection,
+		private readonly Connection $connection,
 	) {
 	}
 
@@ -52,6 +52,7 @@ class CategoryRepository
 	 * Categories that have a published article, for the category pills and the article cards of the front.
 	 * @return CategoryEntity[]
 	 * @throws AttributeDetectionException
+	 * @throws Exception
 	 */
 	public function getUsedCategories(): array
 	{
@@ -69,6 +70,7 @@ class CategoryRepository
 
 	/**
 	 * @throws AttributeDetectionException
+	 * @throws Exception
 	 */
 	public function getBySlug(string $slug): ?CategoryEntity
 	{

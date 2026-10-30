@@ -11,14 +11,18 @@ use App\Model\Blog\CategoryRepository;
 use App\Model\Blog\CommentRepository;
 use App\Presentation\BasePresenter;
 use App\Presentation\Sign\RateLimiter;
+use Dibi\Exception;
 use Drago\Application\UI\Alert;
 use Drago\Attr\AttributeDetectionException;
 use Drago\Form\Autocomplete;
 use Drago\Form\Forms;
+use Drago\Gravatar\EmailException;
+use Drago\Gravatar\SizeException;
 use Drago\Texy\TexyFormatter;
 use Drago\Texy\TexyToolbar;
 use Nette\Application\Attributes\Requires;
 use Nette\Application\UI\Form;
+use Nette\Application\UI\InvalidLinkException;
 use Nette\Http\IRequest;
 use function is_string;
 
@@ -54,6 +58,7 @@ final class BlogPresenter extends BasePresenter
 
 	/**
 	 * @throws AttributeDetectionException
+	 * @throws Exception
 	 */
 	public function actionDetail(string $slug): void
 	{
@@ -76,6 +81,9 @@ final class BlogPresenter extends BasePresenter
 
 	/**
 	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 * @throws EmailException
+	 * @throws SizeException
 	 */
 	public function renderDefault(): void
 	{
@@ -86,6 +94,9 @@ final class BlogPresenter extends BasePresenter
 	/**
 	 * Published articles of a category at /blog/kategorie/slug, with the template of the list.
 	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 * @throws EmailException
+	 * @throws SizeException
 	 */
 	public function renderCategory(string $category): void
 	{
@@ -101,6 +112,9 @@ final class BlogPresenter extends BasePresenter
 
 	/**
 	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 * @throws EmailException
+	 * @throws SizeException
 	 */
 	public function renderDetail(): void
 	{
@@ -138,6 +152,7 @@ final class BlogPresenter extends BasePresenter
 	}
 
 
+	/** @throws InvalidLinkException */
 	protected function createComponentComment(): Form
 	{
 		$form = new Forms;
@@ -173,7 +188,11 @@ final class BlogPresenter extends BasePresenter
 	}
 
 
-	/** @param array{name?: string, email?: ?string, content: string, website: string} $values */
+	/**
+	 * @param array{name?: string, email?: ?string, content: string, website: string} $values
+	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 */
 	private function processCommentForm(Form $form, array $values): void
 	{
 		if (!$this->areCommentsEnabled()) {
@@ -202,6 +221,9 @@ final class BlogPresenter extends BasePresenter
 	/**
 	 * The article list (its categories are also the pills) and the selected category.
 	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 * @throws EmailException
+	 * @throws SizeException
 	 */
 	private function setArticleList(?CategoryEntity $category): void
 	{

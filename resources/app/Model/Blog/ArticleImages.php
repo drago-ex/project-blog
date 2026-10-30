@@ -18,7 +18,7 @@ use function extension_loaded;
  * Cover images of the articles, in www/upload/blog/ (web path upload/blog/). An upload is made smaller to fit
  * MaxWidth × MaxHeight, keeps its format and gets a random name, so a replaced image is never served from a cache.
  */
-class ArticleImages
+readonly class ArticleImages
 {
 	/** Web path of the images, relative to the base path. */
 	public const string Path = 'upload/blog';
@@ -31,7 +31,7 @@ class ArticleImages
 
 
 	public function __construct(
-		private readonly string $wwwDir,
+		private string $wwwDir,
 	) {
 	}
 
