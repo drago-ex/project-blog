@@ -440,7 +440,7 @@ class ArticleControl extends BaseControl
 
 		if ($pending > 0) {
 			$cell->addHtml(' ')->addHtml(
-				Html::el('span', ['class' => 'badge rounded-pill text-bg-warning'])->setText($this->translate('%d pending', $pending)),
+				Html::el('span', ['class' => 'badge rounded-pill text-bg-accent'])->setText($this->translate('%d pending', $pending)),
 			);
 		}
 
