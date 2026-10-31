@@ -63,6 +63,7 @@
 "Please enter a valid email address.": "Zadejte prosím platnou e-mailovou adresu."
 "Articles": "Články"
 "New category": "Nová kategorie"
+"Choose a category": "Vybrat kategorii"
 "Name of the new category": "Název nové kategorie"
 "The category name can have at most %d characters.": "Název kategorie může mít nejvýše %d znaků."
 "The title can have at most %d characters.": "Název může mít nejvýše %d znaků."
@@ -85,6 +86,9 @@
 # main image of an article
 "Upload a main image": "Nahrát hlavní obrázek"
 "Remove the main image": "Odstranit hlavní obrázek"
+"Remove the main image?": "Odstranit hlavní obrázek?"
+"Remove": "Odstranit"
+"The main image has been removed.": "Hlavní obrázek byl odstraněn."
 "JPEG, PNG, GIF or WebP, at most 8 MB.": "JPEG, PNG, GIF nebo WebP, nejvýše 8 MB."
 "The image must be JPEG, PNG, GIF or WebP.": "Obrázek musí být JPEG, PNG, GIF nebo WebP."
 "The image can have at most 8 MB.": "Obrázek může mít nejvýše 8 MB."

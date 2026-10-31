@@ -50,7 +50,7 @@ Presenter administrace je dostupný jako:
 S [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui) přidejte odkazy do jeho menu (viz jeho README).
 
 Novou kategorii napíšete přímo ve formuláři článku
-(„+ Nová kategorie“); tlačítko „Kategorie“ nad články otevře jejich seznam pro přejmenování a mazání. Slug nové
+(tlačítko „+“ vedle kategorie); tlačítko „Kategorie“ nad články otevře jejich seznam pro přejmenování a mazání. Slug nové
 kategorie se vytvoří z názvu pomocí rozšíření PHP intl. Komentáře se spravují u svého článku: seznam článků
 ukazuje, zda jsou povolené (kliknutím na stav se přepne), jejich počet i ty, které čekají na schválení, a otevřený
 článek má záložku „Komentáře“ pro jejich schválení nebo smazání. Počet všech komentářů čekajících na schválení
@@ -139,7 +139,7 @@ $grid->addActionEdit(fn(int $id) => $this->handleEdit($id))
 ```
 
 V článku zobrazte tlačítka schválení a smazání v záložce komentářů (`<div class="article-comment-actions …">`)
-jen s `n:if="$writeAllowed"` a nechte `ArticleControl::getToggleCommentsLink()` bez oprávnění vracet null, aby
+a tlačítko odstranění hlavního obrázku (`<div class="article-image-actions …">`) jen s `n:if="$writeAllowed"` a nechte `ArticleControl::getToggleCommentsLink()` bez oprávnění vracet null, aby
 stav komentářů v gridu nebyl klikací.
 
 Pro dynamická oprávnění nastavovaná v administraci nainstalujte

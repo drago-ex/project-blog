@@ -37,6 +37,12 @@ class ArticleControl extends BaseControl
 	/** The comment that asks for the confirmation of its delete. */
 	private ?int $confirmDeleteComment = null;
 
+	/** The article whose main image a signal redraws (its form is not sent then). */
+	private ?int $imageArticleId = null;
+
+	/** The main image asks for the confirmation of its removal. */
+	private bool $confirmRemoveImage = false;
+
 
 	public function __construct(
 		public Factory $factory,
@@ -61,8 +67,9 @@ class ArticleControl extends BaseControl
 		assert($template instanceof ArticleTemplate);
 
 		// the edited article (also when the form is shown again with errors) shows its main image
-		$id = (int) $this->getComponent('article')->getComponent('id')->getValue();
+		$id = $this->imageArticleId ?? (int) $this->getComponent('article')->getComponent('id')->getValue();
 		$template->mainImage = $id > 0 ? $this->articleRepository->get($id)->record()?->image : null;
+		$template->confirmRemoveImage = $this->confirmRemoveImage;
 
 		// a new category written before a validation error stays open
 		$template->newCategory = (string) $this->getComponent('article')->getComponent(ArticleValues::NewCategory)->getValue() !== '';
@@ -162,6 +169,54 @@ class ArticleControl extends BaseControl
 		$this->addFlashMessage('Delete successful.', Alert::Success);
 		$this->addRedraw($this->snippetMessage);
 		$this->redrawComments($comment->articleId, gridChanged: true);
+	}
+
+
+	/**
+	 * Asks on the main image of the article whether to remove it.
+	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 */
+	#[Requires(ajax: true)]
+	public function handleConfirmRemoveImage(int $id): void
+	{
+		$this->confirmRemoveImage = true;
+		$this->redrawMainImage($id);
+	}
+
+
+	/**
+	 * Hides the confirmation of the removal.
+	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 */
+	#[Requires(ajax: true)]
+	public function handleCancelRemoveImage(int $id): void
+	{
+		$this->redrawMainImage($id);
+	}
+
+
+	/**
+	 * Removes the main image of the article at once, without saving its form.
+	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 */
+	#[Requires(ajax: true)]
+	public function handleRemoveImage(int $id): void
+	{
+		$image = $this->redrawMainImage($id);
+		if ($image !== null) {
+			$this->articleRepository->update([ArticleEntity::ColumnImage => null])
+				->where('%n = ?', ArticleEntity::PrimaryKey, $id)
+				->execute();
+
+			// a file that cannot be deleted is only logged, the article has no image any more
+			$this->articleImages->delete($image);
+		}
+
+		$this->addFlashMessage('The main image has been removed.', Alert::Success);
+		$this->addRedraw($this->snippetMessage);
 	}
 
 
@@ -297,8 +352,6 @@ class ArticleControl extends BaseControl
 				);
 		}
 
-		$form->addCheckbox(ArticleValues::RemoveImage, 'Remove the main image');
-
 		$form->addTextAreaInput(ArticleValues::Content, 'Content (Texy)')
 			->setHtmlAttribute('data-texy-toolbar', $this->texyToolbar->getOptions($this->link('preview!')))
 			->setNullable();
@@ -413,6 +466,24 @@ class ArticleControl extends BaseControl
 
 
 	/**
+	 * Redraws only the main image of the article, so unsaved changes of its form stay; returns the image.
+	 * @throws AttributeDetectionException
+	 * @throws Exception
+	 */
+	private function redrawMainImage(int $id): ?string
+	{
+		$article = $this->articleRepository->get($id)->record();
+		if ($article === null) {
+			$this->error();
+		}
+
+		$this->imageArticleId = $id;
+		$this->redrawControl('mainImage');
+		return $article->image;
+	}
+
+
+	/**
 	 * Whether the article allows comments, their number and the ones waiting for approval, for the grid.
 	 * A click on the state switches it, so the switch is right next to what it changes.
 	 * @throws InvalidLinkException
@@ -455,11 +526,10 @@ class ArticleControl extends BaseControl
 	 */
 	private function processArticleForm(Form $form, ArticleValues $values): void
 	{
-		// the image fields and the new category are not columns, they decide the columns image and category_id
+		// the upload and the new category are not columns, they decide the columns image and category_id
 		$upload = $values->upload;
-		$removeImage = $values->removeImage;
 		$newCategory = trim((string) $values->newCategory);
-		unset($values->upload, $values->removeImage, $values->newCategory);
+		unset($values->upload, $values->newCategory);
 
 		$oldImage = (int) $values->id > 0
 			? $this->articleRepository->get((int) $values->id)->record()?->image
@@ -480,15 +550,13 @@ class ArticleControl extends BaseControl
 
 		// a new category is saved together with the article, so a failed save leaves no category behind
 		try {
-			$this->articleRepository->transaction(function () use ($values, $newCategory, $upload, $removeImage, &$newImage): void {
+			$this->articleRepository->transaction(function () use ($values, $newCategory, $upload, &$newImage): void {
 				if ($newCategory !== '') {
 					$values->categoryId = $this->categoryRepository->getOrCreate($newCategory);
 				}
 
 				if ($upload?->isOk()) {
 					$values->image = $newImage = $this->articleImages->save($upload);
-				} elseif ($removeImage) {
-					$values->image = null;
 				}
 
 				$this->articleRepository->save($values);
@@ -505,7 +573,7 @@ class ArticleControl extends BaseControl
 		}
 
 		// the article is saved: the replaced image goes away (a file that cannot be deleted is only logged)
-		if ($oldImage !== null && ($newImage !== null || $removeImage)) {
+		if ($oldImage !== null && $newImage !== null) {
 			$this->articleImages->delete($oldImage);
 		}
 

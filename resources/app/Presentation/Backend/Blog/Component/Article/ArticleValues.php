@@ -17,7 +17,6 @@ final class ArticleValues extends ExtraArrayHash
 		CommentsEnabled = 'commentsEnabled',
 		PublishedAt = 'publishedAt',
 		Upload = 'upload',
-		RemoveImage = 'removeImage',
 		NewCategory = 'newCategory';
 
 	public ?int $id = null;
@@ -30,9 +29,8 @@ final class ArticleValues extends ExtraArrayHash
 	public bool $commentsEnabled = true;
 	public ?\DateTimeImmutable $publishedAt = null;
 
-	/** Form fields that decide the column image; removed before saving. */
+	/** The form field that decides the column image; removed before saving (the image is removed by a signal). */
 	public ?FileUpload $upload = null;
-	public bool $removeImage = false;
 
 	/** A category written in the form instead of choosing one; it decides the column category_id, removed before saving. */
 	public ?string $newCategory = null;

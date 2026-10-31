@@ -1,6 +1,7 @@
 {templateType App\Presentation\Backend\Blog\Component\Article\ArticleTemplate}
 {embed '../../../../Accessory/Widget/@offcanvas.latte', offcanvasId: $offcanvasId, size: '100vw', mainImage: $mainImage, newCategory: $newCategory,
-	articleId: $articleId, comments: $comments, commentHtml: $commentHtml, confirmDeleteComment: $confirmDeleteComment}
+	confirmRemoveImage: $confirmRemoveImage, articleId: $articleId, comments: $comments, commentHtml: $commentHtml,
+	confirmDeleteComment: $confirmDeleteComment}
 	{block title}{_'Manage article'}{/block}
 	{block body}
 		{snippet offcanvas}
@@ -20,7 +21,8 @@
 
 			<div class="tab-content">
 				<div class="tab-pane fade show active" id="article-tab-form" role="tabpanel">
-					{embed '../../../../Accessory/Widget/@form.latte', class: 'ajax', name: 'article', najaHistory: 'off', mainImage: $mainImage, newCategory: $newCategory}
+					{embed '../../../../Accessory/Widget/@form.latte', class: 'ajax', name: 'article', najaHistory: 'off', mainImage: $mainImage,
+						newCategory: $newCategory, confirmRemoveImage: $confirmRemoveImage, articleId: $articleId}
 						{import '../../../../Accessory/Widget/@dismiss-button.latte'}
 						{block form}
 							{* the text of the article on the left, its settings in cards on the right; nothing is hidden,
@@ -43,15 +45,27 @@
 											<div class="row g-3">
 												{include input, type: 'select', name: 'status'}
 												{include input, name: 'publishedAt'}
-												{include input, type: 'select', name: 'categoryId'}
-												{* a category is written right here; filled in, it is used instead of the select *}
-												<div class="col-12 mt-1">
-													<a href="#article-new-category" class="small text-decoration-none" data-bs-toggle="collapse" role="button" aria-controls="article-new-category" aria-expanded="{$newCategory ? 'true' : 'false'}">
-														+ {_'New category'}
-													</a>
-													<div n:class="collapse, $newCategory ? show" id="article-new-category">
-														<div class="pt-2 form-error">
+												{* a category is chosen, or written right here by the + button; a written one is used instead of the select,
+												   so the × button empties it when it switches back to the select *}
+												<div class="col-12 form-error">
+													{label categoryId, class => 'form-label fw-semibold' /}
+													<div n:class="article-category, collapse, !$newCategory ? show">
+														<div class="input-group">
+															{input categoryId, class => 'form-select'}
+															<button type="button" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target=".article-category"
+																title="{_'New category'}" aria-label="{_'New category'}">
+																<i class="fa-solid fa-plus"></i>
+															</button>
+														</div>
+													</div>
+													<div n:class="article-category, collapse, $newCategory ? show">
+														<div class="input-group">
 															{input newCategory, class => 'form-control'}
+															<button type="button" class="btn btn-dark" data-bs-toggle="collapse" data-bs-target=".article-category"
+																onclick="this.parentElement.querySelector('input').value = ''"
+																title="{_'Choose a category'}" aria-label="{_'Choose a category'}">
+																<i class="fa-solid fa-xmark"></i>
+															</button>
 														</div>
 													</div>
 												</div>
@@ -62,18 +76,30 @@
 
 									<section class="card border-0 shadow-sm bg-body-tertiary">
 										<div class="card-body">
-											<div class="row g-3">
-												<div n:if="$mainImage" class="col-12">
+											{* the image is removed at once by a signal, which redraws only it, so unsaved changes stay *}
+											<div n:snippet="mainImage">
+												<div n:if="$mainImage" class="position-relative mb-3">
 													<img src="{$basePath}/{App\Model\Blog\ArticleImages::Path}/{$mainImage}" alt="" class="w-100 rounded object-fit-cover" style="max-height: 10rem; object-position: top">
+													<div class="article-image-actions position-absolute top-0 end-0 m-2 d-flex flex-wrap justify-content-end align-items-center gap-2">
+														{if $confirmRemoveImage}
+															<span class="badge text-bg-light">{_'Remove the main image?'}</span>
+															<a n:href="removeImage!, id: $articleId" class="ajax btn btn-xs btn-danger" data-naja-history="off">{_'Remove'}</a>
+															<a n:href="cancelRemoveImage!, id: $articleId" class="ajax btn btn-xs btn-secondary" data-naja-history="off">{_'Cancel'}</a>
+														{else}
+															<a n:href="confirmRemoveImage!, id: $articleId" class="ajax btn btn-sm btn-danger" data-naja-history="off"
+																title="{_'Remove the main image'}" aria-label="{_'Remove the main image'}">
+																<i class="fa-regular fa-trash-can"></i>
+															</a>
+														{/if}
+													</div>
 												</div>
+											</div>
+											<div class="row g-3">
 												{if App\Model\Blog\ArticleImages::isSupported()}
 													{include input, name: 'upload'}
 													<div class="col-12 form-text mt-1">{_'JPEG, PNG, GIF or WebP, at most 8 MB.'}</div>
 												{else}
 													<div class="col-12 form-text">{_'Uploading images needs the PHP extension GD.'}</div>
-												{/if}
-												{if $mainImage}
-													{include checkbox, name: 'removeImage'}
 												{/if}
 											</div>
 										</div>

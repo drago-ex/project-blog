@@ -50,7 +50,7 @@ The backend presenter is available as:
 With [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui), add the links to its menu (see its README).
 
 A new category is written right in
-the article form ("+ New category"); the button "Categories" above the articles opens their list for renaming and
+the article form (the "+" button next to the category); the button "Categories" above the articles opens their list for renaming and
 deleting. The slug of a new category is made from its name with the PHP extension intl. Comments are managed with their
 article: the article list shows whether they are allowed (a click on the state switches it), their number and those
 waiting for approval, and an opened article has the tab "Comments" to approve or delete them. The number of all
@@ -141,7 +141,7 @@ $grid->addActionEdit(fn(int $id) => $this->handleEdit($id))
 ```
 
 In the article, show the approve and delete buttons of the comments tab (`<div class="article-comment-actions …">`)
-only with `n:if="$writeAllowed"`, and let `ArticleControl::getToggleCommentsLink()` return null without the
+and the remove button of the main image (`<div class="article-image-actions …">`) only with `n:if="$writeAllowed"`, and let `ArticleControl::getToggleCommentsLink()` return null without the
 privilege, so the state of the comments in the grid is not clickable.
 
 For dynamic permissions set in the administration, install
