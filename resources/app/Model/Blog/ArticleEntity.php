@@ -40,7 +40,7 @@ class ArticleEntity extends Entity
 	/** Texy markup, converted by Drago\Texy\TexyFormatter. */
 	public ?string $content = null;
 	public string $status;
-	public int $commentsEnabled;
+	public bool $commentsEnabled;
 
 	/** The user who wrote the article; null when the account was deleted. */
 	public ?int $authorId = null;

@@ -24,6 +24,6 @@ class CommentEntity extends Entity
 	public string $authorName;
 	public ?string $authorEmail = null;
 	public string $content;
-	public int $approved;
+	public bool $approved;
 	public \DateTimeInterface $createdAt;
 }

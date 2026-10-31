@@ -236,7 +236,7 @@ final class BlogPresenter extends BasePresenter
 	/** Each article allows or disallows its comments (the field "Allow comments" in the administration). */
 	private function areCommentsEnabled(): bool
 	{
-		return (bool) $this->article->commentsEnabled;
+		return $this->article->commentsEnabled;
 	}
 
 

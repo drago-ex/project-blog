@@ -179,9 +179,7 @@ class ArticleControl extends BaseControl
 		}
 
 		$form = $this->getComponent('article');
-		$defaults = (array) $item;
-		$defaults[ArticleValues::CommentsEnabled] = (bool) $item->commentsEnabled;
-		$form->setDefaults($defaults);
+		$form->setDefaults((array) $item);
 
 		$sendControl = $this->getFormComponent($form, 'send');
 		$sendControl?->setCaption('Edit article');
