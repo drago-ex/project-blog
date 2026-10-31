@@ -38,12 +38,11 @@ class CommentRepository
 	/**
 	 * The number of comments waiting for approval, for the badge of the administration menu.
 	 * @throws AttributeDetectionException
+	 * @throws Exception
 	 */
 	public function countPending(): int
 	{
-		return (int) $this->read('COUNT(*)')
-			->where('%n = ?', CommentEntity::ColumnApproved, 0)
-			->fetchSingle();
+		return $this->count([CommentEntity::ColumnApproved => false]);
 	}
 
 

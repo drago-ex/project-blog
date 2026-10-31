@@ -479,24 +479,23 @@ class ArticleControl extends BaseControl
 		}
 
 		// a new category is saved together with the article, so a failed save leaves no category behind
-		$this->articleRepository->beginTransaction();
 		try {
-			if ($newCategory !== '') {
-				$values->categoryId = $this->categoryRepository->getOrCreate($newCategory);
-			}
+			$this->articleRepository->transaction(function () use ($values, $newCategory, $upload, $removeImage, &$newImage): void {
+				if ($newCategory !== '') {
+					$values->categoryId = $this->categoryRepository->getOrCreate($newCategory);
+				}
 
-			if ($upload?->isOk()) {
-				$values->image = $newImage = $this->articleImages->save($upload);
-			} elseif ($removeImage) {
-				$values->image = null;
-			}
+				if ($upload?->isOk()) {
+					$values->image = $newImage = $this->articleImages->save($upload);
+				} elseif ($removeImage) {
+					$values->image = null;
+				}
 
-			$this->articleRepository->save($values);
-			$this->articleRepository->commit();
+				$this->articleRepository->save($values);
+			});
 
 		} catch (\Throwable $e) {
 			// the article was not saved, so a new image would stay unused (errors show in the offcanvas by onError)
-			$this->articleRepository->rollBack();
 			$this->articleImages->delete($newImage);
 			$form->addError(match ($e->getCode()) {
 				1062 => 'This article already exists.',
