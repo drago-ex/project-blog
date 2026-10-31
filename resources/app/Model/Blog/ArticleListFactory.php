@@ -3,7 +3,6 @@
 namespace App\Model\Blog;
 
 use Dibi\Exception;
-use Drago\Attr\AttributeDetectionException;
 use Drago\Gravatar\EmailException;
 use Drago\Gravatar\SizeException;
 
@@ -25,7 +24,6 @@ readonly class ArticleListFactory
 
 	/**
 	 * Published articles, the newest first, of one category or all, at most $limit of them.
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 * @throws EmailException
 	 * @throws SizeException

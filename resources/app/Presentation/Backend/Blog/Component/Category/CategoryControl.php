@@ -8,7 +8,6 @@ use App\Presentation\Backend\Blog\Component\BaseControl;
 use App\Presentation\Backend\Blog\Component\Factory;
 use Dibi\Exception;
 use Drago\Application\UI\Alert;
-use Drago\Attr\AttributeDetectionException;
 use Drago\Datagrid\DataGrid;
 use Drago\Datagrid\Exception\InvalidColumnException;
 use Drago\Datagrid\Exception\InvalidConfigurationException;
@@ -36,14 +35,11 @@ class CategoryControl extends BaseControl
 	}
 
 
-	/**
-	 * @throws AttributeDetectionException
-	 * @throws Exception
-	 */
+	/** @throws Exception */
 	#[Requires(ajax: true)]
 	public function handleEdit(int $id): void
 	{
-		$item = $this->categoryRepository->get($id)->record();
+		$item = $this->categoryRepository->table->get($id)->record();
 		if ($item === null) {
 			$this->error();
 		}
@@ -59,7 +55,7 @@ class CategoryControl extends BaseControl
 
 
 	/**
-	 * @throws AttributeDetectionException|InvalidColumnException
+	 * @throws InvalidColumnException
 	 * @throws InvalidConfigurationException
 	 */
 	protected function createComponentDataGrid(): DataGrid
@@ -107,25 +103,19 @@ class CategoryControl extends BaseControl
 	}
 
 
-	/**
-	 * @throws AttributeDetectionException
-	 * @throws Exception
-	 */
+	/** @throws Exception */
 	protected function deleteItem(int $id): void
 	{
-		$this->categoryRepository
+		$this->categoryRepository->table
 			->delete(CategoryEntity::PrimaryKey, $id)
 			->execute();
 	}
 
 
-	/**
-	 * @throws AttributeDetectionException
-	 * @throws Exception
-	 */
+	/** @throws Exception */
 	protected function getItemTitle(int $id): ?string
 	{
-		return $this->categoryRepository
+		return $this->categoryRepository->table
 			->get($id)
 			->record()
 			?->name;
@@ -137,7 +127,7 @@ class CategoryControl extends BaseControl
 		try {
 			$message = (int) $values->id > 0 ? 'Update successful.' : 'Insert successful.';
 
-			$this->categoryRepository->save($values);
+			$this->categoryRepository->table->save($values);
 			$this->addFlashMessage($message, Alert::Success);
 			$this->addRedraw($this->snippetMessage);
 

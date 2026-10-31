@@ -3,7 +3,6 @@
 namespace App\Presentation\Backend\Blog;
 
 use App\Model\Blog\CommentRepository;
-use Drago\Attr\AttributeDetectionException;
 
 
 /**
@@ -22,7 +21,6 @@ final readonly class CommentBadge
 	/**
 	 * The number next to the menu item of the link, and the label of the entry in the bell.
 	 * @return list<array{link: string, count: int, label: string}>
-	 * @throws AttributeDetectionException
 	 */
 	public function __invoke(): array
 	{

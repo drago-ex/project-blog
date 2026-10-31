@@ -11,7 +11,6 @@ use Nette\Utils\ImageException;
 use Nette\Utils\Random;
 use Tracy\Debugger;
 use Tracy\ILogger;
-use function extension_loaded;
 
 
 /**
@@ -49,13 +48,6 @@ readonly class ArticleImages
 		FileSystem::createDir($this->getDir());
 		$image->save($this->getDir() . '/' . $name);
 		return $name;
-	}
-
-
-	/** GD (only suggested by the package) resizes the uploads; without it no image can be uploaded. */
-	public static function isSupported(): bool
-	{
-		return extension_loaded('gd');
 	}
 
 

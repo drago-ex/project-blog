@@ -14,7 +14,6 @@ use App\Presentation\BasePresenter;
 use App\Presentation\Sign\RateLimiter;
 use Dibi\Exception;
 use Drago\Application\UI\Alert;
-use Drago\Attr\AttributeDetectionException;
 use Drago\Form\Autocomplete;
 use Drago\Form\Forms;
 use Drago\Gravatar\EmailException;
@@ -57,10 +56,7 @@ final class BlogPresenter extends BasePresenter
 	}
 
 
-	/**
-	 * @throws AttributeDetectionException
-	 * @throws Exception
-	 */
+	/** @throws Exception */
 	public function actionDetail(string $slug): void
 	{
 		$article = $this->articleRepository->getPublishedBySlug($slug);
@@ -81,7 +77,6 @@ final class BlogPresenter extends BasePresenter
 
 
 	/**
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 * @throws EmailException
 	 * @throws SizeException
@@ -94,7 +89,6 @@ final class BlogPresenter extends BasePresenter
 
 	/**
 	 * Published articles of a category at /blog/kategorie/slug, with the template of the list.
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 * @throws EmailException
 	 * @throws SizeException
@@ -112,7 +106,6 @@ final class BlogPresenter extends BasePresenter
 
 
 	/**
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 * @throws EmailException
 	 * @throws SizeException
@@ -123,7 +116,7 @@ final class BlogPresenter extends BasePresenter
 		$this->template->article = $article;
 		$this->template->category = $article->categoryId === null
 			? null
-			: $this->categoryRepository->get($article->categoryId)->record();
+			: $this->categoryRepository->table->get($article->categoryId)->record();
 		$this->template->content = $this->texyFormatter->toHtml($article->content);
 		$this->template->description = $article->perex;
 		$this->template->author = $article->authorId === null
@@ -191,7 +184,6 @@ final class BlogPresenter extends BasePresenter
 
 	/**
 	 * @param array{name?: string, email?: ?string, content: string, website: string} $values
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 */
 	private function processCommentForm(Form $form, array $values): void
@@ -221,7 +213,6 @@ final class BlogPresenter extends BasePresenter
 
 	/**
 	 * The article list (its categories are also the pills) and the selected category.
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 * @throws EmailException
 	 * @throws SizeException

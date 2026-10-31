@@ -6,34 +6,29 @@ use App\Model\User\UserEntity;
 use Dibi\Connection;
 use Dibi\Exception;
 use Dibi\Expression;
-use Drago\Attr\AttributeDetectionException;
-use Drago\Attr\Table;
-use Drago\Database\Database;
 use Drago\Database\ExtraFluent;
+use Drago\Database\Table;
 
 
-#[Table(ArticleEntity::Table, ArticleEntity::PrimaryKey, entity: ArticleEntity::class)]
-class ArticleRepository
+readonly class ArticleRepository
 {
-	/** @use Database<ArticleEntity> */
-	use Database;
+	/** @var Table<ArticleEntity> */
+	public Table $table;
 
-	public function __construct(
-		private readonly Connection $connection,
-	) {
+
+	public function __construct(Connection $db)
+	{
+		$this->table = new Table($db, ArticleEntity::Table, ArticleEntity::PrimaryKey, ArticleEntity::class);
 	}
 
 
-	/**
-	 * @return ExtraFluent<ArticleEntity>
-	 * @throws AttributeDetectionException
-	 */
+	/** @return ExtraFluent<ArticleEntity> */
 	public function getArticlesFluent(): ExtraFluent
 	{
 		// numbers of all and of the not yet approved comments, for the column of the administration grid
 		$comments = '(SELECT COUNT(*) FROM %n c WHERE c.%n = %n.%n';
 		$args = [CommentEntity::Table, CommentEntity::ColumnArticleId, ArticleEntity::Table, ArticleEntity::PrimaryKey];
-		return $this->read(
+		return $this->table->read(
 			"*, $comments) AS comments_total, $comments AND c.%n = 0) AS comments_pending",
 			...[...$args, ...$args, CommentEntity::ColumnApproved],
 		)
@@ -60,11 +55,10 @@ class ArticleRepository
 	/**
 	 * Published articles of the front, the newest first.
 	 * @return ExtraFluent<ArticleEntity>
-	 * @throws AttributeDetectionException
 	 */
 	public function getPublishedArticles(?int $categoryId = null): ExtraFluent
 	{
-		$fluent = $this->read('*')
+		$fluent = $this->table->read('*')
 			->where(self::publishedCondition())
 			->orderBy(ArticleEntity::ColumnPublishedAt, 'DESC')
 			->orderBy(ArticleEntity::PrimaryKey, 'DESC');
@@ -77,13 +71,10 @@ class ArticleRepository
 	}
 
 
-	/**
-	 * @throws AttributeDetectionException
-	 * @throws Exception
-	 */
+	/** @throws Exception */
 	public function getPublishedBySlug(string $slug): ?ArticleEntity
 	{
-		return $this->read('*')
+		return $this->table->read('*')
 			->where('%n = ?', ArticleEntity::ColumnSlug, $slug)
 			->where(self::publishedCondition())
 			->record();
@@ -102,7 +93,7 @@ class ArticleRepository
 		}
 
 		$authors = [];
-		$rows = $this->connection
+		$rows = $this->table->getConnection()
 			->select('%n, %n, %n', UserEntity::ColumnId, UserEntity::ColumnUsername, UserEntity::ColumnEmail)
 			->from(UserEntity::Table)
 			->where('%n IN %in', UserEntity::ColumnId, $ids)
@@ -121,12 +112,11 @@ class ArticleRepository
 
 	/**
 	 * Allows or disallows the comments of an article (the switch in the article grid).
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 */
 	public function setCommentsEnabled(int $id, bool $enabled): void
 	{
-		$this->update([ArticleEntity::ColumnCommentsEnabled => (int) $enabled])
+		$this->table->update([ArticleEntity::ColumnCommentsEnabled => (int) $enabled])
 			->where('%n = ?', ArticleEntity::PrimaryKey, $id)
 			->execute();
 	}

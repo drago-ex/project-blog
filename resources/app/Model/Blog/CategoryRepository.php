@@ -4,33 +4,27 @@ namespace App\Model\Blog;
 
 use Dibi\Connection;
 use Dibi\Exception;
-use Drago\Attr\AttributeDetectionException;
-use Drago\Attr\Table;
-use Drago\Database\Database;
 use Drago\Database\ExtraFluent;
+use Drago\Database\Table;
 use Nette\Utils\Strings;
-use function extension_loaded;
 
 
-#[Table(CategoryEntity::Table, CategoryEntity::PrimaryKey, entity: CategoryEntity::class)]
-class CategoryRepository
+readonly class CategoryRepository
 {
-	/** @use Database<CategoryEntity> */
-	use Database;
+	/** @var Table<CategoryEntity> */
+	public Table $table;
 
-	public function __construct(
-		private readonly Connection $connection,
-	) {
+
+	public function __construct(Connection $db)
+	{
+		$this->table = new Table($db, CategoryEntity::Table, CategoryEntity::PrimaryKey, CategoryEntity::class);
 	}
 
 
-	/**
-	 * @return ExtraFluent<CategoryEntity>
-	 * @throws AttributeDetectionException
-	 */
+	/** @return ExtraFluent<CategoryEntity> */
 	public function getCategoriesFluent(): ExtraFluent
 	{
-		return $this->read('*')
+		return $this->table->read('*')
 			->orderBy(CategoryEntity::ColumnName, 'ASC');
 	}
 
@@ -38,7 +32,6 @@ class CategoryRepository
 	/**
 	 * Names by id, for the select of the article form and the article grid.
 	 * @return array<int, string>
-	 * @throws AttributeDetectionException
 	 */
 	public function getNames(): array
 	{
@@ -51,7 +44,6 @@ class CategoryRepository
 	/**
 	 * Categories that have a published article, for the category pills and the article cards of the front.
 	 * @return CategoryEntity[]
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 */
 	public function getUsedCategories(): array
@@ -68,13 +60,10 @@ class CategoryRepository
 	}
 
 
-	/**
-	 * @throws AttributeDetectionException
-	 * @throws Exception
-	 */
+	/** @throws Exception */
 	public function getBySlug(string $slug): ?CategoryEntity
 	{
-		return $this->read('*')
+		return $this->table->read('*')
 			->where('%n = ?', CategoryEntity::ColumnSlug, $slug)
 			->record();
 	}
@@ -83,13 +72,12 @@ class CategoryRepository
 	/**
 	 * Id of the category of this name (new categories are written in the article form); a missing one is created
 	 * with a slug made from the name, numbered when it is taken.
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 */
 	public function getOrCreate(string $name): int
 	{
 		$name = trim($name);
-		$id = $this->read(CategoryEntity::PrimaryKey)
+		$id = $this->table->read(CategoryEntity::PrimaryKey)
 			->where('%n = ?', CategoryEntity::ColumnName, $name)
 			->fetchSingle();
 
@@ -97,17 +85,14 @@ class CategoryRepository
 			return (int) $id;
 		}
 
-		// webalize() needs ext-intl (only suggested); without it letters with accents are left out of the slug
-		$base = extension_loaded('intl')
-			? Strings::webalize($name)
-			: trim((string) preg_replace('~[^a-z0-9]+~', '-', strtolower($name)), '-');
+		$base = Strings::webalize($name);
 		$base = $base !== '' ? $base : 'category';
 		$slug = $base;
 		for ($i = 2; $this->getBySlug($slug) !== null; $i++) {
 			$slug = $base . '-' . $i;
 		}
 
-		$this->insert([CategoryEntity::ColumnName => $name, CategoryEntity::ColumnSlug => $slug])->execute();
-		return $this->getInsertId();
+		$this->table->insert([CategoryEntity::ColumnName => $name, CategoryEntity::ColumnSlug => $slug])->execute();
+		return $this->table->getInsertId();
 	}
 }

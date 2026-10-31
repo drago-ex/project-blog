@@ -13,7 +13,6 @@ use App\Presentation\Backend\Blog\Component\BaseControl;
 use App\Presentation\Backend\Blog\Component\Factory;
 use Dibi\Exception;
 use Drago\Application\UI\Alert;
-use Drago\Attr\AttributeDetectionException;
 use Drago\Datagrid\DataGrid;
 use Drago\Datagrid\Exception\InvalidColumnException;
 use Drago\Datagrid\Exception\InvalidConfigurationException;
@@ -57,10 +56,7 @@ class ArticleControl extends BaseControl
 	}
 
 
-	/**
-	 * @throws AttributeDetectionException
-	 * @throws Exception
-	 */
+	/** @throws Exception */
 	public function render(): void
 	{
 		$template = $this->createRender();
@@ -68,7 +64,7 @@ class ArticleControl extends BaseControl
 
 		// the edited article (also when the form is shown again with errors) shows its main image
 		$id = $this->imageArticleId ?? (int) $this->getComponent('article')->getComponent('id')->getValue();
-		$template->mainImage = $id > 0 ? $this->articleRepository->get($id)->record()?->image : null;
+		$template->mainImage = $id > 0 ? $this->articleRepository->table->get($id)->record()?->image : null;
 		$template->confirmRemoveImage = $this->confirmRemoveImage;
 
 		// a new category written before a validation error stays open
@@ -91,14 +87,13 @@ class ArticleControl extends BaseControl
 
 	/**
 	 * Allows or disallows the comments of an article by a click on their state in the grid.
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 * @throws InvalidLinkException
 	 */
 	#[Requires(ajax: true)]
 	public function handleToggleComments(int $id): void
 	{
-		$article = $this->articleRepository->get($id)->record();
+		$article = $this->articleRepository->table->get($id)->record();
 		if ($article === null) {
 			$this->error();
 		}
@@ -109,7 +104,6 @@ class ArticleControl extends BaseControl
 
 	/**
 	 * Approves a comment in the tab of the article.
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 * @throws InvalidLinkException
 	 */
@@ -126,7 +120,6 @@ class ArticleControl extends BaseControl
 
 	/**
 	 * Asks in the tab of the article whether to delete a comment.
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 * @throws InvalidLinkException
 	 */
@@ -141,7 +134,6 @@ class ArticleControl extends BaseControl
 
 	/**
 	 * Hides the confirmation of a delete.
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 * @throws InvalidLinkException
 	 */
@@ -154,7 +146,6 @@ class ArticleControl extends BaseControl
 
 	/**
 	 * Deletes a comment in the tab of the article.
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 * @throws InvalidLinkException
 	 */
@@ -162,7 +153,7 @@ class ArticleControl extends BaseControl
 	public function handleDeleteComment(int $id): void
 	{
 		$comment = $this->getComment($id);
-		$this->commentRepository
+		$this->commentRepository->table
 			->delete(CommentEntity::PrimaryKey, $id)
 			->execute();
 
@@ -174,7 +165,6 @@ class ArticleControl extends BaseControl
 
 	/**
 	 * Asks on the main image of the article whether to remove it.
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 */
 	#[Requires(ajax: true)]
@@ -187,7 +177,6 @@ class ArticleControl extends BaseControl
 
 	/**
 	 * Hides the confirmation of the removal.
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 */
 	#[Requires(ajax: true)]
@@ -199,7 +188,6 @@ class ArticleControl extends BaseControl
 
 	/**
 	 * Removes the main image of the article at once, without saving its form.
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 */
 	#[Requires(ajax: true)]
@@ -207,7 +195,7 @@ class ArticleControl extends BaseControl
 	{
 		$image = $this->redrawMainImage($id);
 		if ($image !== null) {
-			$this->articleRepository->update([ArticleEntity::ColumnImage => null])
+			$this->articleRepository->table->update([ArticleEntity::ColumnImage => null])
 				->where('%n = ?', ArticleEntity::PrimaryKey, $id)
 				->execute();
 
@@ -222,13 +210,12 @@ class ArticleControl extends BaseControl
 
 	/**
 	 * Handles article edit.
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 */
 	#[Requires(ajax: true)]
 	public function handleEdit(int $id): void
 	{
-		$item = $this->articleRepository->get($id)->record();
+		$item = $this->articleRepository->table->get($id)->record();
 		if ($item === null) {
 			$this->error();
 		}
@@ -252,7 +239,7 @@ class ArticleControl extends BaseControl
 
 
 	/**
-	 * @throws AttributeDetectionException|InvalidColumnException
+	 * @throws InvalidColumnException
 	 * @throws InvalidConfigurationException
 	 */
 	protected function createComponentDataGrid(): DataGrid
@@ -310,10 +297,7 @@ class ArticleControl extends BaseControl
 	}
 
 
-	/**
-	 * @throws AttributeDetectionException
-	 * @throws InvalidLinkException
-	 */
+	/** @throws InvalidLinkException */
 	protected function createComponentArticle(): Form
 	{
 		$form = $this->factory->create();
@@ -340,17 +324,14 @@ class ArticleControl extends BaseControl
 		$form->addTextAreaInput(ArticleValues::Perex, 'Perex')
 			->setNullable();
 
-		// the Image rule and the resizing need GD (only suggested); without it the form has no upload, so it still works
-		if (ArticleImages::isSupported()) {
-			$form->addUpload(ArticleValues::Upload, 'Upload a main image')
-				->addRule($form::Image, 'The image must be JPEG, PNG, GIF or WebP.')
-				->addRule($form::MaxFileSize, 'The image can have at most 8 MB.', self::MaxImageSize)
-				->addRule(
-					ArticleImages::validatePixels(...),
-					'The image can have at most %d megapixels.',
-					ArticleImages::MaxPixels / 1_000_000,
-				);
-		}
+		$form->addUpload(ArticleValues::Upload, 'Upload a main image')
+			->addRule($form::Image, 'The image must be JPEG, PNG, GIF or WebP.')
+			->addRule($form::MaxFileSize, 'The image can have at most 8 MB.', self::MaxImageSize)
+			->addRule(
+				ArticleImages::validatePixels(...),
+				'The image can have at most %d megapixels.',
+				ArticleImages::MaxPixels / 1_000_000,
+			);
 
 		$form->addTextAreaInput(ArticleValues::Content, 'Content (Texy)')
 			->setHtmlAttribute('data-texy-toolbar', $this->texyToolbar->getOptions($this->link('preview!')))
@@ -380,14 +361,11 @@ class ArticleControl extends BaseControl
 	}
 
 
-	/**
-	 * @throws AttributeDetectionException
-	 * @throws Exception
-	 */
+	/** @throws Exception */
 	protected function deleteItem(int $id): void
 	{
-		$image = $this->articleRepository->get($id)->record()?->image;
-		$this->articleRepository
+		$image = $this->articleRepository->table->get($id)->record()?->image;
+		$this->articleRepository->table
 			->delete(ArticleEntity::PrimaryKey, $id)
 			->execute();
 
@@ -395,13 +373,10 @@ class ArticleControl extends BaseControl
 	}
 
 
-	/**
-	 * @throws AttributeDetectionException
-	 * @throws Exception
-	 */
+	/** @throws Exception */
 	protected function getItemTitle(int $id): ?string
 	{
-		return $this->articleRepository
+		return $this->articleRepository->table
 			->get($id)
 			->record()
 			?->title;
@@ -421,7 +396,6 @@ class ArticleControl extends BaseControl
 
 
 	/**
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 * @throws InvalidLinkException
 	 */
@@ -434,13 +408,10 @@ class ArticleControl extends BaseControl
 	}
 
 
-	/**
-	 * @throws AttributeDetectionException
-	 * @throws Exception
-	 */
+	/** @throws Exception */
 	private function getComment(int $id): CommentEntity
 	{
-		$comment = $this->commentRepository->get($id)->record();
+		$comment = $this->commentRepository->table->get($id)->record();
 		if ($comment === null) {
 			$this->error();
 		}
@@ -467,12 +438,11 @@ class ArticleControl extends BaseControl
 
 	/**
 	 * Redraws only the main image of the article, so unsaved changes of its form stay; returns the image.
-	 * @throws AttributeDetectionException
 	 * @throws Exception
 	 */
 	private function redrawMainImage(int $id): ?string
 	{
-		$article = $this->articleRepository->get($id)->record();
+		$article = $this->articleRepository->table->get($id)->record();
 		if ($article === null) {
 			$this->error();
 		}
@@ -521,7 +491,6 @@ class ArticleControl extends BaseControl
 
 	/**
 	 * @throws Exception
-	 * @throws AttributeDetectionException
 	 * @throws InvalidLinkException
 	 */
 	private function processArticleForm(Form $form, ArticleValues $values): void
@@ -532,7 +501,7 @@ class ArticleControl extends BaseControl
 		unset($values->upload, $values->newCategory);
 
 		$oldImage = (int) $values->id > 0
-			? $this->articleRepository->get((int) $values->id)->record()?->image
+			? $this->articleRepository->table->get((int) $values->id)->record()?->image
 			: null;
 		$newImage = null;
 		$message = (int) $values->id > 0 ? 'Update successful.' : 'Insert successful.';
@@ -550,7 +519,7 @@ class ArticleControl extends BaseControl
 
 		// a new category is saved together with the article, so a failed save leaves no category behind
 		try {
-			$this->articleRepository->transaction(function () use ($values, $newCategory, $upload, &$newImage): void {
+			$this->articleRepository->table->transaction(function () use ($values, $newCategory, $upload, &$newImage): void {
 				if ($newCategory !== '') {
 					$values->categoryId = $this->categoryRepository->getOrCreate($newCategory);
 				}
@@ -559,7 +528,7 @@ class ArticleControl extends BaseControl
 					$values->image = $newImage = $this->articleImages->save($upload);
 				}
 
-				$this->articleRepository->save($values);
+				$this->articleRepository->table->save($values);
 			});
 
 		} catch (\Throwable $e) {

@@ -11,6 +11,8 @@ frontend with the article list, categories and article details with comments.
 ## Requirements
 
 - PHP >= 8.3, < 9
+- PHP extensions GD (resizing the cover images) and intl (slugs of new categories); the Docker image of
+  [drago-ex/project-docker](https://github.com/drago-ex/project-docker) has both
 - [Drago Project](https://github.com/drago-ex/project)
 
 ## Installation
@@ -51,7 +53,7 @@ With [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-u
 
 A new category is written right in
 the article form (the "+" button next to the category); the button "Categories" above the articles opens their list for renaming and
-deleting. The slug of a new category is made from its name with the PHP extension intl. Comments are managed with their
+deleting. The slug of a new category is made from its name. Comments are managed with their
 article: the article list shows whether they are allowed (a click on the state switches it), their number and those
 waiting for approval, and an opened article has the tab "Comments" to approve or delete them. The number of all
 comments waiting for approval comes from `CommentBadge`, a service for the menu numbers and the navbar bell of
@@ -80,8 +82,7 @@ large image beside the text (`Front/Blog/@article-featured.latte`), the others a
 `Front/Blog/@article-list.latte`. The author is the signed-in user who created the article.
 
 The cover image is uploaded in the article form. It is made smaller to fit 1600 × 1200 px and saved in
-`www/upload/blog/`; replacing or removing the image and deleting the article delete the file. Resizing needs the
-PHP extension GD (the Docker image of drago-ex/project-docker has it); without it the form offers no upload.
+`www/upload/blog/`; replacing or removing the image and deleting the article delete the file.
 Add `/www/upload/` to `.gitignore`.
 
 Anyone may write a comment; it is shown after an administrator approves it. Comments use basic Texy (no images,

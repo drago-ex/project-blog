@@ -11,6 +11,8 @@ veřejnou část se seznamem článků, kategoriemi a detailem článku s koment
 ## Požadavky
 
 - PHP >= 8.3, < 9
+- Rozšíření PHP GD (zmenšování úvodních obrázků) a intl (slugy nových kategorií); Docker obraz z
+  [drago-ex/project-docker](https://github.com/drago-ex/project-docker) má obě
 - [Drago Project](https://github.com/drago-ex/project)
 
 ## Instalace
@@ -51,7 +53,7 @@ S [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui) 
 
 Novou kategorii napíšete přímo ve formuláři článku
 (tlačítko „+“ vedle kategorie); tlačítko „Kategorie“ nad články otevře jejich seznam pro přejmenování a mazání. Slug nové
-kategorie se vytvoří z názvu pomocí rozšíření PHP intl. Komentáře se spravují u svého článku: seznam článků
+kategorie se vytvoří z názvu. Komentáře se spravují u svého článku: seznam článků
 ukazuje, zda jsou povolené (kliknutím na stav se přepne), jejich počet i ty, které čekají na schválení, a otevřený
 článek má záložku „Komentáře“ pro jejich schválení nebo smazání. Počet všech komentářů čekajících na schválení
 dodává `CommentBadge`, služba pro čísla v menu a zvonek v navbaru project-backend-ui; zaregistrujte ji podle jeho README.
@@ -78,8 +80,7 @@ v `Front/Blog/7.conf.neon`). Nejnovější článek je přes celý řádek s vel
 zobrazí články stejně pomocí `ArticleListFactory::create()` a `Front/Blog/@article-list.latte`. Autorem je přihlášený uživatel, který článek vytvořil.
 
 Úvodní obrázek se nahrává ve formuláři článku. Zmenší se, aby se vešel do 1600 × 1200 px, a uloží do
-`www/upload/blog/`; výměna nebo odebrání obrázku a smazání článku soubor smažou. Zmenšování potřebuje
-rozšíření PHP GD (Docker obraz z drago-ex/project-docker ho má); bez něj formulář nahrávání nenabízí.
+`www/upload/blog/`; výměna nebo odebrání obrázku a smazání článku soubor smažou.
 Přidejte `/www/upload/` do `.gitignore`.
 
 Komentář může napsat kdokoli; zobrazí se po schválení administrátorem. Komentáře používají základní Texy (bez obrázků,
