@@ -1,9 +1,14 @@
 {default bool $addButton = false}
-<h5 class="border-bottom pb-2 d-flex align-items-center gap-2">
-	<span class="me-auto">{block title}{/block}</span>
-	{* links of the page, e.g. to the categories *}
-	{block buttons}{/block}
-	<a n:if="$addButton" n:href="openOffcanvas!" class="btn btn-primary btn-xs ajax" data-naja-history="off">
-		{_'Add item'}
-	</a>
-</h5>
+<header class="mb-4 pb-2 border-bottom d-flex flex-wrap justify-content-between align-items-end gap-3">
+	<div>
+		<h1 class="h5 mb-1">{block title}{/block}</h1>
+		<p class="small text-body-secondary mb-0">{block subtitle}{/block}</p>
+	</div>
+	<div class="d-flex flex-wrap align-items-center gap-2">
+		{* links of the page, e.g. to the categories *}
+		{block buttons}{/block}
+		<a n:if="$addButton" n:href="openOffcanvas!" class="btn btn-primary btn-sm ajax" data-naja-history="off">
+			<i class="fa-solid fa-plus me-1" aria-hidden="true"></i>{_'Add item'}
+		</a>
+	</div>
+</header>
