@@ -76,7 +76,7 @@
 											<div n:snippet="mainImage">
 												<div n:if="$mainImage" class="position-relative mb-3">
 													<img src="{$basePath}/{App\Model\Blog\ArticleImages::Path}/{$mainImage}" alt="" class="w-100 rounded object-fit-cover" style="max-height: 10rem; object-position: top">
-													<div class="article-image-actions position-absolute top-0 end-0 m-2 d-flex flex-wrap justify-content-end align-items-center gap-2">
+													<div n:if="$control->isAllowed('edit')" class="article-image-actions position-absolute top-0 end-0 m-2 d-flex flex-wrap justify-content-end align-items-center gap-2">
 														{if $confirmRemoveImage}
 															<span class="badge text-bg-light">{_'Remove the main image?'}</span>
 															<a n:href="removeImage!, id: $articleId" class="ajax btn btn-xs btn-danger" data-naja-history="off">{_'Remove'}</a>
@@ -137,8 +137,8 @@
 											<a n:href="deleteComment!, id: $comment->id" class="ajax btn btn-xs btn-danger" data-naja-history="off">{_'Delete'}</a>
 											<a n:href="cancelDeleteComment!, id: $comment->id" class="ajax btn btn-xs btn-secondary" data-naja-history="off">{_'Cancel'}</a>
 										{else}
-											<a n:if="!$comment->approved" n:href="approveComment!, id: $comment->id" class="ajax btn btn-xs btn-success" data-naja-history="off">{_'Approve'}</a>
-											<a n:href="confirmDeleteComment!, id: $comment->id" class="ajax btn btn-xs btn-danger" data-naja-history="off">{_'Delete'}</a>
+											<a n:if="!$comment->approved && $control->isAllowed('approveComment')" n:href="approveComment!, id: $comment->id" class="ajax btn btn-xs btn-success" data-naja-history="off">{_'Approve'}</a>
+											<a n:if="$control->isAllowed('deleteComment')" n:href="confirmDeleteComment!, id: $comment->id" class="ajax btn btn-xs btn-danger" data-naja-history="off">{_'Delete'}</a>
 										{/if}
 									</div>
 								</article>
@@ -167,7 +167,7 @@
 	{/block}
 {/embed}
 
-{embed '../@datagrid-heading.latte', addButton: true}
+{embed '../@datagrid-heading.latte', addButton: $control->isAllowed('edit')}
 	{block title}
 		{_'Blog articles'}
 	{/block}

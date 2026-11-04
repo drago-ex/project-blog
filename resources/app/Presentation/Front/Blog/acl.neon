@@ -1,0 +1,8 @@
+# Everyone may read the published articles.
+security:
+	resources:
+		Front:Blog:
+
+	rules:
+		allow:
+			- [guest, Front:Blog]

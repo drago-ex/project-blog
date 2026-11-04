@@ -32,7 +32,7 @@
 	{/block}
 {/embed}
 
-{embed '../@datagrid-heading.latte', addButton: true}
+{embed '../@datagrid-heading.latte', addButton: $control->isAllowed('edit')}
 	{block title}
 		{_'Categories'}
 	{/block}

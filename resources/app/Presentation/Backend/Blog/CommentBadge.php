@@ -3,6 +3,7 @@
 namespace App\Presentation\Backend\Blog;
 
 use App\Model\Blog\CommentRepository;
+use Dibi\Exception;
 
 
 /**
@@ -21,6 +22,7 @@ final readonly class CommentBadge
 	/**
 	 * The number next to the menu item of the link, and the label of the entry in the bell.
 	 * @return list<array{link: string, count: int, label: string}>
+	 * @throws Exception
 	 */
 	public function __invoke(): array
 	{

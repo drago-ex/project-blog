@@ -8,6 +8,8 @@ use Drago\Component\Component;
 use Drago\Component\ModalHandle;
 use Drago\Component\OffcanvasHandle;
 use Drago\Datagrid\DataGrid;
+use Drago\Permission\Access;
+use Drago\Permission\AccessCheck;
 use Nette\Application\Attributes\Requires;
 use Nette\Application\UI\Form;
 use Nette\Application\UI\Template;
@@ -16,10 +18,15 @@ use Tracy\Debugger;
 use Tracy\ILogger;
 
 
-/** @property-read BaseTemplate $template */
+/**
+ * The privileges of the blog administration (resource Backend:Blog): "edit" (the forms, the row edit, the comments
+ * switch, the main image), "delete", "approveComment" and "deleteComment"; isAllowed() of AccessCheck shows the buttons.
+ * @property-read BaseTemplate $template
+ */
 abstract class BaseControl extends ExtraControl implements OffcanvasHandle, ModalHandle
 {
 	use Component;
+	use AccessCheck;
 
 	public ?string $deleteTitle = null;
 	protected string $snippetMessage = 'message';
@@ -42,6 +49,8 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 	}
 
 
+	/** Only opens the dialog, the page is enough; its form is checked. */
+	#[Access]
 	#[Requires(ajax: true)]
 	public function handleOpenModal(): void
 	{
@@ -49,6 +58,8 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 	}
 
 
+	/** Only opens the offcanvas, the page is enough; its form is checked. */
+	#[Access]
 	#[Requires(ajax: true)]
 	public function handleOpenOffcanvas(): void
 	{

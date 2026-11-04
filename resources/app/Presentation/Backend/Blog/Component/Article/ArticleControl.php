@@ -17,6 +17,7 @@ use Drago\Datagrid\DataGrid;
 use Drago\Datagrid\Exception\InvalidColumnException;
 use Drago\Datagrid\Exception\InvalidConfigurationException;
 use Drago\Form\Autocomplete;
+use Drago\Permission\Access;
 use Drago\Texy\TexyFormatter;
 use Drago\Texy\TexyToolbar;
 use Nette\Application\Attributes\Requires;
@@ -90,6 +91,7 @@ class ArticleControl extends BaseControl
 	 * @throws Exception
 	 * @throws InvalidLinkException
 	 */
+	#[Access('edit')]
 	#[Requires(ajax: true)]
 	public function handleToggleComments(int $id): void
 	{
@@ -123,6 +125,7 @@ class ArticleControl extends BaseControl
 	 * @throws Exception
 	 * @throws InvalidLinkException
 	 */
+	#[Access('deleteComment')]
 	#[Requires(ajax: true)]
 	public function handleConfirmDeleteComment(int $id): void
 	{
@@ -137,6 +140,7 @@ class ArticleControl extends BaseControl
 	 * @throws Exception
 	 * @throws InvalidLinkException
 	 */
+	#[Access('deleteComment')]
 	#[Requires(ajax: true)]
 	public function handleCancelDeleteComment(int $id): void
 	{
@@ -167,6 +171,7 @@ class ArticleControl extends BaseControl
 	 * Asks on the main image of the article whether to remove it.
 	 * @throws Exception
 	 */
+	#[Access('edit')]
 	#[Requires(ajax: true)]
 	public function handleConfirmRemoveImage(int $id): void
 	{
@@ -179,6 +184,7 @@ class ArticleControl extends BaseControl
 	 * Hides the confirmation of the removal.
 	 * @throws Exception
 	 */
+	#[Access('edit')]
 	#[Requires(ajax: true)]
 	public function handleCancelRemoveImage(int $id): void
 	{
@@ -190,6 +196,7 @@ class ArticleControl extends BaseControl
 	 * Removes the main image of the article at once, without saving its form.
 	 * @throws Exception
 	 */
+	#[Access('edit')]
 	#[Requires(ajax: true)]
 	public function handleRemoveImage(int $id): void
 	{
@@ -230,7 +237,8 @@ class ArticleControl extends BaseControl
 	}
 
 
-	/** Returns the HTML of the content for the preview of the Texy toolbar. */
+	/** Returns the HTML of the content for the preview of the Texy toolbar; it only reads, the page is enough. */
+	#[Access]
 	#[Requires(methods: 'POST', ajax: true)]
 	public function handlePreview(): void
 	{
@@ -290,14 +298,17 @@ class ArticleControl extends BaseControl
 
 		// A click on the row opens the form, the Edit button is then hidden by the grid.
 		$grid->setRowClickAction('edit');
-		$grid->addActionEdit(fn(int $id) => $this->handleEdit($id));
-		$grid->addActionDelete(fn(int $id) => $this->handleDelete($id));
+		$grid->addActionEdit(fn(int $id) => $this->handleEdit($id))
+			->setVisible($this->isAllowed('edit'));
+		$grid->addActionDelete(fn(int $id) => $this->handleDelete($id))
+			->setVisible($this->isAllowed('delete'));
 
 		return $grid;
 	}
 
 
 	/** @throws InvalidLinkException */
+	#[Access('edit')]
 	protected function createComponentArticle(): Form
 	{
 		$form = $this->factory->create();
@@ -385,13 +396,12 @@ class ArticleControl extends BaseControl
 
 	/**
 	 * The link of the state badge that switches the comments of an article, null when it is not clickable
-	 * (the permission steps of the README return null without the write privilege).
+	 * (without the privilege "edit", which the signal needs).
 	 * @throws InvalidLinkException
-	 * @phpstan-ignore return.unusedType
 	 */
 	private function getToggleCommentsLink(int $id): ?string
 	{
-		return $this->link('toggleComments!', ['id' => $id]);
+		return $this->isAllowed('edit') ? $this->link('toggleComments!', ['id' => $id]) : null;
 	}
 
 

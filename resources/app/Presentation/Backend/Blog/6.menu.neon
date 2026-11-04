@@ -1,0 +1,11 @@
+# Item of the administration menu of drago-ex/project-backend-ui (without it the parameter is unused; the key lets a later file extend it).
+parameters:
+	sidebar:
+		Content:
+			# articles with their comments; the categories are opened from the articles
+			blog: {title: Blog, link: 'Blog:', icon: fa-regular fa-newspaper bell}
+
+
+services:
+	# the number of comments waiting for approval next to "Blog" (read by drago-ex/project-backend-ui)
+	- {factory: App\Presentation\Backend\Blog\CommentBadge, tags: [sidebar.badge], autowired: no}

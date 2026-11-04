@@ -12,6 +12,7 @@ use Drago\Datagrid\DataGrid;
 use Drago\Datagrid\Exception\InvalidColumnException;
 use Drago\Datagrid\Exception\InvalidConfigurationException;
 use Drago\Form\Autocomplete;
+use Drago\Permission\Access;
 use Nette\Application\Attributes\Requires;
 use Nette\Application\UI\Form;
 
@@ -73,13 +74,16 @@ class CategoryControl extends BaseControl
 
 		// A click on the row opens the form, the Edit button is then hidden by the grid.
 		$grid->setRowClickAction('edit');
-		$grid->addActionEdit(fn(int $id) => $this->handleEdit($id));
-		$grid->addActionDelete(fn(int $id) => $this->handleDelete($id));
+		$grid->addActionEdit(fn(int $id) => $this->handleEdit($id))
+			->setVisible($this->isAllowed('edit'));
+		$grid->addActionDelete(fn(int $id) => $this->handleDelete($id))
+			->setVisible($this->isAllowed('delete'));
 
 		return $grid;
 	}
 
 
+	#[Access('edit')]
 	protected function createComponentCategory(): Form
 	{
 		$form = $this->factory->create();

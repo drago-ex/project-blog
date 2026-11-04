@@ -1,0 +1,4 @@
+# The blog administration; administrators are allowed everything (permission).
+security:
+	resources:
+		Backend:Blog:

@@ -36,9 +36,24 @@ The migrations create the tables `blog_article`, `blog_category` and `blog_comme
 
 ## Assets
 
+Register the Naja extension, which puts "#2 Name" into the comment form after a click on "Reply" under a comment, in
+`assets/front.js` (without it the link only goes to the form):
+
+```js
+import CommentReply from './naja/comment-reply.js';
+
+registerNajaExtensions(
+	// ...
+	CommentReply
+);
+```
+
 The toolbar of the content field and the copy button of code blocks come from
 [drago-ex/texy-toolbar](https://github.com/drago-ex/texy-toolbar); set them up as its README shows (`admin.js` for
 the toolbar, `front.js` for the toolbar of comments and the copy button). Without them the blog works too.
+
+The lists of articles and categories come from [drago-ex/datagrid](https://github.com/drago-ex/datagrid); set up its assets in
+`admin.js` and `admin.scss` as its README shows.
 
 ## Backend
 
@@ -49,7 +64,7 @@ The backend presenter is available as:
 {link :Backend:Blog:categories}  {* categories *}
 ```
 
-With [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui), add the links to its menu (see its README).
+With [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui), the page gets its menu item from `Backend/Blog/6.menu.neon`.
 
 A new category is written right in
 the article form (the "+" button next to the category); the button "Categories" above the articles opens their list for renaming and
@@ -57,9 +72,9 @@ deleting. The slug of a new category is made from its name. Comments are managed
 article: the article list shows whether they are allowed (a click on the state switches it), their number and those
 waiting for approval, and an opened article has the tab "Comments" to approve or delete them. The number of all
 comments waiting for approval comes from `CommentBadge`, a service for the menu numbers and the navbar bell of
-project-backend-ui; register it as its README shows.
+project-backend-ui, registered in `Backend/Blog/6.menu.neon`.
 
-The module uses the permission resource `Backend:Blog`. The backend provider allows the administrator role.
+The module uses the permission resource `Backend:Blog`.
 
 ## Frontend
 
@@ -89,66 +104,18 @@ Anyone may write a comment; it is shown after an administrator approves it. Comm
 headings or HTML). Each article allows or disallows them by its own "Allow comments" switch. A signed-in user does
 not fill in the name and email, the comment gets those of the account. Approved comments are numbered (`#1`, `#2`,
 …) and "Reply" puts `#2 Name` into the form; such a number in a comment links the comment, which lists its replies.
-Putting the text into the form needs a small script of the project (without it the link only goes to the form).
+Putting the text into the form needs the Naja extension `CommentReply` (see Assets).
 
-The frontend permission provider uses the resource `Front:Blog` and allows it to guests.
+The resource `Front:Blog` is allowed to guests.
 
----
+## Access rules
 
-## Optional add-ons
+The access rules are in `acl.neon` next to the presenters: `app/Presentation/Backend/Blog/acl.neon` (the resource `Backend:Blog`, for the administrator only)
+and `app/Presentation/Front/Blog/acl.neon` (the resource `Front:Blog` for everyone).
+[drago-ex/permission](https://github.com/drago-ex/permission) merges them with its base roles, in which the administrator is allowed everything.
 
-The package works without them. Set them up by hand as described below when the project needs them.
-
-### Permissions
-
-The blog works without permissions and without [drago-ex/permission](https://github.com/drago-ex/permission):
-the administration shows all its buttons.
-
-For static permissions, the access rules are prepared in [`bin/create-blog-permission`](bin/create-blog-permission); drago-ex/permission
-generates a provider from it (set up as its README shows):
-
-```bash
-php vendor/bin/drago-commands
-```
-
-To show the add, edit and delete buttons only to roles with the privilege, add the `WriteAccess` trait of
-drago-ex/permission; its `isWriteAllowed()` asks for the `{component}-write` privilege. In
-`app/Presentation/Backend/Blog/Component/BaseControl.php` use the trait and pass the result to the template
-(with `public bool $writeAllowed = false;` in `BaseTemplate`):
-
-```php
-use Drago\Permission\WriteAccess;
-
-abstract class BaseControl extends ExtraControl implements OffcanvasHandle, ModalHandle
-{
-	use Component;
-	use WriteAccess;
-
-	public function createRender(): Template
-	{
-		// ...
-		$template->writeAllowed = $this->isWriteAllowed();
-```
-
-then hide the grid actions by it and show the add button only when allowed:
-
-```php
-$grid->addActionEdit(fn(int $id) => $this->handleEdit($id))
-	->setVisible($this->isWriteAllowed());
-```
-
-```latte
-{embed '../@datagrid-heading.latte', addButton: $writeAllowed}
-```
-
-In the article, show the approve and delete buttons of the comments tab (`<div class="article-comment-actions …">`)
-and the remove button of the main image (`<div class="article-image-actions …">`) only with `n:if="$writeAllowed"`, and let `ArticleControl::getToggleCommentsLink()` return null without the
-privilege, so the state of the comments in the grid is not clickable.
-
-For dynamic permissions set in the administration, install
-[drago-ex/project-permission](https://github.com/drago-ex/project-permission) and import the privileges of the blog
-into its `resources` table by hand, so roles can be given them (e.g. an editor who only views articles):
-
-```bash
-php vendor/bin/migration db:migrate vendor/drago-ex/project-blog/migrations-permission
-```
+The privileges of the administration (`Backend:Blog`) are `default` and `categories` (the pages), `edit` (adding
+and editing articles and categories, the comments switch, the main image), `delete`, `approveComment` and
+`deleteComment`. Its buttons are shown only to those who may use them. With
+[drago-ex/project-permission](https://github.com/drago-ex/project-permission), roles can be given these privileges
+in its administration, e.g. a moderator with `default` and `approveComment`.

@@ -36,9 +36,24 @@ Migrace vytvoří tabulky `blog_article`, `blog_category` a `blog_comment`.
 
 ## Assety
 
+Zaregistrujte rozšíření Naja, které po kliknutí na „Odpovědět“ pod komentářem vloží „#2 Jméno“ do formuláře komentáře,
+v `assets/front.js` (bez něj odkaz jen vede k formuláři):
+
+```js
+import CommentReply from './naja/comment-reply.js';
+
+registerNajaExtensions(
+	// ...
+	CommentReply
+);
+```
+
 Lišta pole s obsahem a tlačítko pro kopírování bloků kódu pocházejí z
 [drago-ex/texy-toolbar](https://github.com/drago-ex/texy-toolbar); nastavte je podle jeho README (`admin.js` pro
 lištu, `front.js` pro lištu komentářů a tlačítko kopírování). Blog funguje i bez nich.
+
+Seznamy článků a kategorií pocházejí z [drago-ex/datagrid](https://github.com/drago-ex/datagrid); nastavte jeho assety
+v `admin.js` a `admin.scss` podle jeho README.
 
 ## Administrace
 
@@ -49,16 +64,16 @@ Presenter administrace je dostupný jako:
 {link :Backend:Blog:categories}  {* categories *}
 ```
 
-S [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui) přidejte odkazy do jeho menu (viz jeho README).
+S [drago-ex/project-backend-ui](https://github.com/drago-ex/project-backend-ui) dostane stránka položku menu z `Backend/Blog/6.menu.neon`.
 
 Novou kategorii napíšete přímo ve formuláři článku
 (tlačítko „+“ vedle kategorie); tlačítko „Kategorie“ nad články otevře jejich seznam pro přejmenování a mazání. Slug nové
 kategorie se vytvoří z názvu. Komentáře se spravují u svého článku: seznam článků
 ukazuje, zda jsou povolené (kliknutím na stav se přepne), jejich počet i ty, které čekají na schválení, a otevřený
 článek má záložku „Komentáře“ pro jejich schválení nebo smazání. Počet všech komentářů čekajících na schválení
-dodává `CommentBadge`, služba pro čísla v menu a zvonek v navbaru project-backend-ui; zaregistrujte ji podle jeho README.
+dodává `CommentBadge`, služba pro čísla v menu a zvonek v navbaru project-backend-ui, zaregistrovaná v `Backend/Blog/6.menu.neon`.
 
-Modul používá zdroj oprávnění `Backend:Blog`. Provider administrace povoluje roli administrátora.
+Modul používá zdroj oprávnění `Backend:Blog`.
 
 ## Veřejná část
 
@@ -87,66 +102,17 @@ Komentář může napsat kdokoli; zobrazí se po schválení administrátorem. K
 nadpisů a HTML). Každý článek je povoluje nebo zakazuje vlastním přepínačem „Povolit komentáře“. Přihlášený
 uživatel jméno a e-mail nevyplňuje, komentář dostane ty z jeho účtu. Schválené komentáře jsou očíslované (`#1`,
 `#2`, …) a „Odpovědět“ vloží do formuláře `#2 Jméno`; takové číslo v komentáři odkazuje na komentář, který vypisuje
-své odpovědi. Vložení textu do formuláře potřebuje malý skript projektu (bez něj odkaz jen vede k formuláři).
+své odpovědi. Vložení textu do formuláře zajistí rozšíření Naja `CommentReply` (viz Assety).
 
-Provider oprávnění veřejné části používá zdroj `Front:Blog` a povoluje ho návštěvníkům.
+Zdroj `Front:Blog` je povolený návštěvníkům.
 
----
+## Pravidla přístupu
 
-## Volitelné doplňky
+Pravidla přístupu jsou v `acl.neon` vedle presenterů: `app/Presentation/Backend/Blog/acl.neon` (zdroj `Backend:Blog` jen pro administrátora)
+a `app/Presentation/Front/Blog/acl.neon` (zdroj `Front:Blog` pro všechny).
+[drago-ex/permission](https://github.com/drago-ex/permission) je sloučí se svými výchozími rolemi, ve kterých administrátor smí všechno.
 
-Balíček funguje i bez nich. Pokud je projekt potřebuje, nastavte je ručně podle popisu níže.
-
-### Oprávnění
-
-Blog funguje bez oprávnění i bez [drago-ex/permission](https://github.com/drago-ex/permission):
-administrace pak zobrazuje všechna svá tlačítka.
-
-Pro statická oprávnění jsou pravidla přístupu připravená v [`bin/create-blog-permission`](bin/create-blog-permission); drago-ex/permission
-z nich vygeneruje provider (nastavení popisuje jeho README):
-
-```bash
-php vendor/bin/drago-commands
-```
-
-Aby tlačítka pro přidání, úpravu a mazání viděly jen role s privilegiem, přidejte trait `WriteAccess` z
-drago-ex/permission; jeho `isWriteAllowed()` se ptá na privilegium `{component}-write`. V
-`app/Presentation/Backend/Blog/Component/BaseControl.php` trait použijte a výsledek předejte do šablony
-(s `public bool $writeAllowed = false;` v `BaseTemplate`):
-
-```php
-use Drago\Permission\WriteAccess;
-
-abstract class BaseControl extends ExtraControl implements OffcanvasHandle, ModalHandle
-{
-	use Component;
-	use WriteAccess;
-
-	public function createRender(): Template
-	{
-		// ...
-		$template->writeAllowed = $this->isWriteAllowed();
-```
-
-potom podle něj skryjte akce gridu a tlačítko pro přidání zobrazte jen s oprávněním:
-
-```php
-$grid->addActionEdit(fn(int $id) => $this->handleEdit($id))
-	->setVisible($this->isWriteAllowed());
-```
-
-```latte
-{embed '../@datagrid-heading.latte', addButton: $writeAllowed}
-```
-
-V článku zobrazte tlačítka schválení a smazání v záložce komentářů (`<div class="article-comment-actions …">`)
-a tlačítko odstranění hlavního obrázku (`<div class="article-image-actions …">`) jen s `n:if="$writeAllowed"` a nechte `ArticleControl::getToggleCommentsLink()` bez oprávnění vracet null, aby
-stav komentářů v gridu nebyl klikací.
-
-Pro dynamická oprávnění nastavovaná v administraci nainstalujte
-[drago-ex/project-permission](https://github.com/drago-ex/project-permission) a ručně naimportujte privilegia blogu
-do jeho tabulky `resources`, aby je bylo možné přidělovat rolím (např. redaktor, který články jen prohlíží):
-
-```bash
-php vendor/bin/migration db:migrate vendor/drago-ex/project-blog/migrations-permission
-```
+Privilegia administrace (`Backend:Blog`) jsou `default` a `categories` (stránky), `edit` (přidání a úpravy
+článků a kategorií, přepínač komentářů, hlavní obrázek), `delete`, `approveComment` a `deleteComment`. Její tlačítka
+se zobrazí jen těm, kdo je smí použít. S [drago-ex/project-permission](https://github.com/drago-ex/project-permission)
+lze tato privilegia přidělit rolím v jeho administraci, např. moderátorovi `default` a `approveComment`.
