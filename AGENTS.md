@@ -1,58 +1,69 @@
 # Agent Guide
 
-Use this file as package-specific guidance when working in this repository. Keep changes aligned with the existing public API, project conventions, and supported PHP range.
+`drago-ex/project-blog` (type drago-tools-resource, PHP >=8.3 <9, requires ext-gd and ext-intl): blog articles,
+categories and comments, copied into the project by project-tools. The workspace rules are in `../AGENTS.md`;
+dependencies are in `composer.json`.
 
-## Package Overview
-- **Package**: `drago-ex/project-blog`
-- **Type**: drago-tools-resource
-- **Purpose**: Blog articles and comments for Drago Project.
-- **PHP**: >=8.3 <9
-- **Runtime dependencies**: nette/application (^3.2), nette/di (^3.2), drago-ex/application (^4.0), drago-ex/component (^3.0), drago-ex/database (^5.0), drago-ex/datagrid (^1.0), drago-ex/form (^3.0), drago-ex/migration (^1.0), drago-ex/project-auth (^2.0), drago-ex/project-backend (^1.0), drago-ex/translator (^4.0.1), drago-ex/utils (^2.0), drago-ex/texy-toolbar (^1.0), drago-ex/gravatar (^2.1.1)
-- **License**: MIT
+## Layout
+- `resources/app/Model/Blog`: entities, repositories, `ArticleImages` (uploads), `ArticleAuthors`,
+  `ArticleList` + `ArticleListFactory`.
+- `resources/app/Presentation/Backend/Blog`: `BlogPresenter`, components `Article` and `Category`,
+  `CommentBadge`, `6.menu.neon`, `acl.neon`, `Translate/cs.neon`.
+- `resources/app/Presentation/Front/Blog`: `BlogPresenter`, `BlogRouter` (`7.conf.neon`), `CommentReferences`,
+  `TimeAgoExtension` (filter `|ago`), the article templates, `acl.neon`.
+- `resources/assets/naja/comment-reply.js`: Naja extension `CommentReply`, copied to `assets/naja/`.
+- `migrations/001_blog.sql`, `tests/` (Nette Tester).
 
-## Repository Layout
-- `resources/app/Presentation/Backend/Blog/acl.neon` and `resources/app/Presentation/Front/Blog/acl.neon`: the ACL of the package (resources = presenter names, rules only for roles other than the administrator), merged by Nette with `role.acl.neon` of drago-ex/permission (required); a new presenter gets its resource in the `acl.neon` next to it. No bin script or providers.
-- `migrations/`: database migrations.
-- `resources/`: application resources contributed to the consuming Drago project.
-- `.github/`: CI workflows; keep their PHP versions and commands consistent with Composer and the package scripts.
-- `composer.json`: package metadata, dependency constraints, autoloading, and available Composer scripts.
+## Permissions
+- `acl.neon` next to the presenters (resources = presenter names, rules only for roles other than the
+  administrator), merged with `role.acl.neon` of drago-ex/permission. A new presenter gets its resource there.
+- `BaseControl` uses `AccessCheck`; buttons ask `isAllowed()` (grid actions `setVisible()`, templates
+  `$control->isAllowed(...)`), signals are named by `#[Access]`. Privileges of `Backend:Blog`: `default`,
+  `categories`, `edit` (article and category forms, row edit, `toggleComments`, main image signals), `delete`,
+  `approveComment`, `deleteComment`. `openModal`, `openOffcanvas`, `preview` need only the page.
+  `getToggleCommentsLink()` returns null without `edit`.
+- project-permission reads the privileges from the code (`PrivilegeCatalog`); a new signal needs its privilege
+  decided here, no list to update.
 
-## Buttons and permissions
-- Permission code is in the package (2026-11-03, step 6 of the ACL-in-neon rework; before, only README steps and project-preset-permission copies): `BaseControl` uses `AccessCheck` of drago-ex/permission, buttons ask `isAllowed()` (grid actions `setVisible()`, templates `$control->isAllowed(...)`, `addButton:`), signals are named by `#[Access]`. Privileges of `Backend:Blog`: pages `default`, `categories`; `edit` (`createComponentArticle`/`createComponentCategory`, row edit, `toggleComments`, the main image confirm/cancel/remove); `delete` (delete dialog + form, row delete); `approveComment`; `deleteComment` (with its confirm/cancel). `#[Access]` (page enough): `openModal`, `openOffcanvas`, `preview`. `getToggleCommentsLink()` returns null without `edit`. A new signal needs its privilege decided here (attribute or its own name), the catalog of project-permission shows it at once.
-- `@datagrid-heading.latte` shows the add button with `addButton: true`.
-- The add/edit form in the full-screen offcanvas has two columns (2026-10-24, the user's choice over tabs or an accordion, which would hide fields with errors): the title and the content on the left (`col-lg-8`), the settings in cards on the right (`col-lg-4`), and the buttons in a `sticky-bottom` bar, so they stay visible while the content scrolls. A new field goes into the fitting card, nothing is hidden.
-- Article form cards: first card: status, date, category, comments; second: the main image (preview of the stored image from `ArticleTemplate::$mainImage`, which `ArticleControl::render()` loads by the form's id, so it stays after a validation error; upload; the stored image is removed at once by the trash button on the preview: signals `confirmRemoveImage`, `cancelRemoveImage` and `removeImage` (an inline confirmation like the comments) redraw only the snippet `mainImage`, so unsaved changes of the form stay; there is no remove checkbox any more); third: slug, perex. The cards have no headings, the field labels are enough (the user removed them).
-- Articles have a cover image (`image`, a file name) and an author (`author_id` → `users`, ON DELETE SET NULL). `Model/Blog/ArticleImages` stores uploads in `www/upload/blog/` (resized to fit 1600 × 1200 with Nette Image, random name, deleted on replace, remove and article delete); ext-gd and ext-intl (`Strings::webalize()` of the category slug) are required in composer.json (user, 2026-10-31: the Docker image of project-docker has both, no fallback code without them). `ArticleValues::$image` and `$authorId` are declared without a default: uninitialized, they are not saved (`save()` casts the values to an array), so an edit keeps them. `Model/Blog/ArticleAuthors` gives the name and the Gravatar URL, so email addresses never reach templates. `Front/Blog/@article-item.latte` is the card of the blog list and of the project-preset home page, like blog.getbootstrap.com (2026-10-24, the user's choice): cards side by side (2/3 columns), a soft background (`.blog-card` in project-preset front.scss) and no border or shadow, a smaller wide image (2:1, `--bs-aspect-ratio: 50%` because Bootstrap has no ratio-2x1), date · category, title (stretched link over the whole card; `.blog-card-over` keeps the category and comment links clickable), perex clamped to 3 lines, author at the bottom. Every article list of the front (blog, category, project-preset home) is `Model/Blog/ArticleListFactory::create(?categoryId, ?limit)` (articles, authors, used categories, approved comment counts in one `ArticleList`) rendered by `Front/Blog/@article-list.latte`, so the lists cannot drift apart. The newest article of a list is `@article-featured.latte` over the whole row (image col-lg-7 16:9, title display-6, perex, author with a 56px avatar; no background, like blog.nette.org), the rest are cards. The list has the categories as pills under the title (`.blog-pill` in project-preset front.scss, the selected one `.active`). The detail is a 48rem column with a wide cropped image (21:9) and a line of author, date and category; `TimeAgoExtension` adds the Latte filter `|ago` (one message for one and one for more per unit, enough for Czech "před" and English "ago").
-- Categories (2026-10-24, the user wants less clicking): written right in the article form: the select has a "+" button in an input group, which switches it (Bootstrap collapse of the two `.article-category` groups) to the field `newCategory` with a "×" button back; "×" empties the field (inline `onclick`, like the `onchange` of project-permission), because a filled name wins over the select; the field is open after a validation error via `ArticleTemplate::$newCategory`; `CategoryRepository::getOrCreate()` reuses a category of the same name (case-insensitive collation) or creates it with a `Strings::webalize()` slug (ext-intl, only suggested; without it a plain a-z0-9 slug), numbered when taken; the new category wins over the select. The categories page stays for renaming and deleting but is not in the menu: the button "Categories" in the heading of the articles (`{block buttons}` of `@datagrid-heading.latte`, `{plink}` because `n:href` of a component cannot link a presenter) and "← Articles" back. Comments per article: `getArticlesFluent()` adds `comments_total` and `comments_pending` (subqueries) for the grid column "Comments" (state badge Allowed/Disallowed, count, "%d pending" badge); the state badge itself switches the comments (signal `toggleComments!`, link from `getToggleCommentsLink()`, null without `edit`), because separate Allow/Disallow buttons next to Delete were unclear (user, 2026-10-24); the edit offcanvas of an existing article has tabs "Article | Comments (n)" (a `btn-group` like the product of project-commerce) (a tab outside the form, so no field with an error is hidden); the comments tab (`CommentRepository::getByArticle()`, all comments) approves and deletes by signals of ArticleControl (`approveComment`, `confirmDeleteComment` → inline confirmation, `cancelDeleteComment`, `deleteComment`) that redraw only the snippets `comments` and `commentCount` (and the grid), never the form, so unsaved edits stay; the comment of a signal gives the article (`commentsArticleId`). Comments in the administration are basic Texy like on the website (`ArticleTemplate::$commentHtml` via TexyFormatter). There is no comments page any more (removed 2026-10-24 by the user: comments are managed with their article only; no `comments-read/write` privileges, the menu item is the single item "Blog"). `Backend/Blog/CommentBadge` (registered in the package's `Backend/Blog/6.menu.neon` with the menu item, tag `sidebar.badge`, autowired: no; the menu neon is in the package (user, 2026-11-04, reverses the 2026-10-27 rule that project-preset ships the menu neons)) returns `[[link: 'Blog:', count: countPending(), label: 'Comments waiting for approval']]` for the menu badge and the navbar bell of project-backend-ui; it is duck-typed, so the blog needs no backend-ui class.
-- Comment replies like nette.org (2026-10-24): approved comments are numbered by their order (`commentNumbers`, anchors `#comment-N`; numbers shift when an older comment is deleted or unapproved, accepted by the user), `Front/Blog/CommentReferences` links "#N" (and the author name after it) in the Texy HTML text only (not in tags, links, code) and collects replies ("Replies: #3 Name"), test `tests/Presentation/Front/Blog/CommentReferences.phpt`; "Reply" (`data-comment-reply`) is handled by the Naja extension `resources/assets/naja/comment-reply.js` (`CommentReply`, copied to `assets/naja/`, registered in `front.js` as the README shows; moved from project-preset front.js 2026-11-04), the form box has `id="comment-form"`.
-- A signed-in user comments without the name and email fields (`BlogPresenter::getSignedInAuthor()` from the identity data `username`/`email` of project-auth; the values are taken from the identity on submit, never from the request; the template shows "You are commenting as %s."). Comments are allowed per article only (`blog_article.comments_enabled`, "Allow comments" in the article form); there is no global switch and no dependency on project-settings (the setting `blog.comments_enabled` was removed on purpose, 2026-10-24).
-- What the front shows (a published article whose date has come) is only `ArticleRepository::publishedCondition()` (a `Dibi\Expression`, also usable as `?` in a subquery; `%ex` with an array breaks inside a subquery string), used by the list, the detail and `CategoryRepository::getUsedCategories()`.
-- Privileges for drago-ex/project-permission are read from the code (`PrivilegeCatalog` of drago-ex/permission: pages, `handle*()` signals, forms, `#[Access]`); there is no `migrations-permission/` any more (removed 2026-11-03). A new page or button needs no list update.
+## Administration
+- The article form is a full-screen offcanvas with two columns: title and content left (`col-lg-8`), settings in
+  cards right (`col-lg-4`): status, date, category, comments / main image / slug, perex. Buttons are in a
+  `sticky-bottom` bar. A new field goes into the fitting card; nothing is hidden in tabs or accordions, because
+  a field with an error must stay visible. Cards have no headings.
+- Main image: `ArticleTemplate::$mainImage` is loaded by `ArticleControl::render()` from the form's id, so it stays
+  after a validation error. The trash button on the preview removes it by signals `confirmRemoveImage`,
+  `cancelRemoveImage`, `removeImage`, which redraw only the snippet `mainImage`, so unsaved form changes stay.
+- `ArticleImages` stores uploads in `www/upload/blog/` (fit 1600 × 1200, random name) and deletes them on replace,
+  remove and article delete. `ArticleValues::$image` and `$authorId` have no default: uninitialized, they are
+  not saved, so an edit keeps them.
+- Categories are written in the article form: the "+" button switches the select to the field `newCategory`,
+  "×" empties it and goes back; a filled name wins over the select (`ArticleTemplate::$newCategory` keeps it open
+  after an error). `CategoryRepository::getOrCreate()` reuses a category of the same name or creates one with a
+  `Strings::webalize()` slug, numbered when taken. The categories page is reached by the button "Categories" in
+  the heading of the articles (`{plink}` in `{block buttons}`), not by the menu.
+- Comments are managed with their article only (no comments page): the grid column "Comments" shows the state
+  badge (a click toggles it), the count and the pending count (`comments_total`, `comments_pending` subqueries
+  of `getArticlesFluent()`); the edit offcanvas has the tabs "Article | Comments (n)" outside the form. Approving
+  and deleting are signals of `ArticleControl` that redraw only the snippets `comments` and `commentCount`.
+- `CommentBadge` (in `6.menu.neon`, tag `sidebar.badge`, `autowired: no`) returns the pending count for the menu
+  badge and the navbar bell of project-backend-ui; it is duck-typed, so the blog needs no backend-ui class.
 
-## Dependencies
+## Website
+- What the front shows is only `ArticleRepository::publishedCondition()` (published and dated), used by the list,
+  the detail and `CategoryRepository::getUsedCategories()`.
+- Every article list (blog, category, the home page of project-front-ui) is
+  `ArticleListFactory::create(?categoryId, ?limit)` rendered by `@article-list.latte`: the newest article as
+  `@article-featured.latte`, the rest as cards `@article-item.latte`. The card styles (`.blog-card`,
+  `.blog-pill`) are in `front.scss` of project-front-ui.
+- `ArticleAuthors` gives names and Gravatar URLs, so email addresses never reach templates.
+- Comments: allowed per article (`blog_article.comments_enabled`), no global setting. Approved comments are
+  numbered (`#comment-N`); `CommentReferences` links "#N" in the Texy HTML text and collects replies
+  (test `CommentReferences.phpt`). A signed-in user comments with the `username`/`email` of the identity, taken on
+  submit, never from the request. "Reply" (`data-comment-reply`) needs `CommentReply`; the form box has
+  `id="comment-form"`.
 
-Composer constraints describe the package contract. Before changing integration behavior, inspect the source and the actual call sites in this package; do not infer runtime usage solely from dependency declarations.
-Development dependencies include nette/tester (^2.5), phpstan/phpstan-nette (^2.0), drago-ex/project-tools (^1.0).
-
-## Essential Commands
-
+## Commands
 ```bash
-composer phpstan                # phpstan analyse
-composer tester                 # tester tests -s -C
+composer phpstan
+composer tester     # tests/bootstrap.php loads App\ from resources/app, then .dev-resource/app
 ```
-
-## Tests
-
-Nette Tester tests are in `tests/` (`BlogRouter.phpt`, `CommentReferences.phpt`); run them with `composer tester`. `tests/bootstrap.php` autoloads `App\` classes from `resources/app`, then from `.dev-resource/app`.
-
-## Installation Hooks
-
-Composer install and update hooks invoke Drago project setup/cleanup commands. Inspect those scripts and their effects before invoking Composer operations that trigger them; they may modify generated project files.
-
-## Conventions & Rules
-
-- Preserve backward compatibility unless the task explicitly permits a breaking change. Check callers and public signatures before changing behavior.
-- Follow the existing PHP style: strict types, explicit parameter and return types, tabs for indentation, and single-quoted strings where practical. Match nearby code when a convention is unclear.
-- Keep package-specific configuration, resources, and migrations in their established directories. Do not edit generated or consuming-project files without confirming they are part of this repository’s intended output.
-- Add or update focused tests for behavioral changes when this package has a runnable test setup. Do not invent test commands; use only the scripts and configuration present here.
-- Update README examples and Composer metadata when a public API or supported requirement changes.
