@@ -1,4 +1,15 @@
 # The blog administration; administrators are allowed everything (permission).
+parameters:
+	# descriptions for the permissions page of drago-ex/project-permission; the pages default and categories are
+	# described by the titles of their templates
+	permissionLabels:
+		Backend:Blog:
+			edit: 'Managing articles and categories (adding and editing)'
+			delete: Deleting articles and categories
+			approveComment: Approving comments
+			deleteComment: Deleting comments
+
+
 security:
 	resources:
 		Backend:Blog:

@@ -1,4 +1,15 @@
 # Everyone may read the published articles.
+parameters:
+	# descriptions for the permissions page of drago-ex/project-permission
+	permissionLabels:
+		Front:Blog:
+			default: List of articles
+			category: Articles of a category
+			detail: Article with comments
+			comment: Writing a comment
+			commentPreview: Preview of a comment
+
+
 security:
 	resources:
 		Front:Blog:

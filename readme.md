@@ -91,3 +91,5 @@ The rules are in `Backend/Blog/acl.neon` (resource `Backend:Blog`, the administr
 `categories`, `edit`, `delete`, `approveComment` and `deleteComment`; buttons are shown only to those who may use
 them. [Project Permission](https://github.com/drago-ex/project-permission) gives them to other roles, e.g. a
 moderator with `default` and `approveComment`.
+
+The same files describe the privileges (`permissionLabels`) for the permissions page of [Project Permission](https://github.com/drago-ex/project-permission).

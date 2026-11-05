@@ -103,3 +103,14 @@
 "a year ago": "před rokem"
 "%d years ago": "před %d lety"
 "Comments waiting for approval": "Komentáře čekající na schválení"
+
+# descriptions of the privileges (permissionLabels in acl.neon)
+"Managing articles and categories (adding and editing)": "Správa článků a kategorií (přidání a úprava)"
+"Deleting articles and categories": "Mazání článků a kategorií"
+"Approving comments": "Schvalování komentářů"
+"Deleting comments": "Mazání komentářů"
+"List of articles": "Seznam článků"
+"Articles of a category": "Články kategorie"
+"Article with comments": "Článek s komentáři"
+"Writing a comment": "Psaní komentáře"
+"Preview of a comment": "Náhled komentáře"
