@@ -6,6 +6,9 @@ parameters:
 		Backend:Blog:
 			edit: 'Managing articles and categories (adding and editing)'
 			delete: Deleting articles and categories
+			publish: 'Publishing articles (and taking them back to drafts)'
+			comments: Allowing and disallowing the comments of articles
+			export: Exporting articles and categories to CSV
 			approveComment: Approving comments
 			deleteComment: Deleting comments
 

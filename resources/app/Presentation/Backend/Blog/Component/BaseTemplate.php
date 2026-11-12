@@ -9,5 +9,6 @@ class BaseTemplate extends ExtraTemplate
 {
 	public string $offcanvasId;
 	public string $modalId;
-	public ?string $deleteTitle = null;
+	/** @var list<string> */
+	public array $deleteTitles = [];
 }

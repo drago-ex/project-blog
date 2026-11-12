@@ -12,9 +12,10 @@ readonly class Factory extends \Drago\Application\UI\Factory
 	public function createDelete(): Form
 	{
 		$form = $this->create();
-		$form->addHidden('id')
+		// the ids of the items to delete, separated by commas
+		$form->addHidden('ids')
 			->setRequired()
-			->addRule($form::Integer);
+			->addRule($form::Pattern, null, '\d+(,\d+)*');
 
 		return $form;
 	}

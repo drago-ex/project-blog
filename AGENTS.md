@@ -19,9 +19,9 @@ dependencies are in `composer.json`.
   administrator), merged with `role.acl.neon` of drago-ex/permission. A new presenter gets its resource there.
 - `BaseControl` uses `AccessCheck`; buttons ask `isAllowed()` (grid actions `setVisible()`, templates
   `$control->isAllowed(...)`), signals are named by `#[Access]`. Privileges of `Backend:Blog`: `default`,
-  `categories`, `edit` (article and category forms, row edit, `toggleComments`, main image signals), `delete`,
-  `approveComment`, `deleteComment`. `openModal`, `openOffcanvas`, `preview` need only the page.
-  `getToggleCommentsLink()` returns null without `edit`.
+  `categories`, `edit` (article and category forms, the bulk action Edit, main image signals), `delete`,
+  `publish` and `comments` (the switches of the status and of the comments in the article grid, both ways), `export` (CSV of both grids), `approveComment`,
+  `deleteComment`. `openModal`, `openOffcanvas`, `preview` need only the page.
 - project-permission reads the privileges from the code (`PrivilegeCatalog`); a new signal needs its privilege
   decided here, no list to update.
 
@@ -41,8 +41,9 @@ dependencies are in `composer.json`.
   after an error). `CategoryRepository::getOrCreate()` reuses a category of the same name or creates one with a
   `Strings::webalize()` slug, numbered when taken. The categories page is reached by the button "Categories" in
   the heading of the articles (`{plink}` in `{block buttons}`), not by the menu.
-- Comments are managed with their article only (no comments page): the grid column "Comments" shows the state
-  badge (a click toggles it), the count and the pending count (`comments_total`, `comments_pending` subqueries
+- Every grid has inline filters, no row menu and no row click that opens the form: the actions are bulk actions of drago-ex/datagrid in the bar under the table (articles: Edit, Export, Delete; categories: Edit, Export, Delete), a click anywhere on a row chooses it (`setRowClickAction('select')`), states are badges that are only read (`setBadges()`). The name of a bulk action is its privilege, and the control has a `handle<Name>()` method the callback calls, so `PrivilegeCatalog` finds the privilege; `export` comes from `DataGrid::handleExport()`. `BaseControl::handleDelete(array $ids)` opens one confirmation for all chosen items (`$deleteTitles`, the hidden field `ids` of the delete form) and `deleteItem()` runs for each. The state (published or draft, `handlePublish(int $id, bool $publish)`) is a switch in its column (`setSwitch()`), not a bulk action. The column "Updated at" has a date range filter. `ArticleRepository::setStatus()` gives a published article without a date the current one, or the front would not show it.
+- Comments are managed with their article only (no comments page): the grid column "Comments" is a switch
+  (`handleComments()`, also in the form of the article), the column "Count" shows the count and the pending count (`comments_total`, `comments_pending` subqueries
   of `getArticlesFluent()`); the edit offcanvas has the tabs "Article | Comments (n)" outside the form. Approving
   and deleting are signals of `ArticleControl` that redraw only the snippets `comments` and `commentCount`.
 - `CommentBadge` (in `6.menu.neon`, tag `sidebar.badge`, `autowired: no`) returns the pending count for the menu

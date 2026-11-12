@@ -24,6 +24,7 @@
 "Edit article": "Upravit článek"
 "Confirm delete": "Potvrzení smazání"
 "Are you sure you want to delete the item?": "Opravdu chcete tuto položku smazat?"
+"Are you sure you want to delete the chosen items?": "Opravdu chcete smazat vybrané položky?"
 "Confirm": "Potvrdit"
 "Insert successful.": "Záznam byl úspěšně vytvořen."
 "Update successful.": "Záznam byl úspěšně upraven."
@@ -44,8 +45,7 @@
 "Cancel": "Zrušit"
 "Allowed": "Povoleno"
 "Disallowed": "Zakázáno"
-"Click to allow comments": "Kliknutím komentáře povolíte"
-"Click to disallow comments": "Kliknutím komentáře zakážete"
+"Count": "Počet"
 "Comments have been disallowed.": "Komentáře byly zakázány."
 "Comments have been allowed.": "Komentáře byly povoleny."
 "Name": "Jméno"
@@ -104,6 +104,10 @@
 "%d years ago": "před %d lety"
 "Comments waiting for approval": "Komentáře čekající na schválení"
 
+# the switch of the status in the grid
+"The article has been published.": "Článek byl publikován."
+"The article has been taken back to a draft.": "Článek byl vrácen mezi koncepty."
+
 # descriptions of the privileges (permissionLabels in acl.neon)
 "Managing articles and categories (adding and editing)": "Správa článků a kategorií (přidání a úprava)"
 "Deleting articles and categories": "Mazání článků a kategorií"
@@ -114,3 +118,6 @@
 "Article with comments": "Článek s komentáři"
 "Writing a comment": "Psaní komentáře"
 "Preview of a comment": "Náhled komentáře"
+"Publishing articles (and taking them back to drafts)": "Publikování článků (a jejich vracení mezi koncepty)"
+"Allowing and disallowing the comments of articles": "Povolování a zakazování komentářů u článků"
+"Exporting articles and categories to CSV": "Export článků a kategorií do CSV"

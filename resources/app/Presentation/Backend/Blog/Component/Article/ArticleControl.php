@@ -87,24 +87,6 @@ class ArticleControl extends BaseControl
 
 
 	/**
-	 * Allows or disallows the comments of an article by a click on their state in the grid.
-	 * @throws Exception
-	 * @throws InvalidLinkException
-	 */
-	#[Access('edit')]
-	#[Requires(ajax: true)]
-	public function handleToggleComments(int $id): void
-	{
-		$article = $this->articleRepository->table->get($id)->record();
-		if ($article === null) {
-			$this->error();
-		}
-
-		$this->setCommentsEnabled($id, !$article->commentsEnabled);
-	}
-
-
-	/**
 	 * Approves a comment in the tab of the article.
 	 * @throws Exception
 	 * @throws InvalidLinkException
@@ -237,6 +219,40 @@ class ArticleControl extends BaseControl
 	}
 
 
+	/**
+	 * Publishes an article or takes it back to a draft (the switch of the grid); a published article without
+	 * a date gets today.
+	 * @throws Exception
+	 * @throws InvalidLinkException
+	 */
+	#[Requires(methods: 'POST', ajax: true)]
+	public function handlePublish(int $id, bool $publish = true): void
+	{
+		$this->articleRepository->setStatus([$id], $publish ? ArticleEntity::StatusPublished : ArticleEntity::StatusDraft);
+		$this->addFlashMessage(
+			$publish ? 'The article has been published.' : 'The article has been taken back to a draft.',
+			Alert::Success,
+		);
+		$this->addRedraw($this->snippetMessage);
+		$this['dataGrid']->redrawDataGrid();
+	}
+
+
+	/**
+	 * Allows or disallows the comments of an article (the switch of the grid).
+	 * @throws Exception
+	 * @throws InvalidLinkException
+	 */
+	#[Requires(methods: 'POST', ajax: true)]
+	public function handleComments(int $id, bool $allow = true): void
+	{
+		$this->articleRepository->setCommentsEnabled($id, $allow);
+		$this->addFlashMessage($allow ? 'Comments have been allowed.' : 'Comments have been disallowed.', Alert::Success);
+		$this->addRedraw($this->snippetMessage);
+		$this['dataGrid']->redrawDataGrid();
+	}
+
+
 	/** Returns the HTML of the content for the preview of the Texy toolbar; it only reads, the page is enough. */
 	#[Access]
 	#[Requires(methods: 'POST', ajax: true)]
@@ -254,14 +270,11 @@ class ArticleControl extends BaseControl
 	{
 		$grid = new DataGrid;
 		$grid->setTranslator($this->translator);
+		$grid->setFilterMode('inline');
 		$grid->setDataSource($this->articleRepository->getArticlesFluent())
 			->setPrimaryKey(ArticleEntity::PrimaryKey);
 
 		$grid->addColumnText(ArticleEntity::ColumnTitle, 'Title')
-			->setNaturalSort()
-			->setFilterText();
-
-		$grid->addColumnText(ArticleEntity::ColumnSlug, 'Slug')
 			->setNaturalSort()
 			->setFilterText();
 
@@ -277,31 +290,48 @@ class ArticleControl extends BaseControl
 			ArticleEntity::StatusDraft => 'Draft',
 			ArticleEntity::StatusPublished => 'Published',
 		];
-		$grid->addColumnText(
-			ArticleEntity::ColumnStatus,
-			'Status',
-			formatter: fn(mixed $value): string => $this->translate($statuses[(string) $value] ?? (string) $value),
-		)->setFilterSelect($statuses);
+		// the status is switched right in the grid; without the privilege the switch only shows it
+		$grid->addColumnText(ArticleEntity::ColumnStatus, 'Status')
+			->setSwitch(
+				'publish',
+				fn(int $id, bool $on) => $this->handlePublish($id, $on),
+				on: ArticleEntity::StatusPublished,
+				labels: ['Published', 'Draft'],
+				enabled: $this->isAllowed('publish'),
+			)
+			->setFilterSelect($statuses);
+
+		// the comments of an article are allowed by a switch like its status; their number has its own column
+		$grid->addColumnText(ArticleEntity::ColumnCommentsEnabled, 'Comments')
+			->setSwitch(
+				'comments',
+				fn(int $id, bool $on) => $this->handleComments($id, $on),
+				labels: ['Allowed', 'Disallowed'],
+				enabled: $this->isAllowed('comments'),
+			)
+			->setFilterSelect([1 => 'Allowed', 0 => 'Disallowed']);
 
 		$grid->addColumnText(
 			'comments_total',
-			'Comments',
-			formatter: fn(mixed $value, array $row): Html => $this->formatComments(
-				(int) $row[ArticleEntity::PrimaryKey],
-				(int) $row[ArticleEntity::ColumnCommentsEnabled] === 1,
-				(int) $value,
-				(int) $row['comments_pending'],
-			),
+			'Count',
+			formatter: fn(mixed $value, array $row): Html => $this->formatCommentCount((int) $value, (int) $row['comments_pending']),
 		);
 
-		$grid->addColumnDate(ArticleEntity::ColumnUpdatedAt, 'Updated at');
+		$grid->addColumnDate(ArticleEntity::ColumnUpdatedAt, 'Updated at')
+			->setFilterDate(range: true);
 
-		// A click on the row opens the form, the Edit button is then hidden by the grid.
-		$grid->setRowClickAction('edit');
-		$grid->addActionEdit(fn(int $id) => $this->handleEdit($id))
+		// The actions stand in the bar under the table and work with the rows chosen by their checkboxes
+		// or by a click anywhere on a row; Edit is for one row.
+		$grid->setRowClickAction('select');
+		$grid->addBulkActionEdit(fn(int $id) => $this->handleEdit($id))
 			->setVisible($this->isAllowed('edit'));
-		$grid->addActionDelete(fn(int $id) => $this->handleDelete($id))
+		$grid->addBulkActionExport()
+			->setVisible($this->isAllowed('export'));
+		$grid->addBulkActionDelete(fn(array $ids) => $this->handleDelete($ids))
 			->setVisible($this->isAllowed('delete'));
+
+		// "Export" under the table: all rows of the current filters
+		$grid->setExport('articles.csv', button: $this->isAllowed('export'));
 
 		return $grid;
 	}
@@ -394,30 +424,6 @@ class ArticleControl extends BaseControl
 	}
 
 
-	/**
-	 * The link of the state badge that switches the comments of an article, null when it is not clickable
-	 * (without the privilege "edit", which the signal needs).
-	 * @throws InvalidLinkException
-	 */
-	private function getToggleCommentsLink(int $id): ?string
-	{
-		return $this->isAllowed('edit') ? $this->link('toggleComments!', ['id' => $id]) : null;
-	}
-
-
-	/**
-	 * @throws Exception
-	 * @throws InvalidLinkException
-	 */
-	private function setCommentsEnabled(int $id, bool $enabled): void
-	{
-		$this->articleRepository->setCommentsEnabled($id, $enabled);
-		$this->addFlashMessage($enabled ? 'Comments have been allowed.' : 'Comments have been disallowed.', Alert::Success);
-		$this->addRedraw($this->snippetMessage);
-		$this['dataGrid']->redrawDataGrid();
-	}
-
-
 	/** @throws Exception */
 	private function getComment(int $id): CommentEntity
 	{
@@ -468,30 +474,14 @@ class ArticleControl extends BaseControl
 	 * A click on the state switches it, so the switch is right next to what it changes.
 	 * @throws InvalidLinkException
 	 */
-	private function formatComments(int $id, bool $enabled, int $total, int $pending): Html
+	private function formatCommentCount(int $total, int $pending): Html
 	{
-		$badge = Html::el('span', ['class' => 'badge rounded-pill ' . ($enabled ? 'text-bg-success' : 'text-bg-secondary')])
-			->setText($this->translate($enabled ? 'Allowed' : 'Disallowed'));
-
-		$link = $this->getToggleCommentsLink($id);
-		if ($link !== null) {
-			$badge->setName('a')->addAttributes([
-				'href' => $link,
-				'class' => $badge->getAttribute('class') . ' ajax text-decoration-none',
-				'data-naja-history' => 'off',
-				'title' => $this->translate($enabled ? 'Click to disallow comments' : 'Click to allow comments'),
-			]);
-		}
-
-		$cell = Html::el()->addHtml($badge);
-
-		if ($total > 0) {
-			$cell->addText(' ' . $total);
-		}
+		// no comments are a quiet zero, so the column is not empty and reads in one look
+		$cell = Html::el()->addHtml(Html::el('span', ['class' => $total > 0 ? null : 'text-body-secondary'])->setText((string) $total));
 
 		if ($pending > 0) {
 			$cell->addHtml(' ')->addHtml(
-				Html::el('span', ['class' => 'badge rounded-pill text-bg-accent'])->setText($this->translate('%d pending', $pending)),
+				Html::el('span', ['class' => 'badge badge-subtle theme-warning'])->setText($this->translate('%d pending', $pending)),
 			);
 		}
 

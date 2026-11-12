@@ -111,7 +111,7 @@ readonly class ArticleRepository
 
 
 	/**
-	 * Allows or disallows the comments of an article (the switch in the article grid).
+	 * Allows or disallows the comments of an article (the switch of the article grid).
 	 * @throws Exception
 	 */
 	public function setCommentsEnabled(int $id, bool $enabled): void
@@ -119,5 +119,25 @@ readonly class ArticleRepository
 		$this->table->update([ArticleEntity::ColumnCommentsEnabled => (int) $enabled])
 			->where('%n = ?', ArticleEntity::PrimaryKey, $id)
 			->execute();
+	}
+
+
+	/**
+	 * Publishes articles or takes them back to drafts (the switch of the article grid). A published
+	 * article without a date gets the current one, or the front would not show it.
+	 * @param array<int> $ids
+	 * @throws Exception
+	 */
+	public function setStatus(array $ids, string $status): void
+	{
+		$this->table->update([ArticleEntity::ColumnStatus => $status])
+			->where('%n IN %in', ArticleEntity::PrimaryKey, $ids)
+			->execute();
+
+		if ($status === ArticleEntity::StatusPublished) {
+			$this->table->update([ArticleEntity::ColumnPublishedAt => new \DateTimeImmutable])
+				->where('%n IN %in AND %n IS NULL', ArticleEntity::PrimaryKey, $ids, ArticleEntity::ColumnPublishedAt)
+				->execute();
+		}
 	}
 }
