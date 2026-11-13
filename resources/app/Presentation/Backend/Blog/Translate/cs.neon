@@ -3,7 +3,6 @@
 "Add item": "Přidat položku"
 "Write, publish and manage the articles of the blog.": "Pište, publikujte a spravujte články blogu."
 "Rename or delete the categories of the articles.": "Přejmenujte nebo smažte kategorie článků."
-"Article sections": "Části článku"
 "Edit": "Upravit"
 "Delete": "Smazat"
 "Title": "Název"
@@ -13,6 +12,7 @@
 "Content": "Obsah"
 "Published at": "Publikováno"
 "Updated at": "Upraveno"
+"Author": "Autor"
 "Allow comments": "Povolit komentáře"
 "Draft": "Koncept"
 "Published": "Publikováno"
@@ -43,11 +43,6 @@
 "Waiting for approval": "Čeká na schválení"
 "%d pending": "%d čeká"
 "Cancel": "Zrušit"
-"Allowed": "Povoleno"
-"Disallowed": "Zakázáno"
-"Count": "Počet"
-"Comments have been disallowed.": "Komentáře byly zakázány."
-"Comments have been allowed.": "Komentáře byly povoleny."
 "Name": "Jméno"
 "Email (not published)": "E-mail (nezveřejní se)"
 "Website": "Web"
@@ -78,9 +73,12 @@
 "This category already exists.": "Tato kategorie již existuje."
 "All": "Vše"
 "Comments: %d": "Komentáře: %d"
+"Comments of the article": "Komentáře článku"
 
 # main image of an article
 "Upload a main image": "Nahrát hlavní obrázek"
+"Drop the main image here or": "Přetáhněte sem hlavní obrázek nebo"
+"choose it": "ho vyberte"
 "Remove the main image": "Odstranit hlavní obrázek"
 "Remove the main image?": "Odstranit hlavní obrázek?"
 "Remove": "Odstranit"
@@ -104,7 +102,7 @@
 "%d years ago": "před %d lety"
 "Comments waiting for approval": "Komentáře čekající na schválení"
 
-# the switch of the status in the grid
+# the menu of the status in the grid
 "The article has been published.": "Článek byl publikován."
 "The article has been taken back to a draft.": "Článek byl vrácen mezi koncepty."
 
@@ -119,5 +117,4 @@
 "Writing a comment": "Psaní komentáře"
 "Preview of a comment": "Náhled komentáře"
 "Publishing articles (and taking them back to drafts)": "Publikování článků (a jejich vracení mezi koncepty)"
-"Allowing and disallowing the comments of articles": "Povolování a zakazování komentářů u článků"
 "Exporting articles and categories to CSV": "Export článků a kategorií do CSV"

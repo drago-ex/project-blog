@@ -17,10 +17,16 @@ class ArticleTemplate extends BaseTemplate
 	/** The field of a new category is open (it has a value after a validation error). */
 	public bool $newCategory = false;
 
-	/** The edited article, 0 for a new one (which has no comments tab). */
+	/** The edited article, 0 for a new one. */
 	public int $articleId = 0;
 
-	/** @var CommentEntity[] all comments of the edited article, approved or not */
+	/** The id of the offcanvas with the comments of an article. */
+	public string $commentsId;
+
+	/** The title of the article whose comments are shown. */
+	public ?string $commentsTitle = null;
+
+	/** @var CommentEntity[] all comments of that article, approved or not */
 	public array $comments = [];
 
 	/** @var array<int, string> HTML of the basic Texy of the comments by id, made safe by TexyFormatter */

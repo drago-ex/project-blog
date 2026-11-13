@@ -25,12 +25,15 @@ readonly class ArticleRepository
 	/** @return ExtraFluent<ArticleEntity> */
 	public function getArticlesFluent(): ExtraFluent
 	{
-		// numbers of all and of the not yet approved comments, for the column of the administration grid
+		// numbers of all and of the not yet approved comments and the name of the author, for the columns of
+		// the administration grid
 		$comments = '(SELECT COUNT(*) FROM %n c WHERE c.%n = %n.%n';
 		$args = [CommentEntity::Table, CommentEntity::ColumnArticleId, ArticleEntity::Table, ArticleEntity::PrimaryKey];
 		return $this->table->read(
-			"*, $comments) AS comments_total, $comments AND c.%n = 0) AS comments_pending",
+			"*, $comments) AS comments_total, $comments AND c.%n = 0) AS comments_pending,"
+			. ' (SELECT u.%n FROM %n u WHERE u.%n = %n.%n) AS author_name',
 			...[...$args, ...$args, CommentEntity::ColumnApproved],
+			...[UserEntity::ColumnUsername, UserEntity::Table, UserEntity::ColumnId, ArticleEntity::Table, ArticleEntity::ColumnAuthorId],
 		)
 			->orderBy(ArticleEntity::PrimaryKey, 'DESC');
 	}
@@ -111,19 +114,7 @@ readonly class ArticleRepository
 
 
 	/**
-	 * Allows or disallows the comments of an article (the switch of the article grid).
-	 * @throws Exception
-	 */
-	public function setCommentsEnabled(int $id, bool $enabled): void
-	{
-		$this->table->update([ArticleEntity::ColumnCommentsEnabled => (int) $enabled])
-			->where('%n = ?', ArticleEntity::PrimaryKey, $id)
-			->execute();
-	}
-
-
-	/**
-	 * Publishes articles or takes them back to drafts (the switch of the article grid). A published
+	 * Publishes articles or takes them back to drafts (the menu of the state in the article grid). A published
 	 * article without a date gets the current one, or the front would not show it.
 	 * @param array<int> $ids
 	 * @throws Exception

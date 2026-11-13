@@ -1,22 +1,9 @@
 {templateType App\Presentation\Backend\Blog\Component\Article\ArticleTemplate}
 {embed '../../../../Accessory/Widget/@offcanvas.latte', offcanvasId: $offcanvasId, size: '100vw', mainImage: $mainImage, newCategory: $newCategory,
-	confirmRemoveImage: $confirmRemoveImage, articleId: $articleId, comments: $comments, commentHtml: $commentHtml,
-	confirmDeleteComment: $confirmDeleteComment}
+	confirmRemoveImage: $confirmRemoveImage, articleId: $articleId}
 	{block title}{_'Manage article'}{/block}
 	{block body}
 		{snippet offcanvas}
-			{* an edited article has its comments in a second tab; they are not in the form, so no error is hidden *}
-			<div n:if="$articleId" class="btn-group mb-3" role="tablist" aria-label="{_'Article sections'}">
-				<button class="btn btn-secondary btn-sm active" type="button" role="tab" data-bs-toggle="pill" data-bs-target="#article-tab-form" aria-controls="article-tab-form" aria-selected="true">
-					{_'Article'}
-				</button>
-				<button class="btn btn-secondary btn-sm" type="button" role="tab" data-bs-toggle="pill" data-bs-target="#article-tab-comments" aria-controls="article-tab-comments" aria-selected="false">
-					{_'Comments'} <span n:snippet="commentCount" class="opacity-75">({count($comments)})</span>
-				</button>
-			</div>
-
-			<div class="tab-content">
-				<div class="tab-pane fade show active" id="article-tab-form" role="tabpanel">
 					{embed '../../../../Accessory/Widget/@form.latte', class: 'ajax', name: 'article', najaHistory: 'off', mainImage: $mainImage,
 						newCategory: $newCategory, confirmRemoveImage: $confirmRemoveImage, articleId: $articleId}
 						{import '../../../../Accessory/Widget/@dismiss-button.latte'}
@@ -90,9 +77,16 @@
 													</div>
 												</div>
 											</div>
-											<div class="row g-3">
-												{include input, name: 'upload'}
-												<div class="col-12 form-text mt-1">{_'JPEG, PNG, GIF or WebP, at most 8 MB.'}</div>
+											{* the dropzone of compostrap: the file input covers the area, so it stays the field of the form;
+											   the image is saved with the article, not at once (no data-dropzone-submit) *}
+											<div class="form-error">
+												<label class="dropzone">
+													{input upload, class => 'dropzone-input', accept => 'image/jpeg,image/png,image/gif,image/webp'}
+													<i class="bi bi-cloud-arrow-up dropzone-icon" aria-hidden="true"></i>
+													<span class="dropzone-title">{_'Drop the main image here or'} <span class="dropzone-link">{_'choose it'}</span></span>
+													<span class="dropzone-hint">{_'JPEG, PNG, GIF or WebP, at most 8 MB.'}</span>
+													<span class="dropzone-files" data-dropzone-files></span>
+												</label>
 											</div>
 										</div>
 									</section>
@@ -115,39 +109,48 @@
 							</div>
 						{/block}
 					{/embed}
-				</div>
+		{/snippet}
+	{/block}
+{/embed}
 
-				<div n:if="$articleId" class="tab-pane fade" id="article-tab-comments" role="tabpanel">
-					{* the comment signals redraw only this snippet, so unsaved changes of the form stay *}
-					{snippet comments}
-						<div class="vstack gap-3" style="max-width: 60rem">
-							{foreach $comments as $comment}
-								<article class="p-3 bg-body-tertiary rounded-3">
-									<div class="d-flex flex-wrap align-items-center column-gap-2 small mb-2">
-										<span class="fw-semibold">{$comment->authorName}</span>
-										<span n:if="$comment->authorEmail" class="text-body-secondary">{$comment->authorEmail}</span>
-										<span class="text-body-secondary">&middot; {$comment->createdAt|date:'j. n. Y H:i'}</span>
-										<span n:if="!$comment->approved" class="badge rounded-pill text-bg-accent">{_'Waiting for approval'}</span>
-									</div>
-									<div class="mb-2">{$commentHtml[$comment->id]|noescape}</div>
-
-									<div class="article-comment-actions d-flex flex-wrap align-items-center gap-2">
-										{if $confirmDeleteComment === $comment->id}
-											<span class="small fw-semibold text-danger">{_'Are you sure you want to delete the item?'}</span>
-											<a n:href="deleteComment!, id: $comment->id" class="ajax btn btn-xs btn-danger" data-naja-history="off">{_'Delete'}</a>
-											<a n:href="cancelDeleteComment!, id: $comment->id" class="ajax btn btn-xs btn-secondary" data-naja-history="off">{_'Cancel'}</a>
-										{else}
-											<a n:if="!$comment->approved && $control->isAllowed('approveComment')" n:href="approveComment!, id: $comment->id" class="ajax btn btn-xs btn-success" data-naja-history="off">{_'Approve'}</a>
-											<a n:if="$control->isAllowed('deleteComment')" n:href="confirmDeleteComment!, id: $comment->id" class="ajax btn btn-xs btn-danger" data-naja-history="off">{_'Delete'}</a>
-										{/if}
-									</div>
-								</article>
-							{else}
-								<p class="text-body-secondary mb-0">{_'No comments yet.'}</p>
-							{/foreach}
+{* the comments of an article, opened by the button with their number in the grid; the comment signals redraw
+   only this offcanvas and the grid *}
+{embed '../../../../Accessory/Widget/@offcanvas.latte', offcanvasId: $commentsId, size: '48rem', commentsTitle: $commentsTitle,
+	comments: $comments, commentHtml: $commentHtml, confirmDeleteComment: $confirmDeleteComment}
+	{block title}{_'Comments of the article'}{/block}
+	{block body}
+		<p n:snippet="commentsTitle" class="fw-semibold text-body-emphasis mb-3">{$commentsTitle}</p>
+		{snippet comments}
+			<div class="vstack gap-3">
+				{foreach $comments as $comment}
+					<article class="p-3 bg-body-tertiary rounded-3">
+						<div class="d-flex flex-wrap align-items-center column-gap-2 mb-2">
+							<span class="fw-semibold">{$comment->authorName}</span>
+							<span n:if="$comment->authorEmail" class="text-body-secondary">{$comment->authorEmail}</span>
+							<span class="text-body-secondary">&middot; {$comment->createdAt|date:'j. n. Y H:i'}</span>
+							<span n:if="!$comment->approved" class="badge badge-subtle theme-warning">{_'Waiting for approval'}</span>
 						</div>
-					{/snippet}
-				</div>
+						<div class="mb-2">{$commentHtml[$comment->id]|noescape}</div>
+
+						{* Cancel first, the main action last *}
+						<div class="article-comment-actions d-flex flex-wrap align-items-center gap-2">
+							{if $confirmDeleteComment === $comment->id}
+								<span class="fw-semibold text-danger">{_'Are you sure you want to delete the item?'}</span>
+								<a n:href="cancelDeleteComment!, id: $comment->id" class="ajax btn btn-xs btn-secondary" data-naja-history="off">{_'Cancel'}</a>
+								<a n:href="deleteComment!, id: $comment->id" class="ajax btn btn-xs btn-danger" data-naja-history="off">{_'Delete'}</a>
+							{else}
+								<a n:if="!$comment->approved && $control->isAllowed('approveComment')" n:href="approveComment!, id: $comment->id" class="ajax btn btn-xs btn-subtle theme-success" data-naja-history="off">
+									<i class="bi bi-check-lg me-1" aria-hidden="true"></i>{_'Approve'}
+								</a>
+								<a n:if="$control->isAllowed('deleteComment')" n:href="confirmDeleteComment!, id: $comment->id" class="ajax btn btn-xs btn-subtle theme-danger" data-naja-history="off">
+									<i class="bi bi-trash me-1" aria-hidden="true"></i>{_'Delete'}
+								</a>
+							{/if}
+						</div>
+					</article>
+				{else}
+					<p class="text-body-secondary mb-0">{_'No comments yet.'}</p>
+				{/foreach}
 			</div>
 		{/snippet}
 	{/block}

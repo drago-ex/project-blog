@@ -42,6 +42,24 @@ registerNajaExtensions(
 );
 ```
 
+### Main image of an article
+
+The main image is dropped on or chosen in a dropzone of [compostrap](https://github.com/compostrap/compostrap).
+Bind it in `assets/admin.js`, also after a redraw of a snippet (the form opens in an offcanvas):
+
+```js
+import { DropzoneInput } from 'compostrap/dropzone';
+
+DropzoneInput.init();
+naja.snippetHandler.addEventListener('afterUpdate', (event) => DropzoneInput.init(event.detail.snippet));
+```
+
+and import its styles in `assets/admin.scss`:
+
+```scss
+@import 'compostrap/src/scss/dropzone';
+```
+
 ### Used libraries
 
 - [drago-ex/datagrid](https://github.com/drago-ex/datagrid): the lists of articles and categories, set up in
@@ -63,8 +81,12 @@ together with the number of comments waiting for approval (`CommentBadge`), show
   from the name. The button "Categories" above the articles opens their list for renaming and deleting.
 - The cover image is resized to fit 1600 × 1200 px and saved in `www/upload/blog/`; replacing or removing it and
   deleting the article delete the file. Add `/www/upload/` to `.gitignore`.
-- The article list shows whether comments are allowed (a click switches it), their number and those waiting for
-  approval; an opened article has the tab "Comments" to approve or delete them.
+- The article list shows the main image, the slug, the category, the date of publication and the author of each
+  article.
+- The status of an article is a badge in the article list; a click on it opens a menu that publishes the article
+  or takes it back to a draft.
+- The article list shows the number of comments of each article and those waiting for approval; a click on the
+  number opens the comments in a side panel to approve or delete them.
 
 ## Website
 
@@ -80,7 +102,7 @@ The routes `/blog`, `/blog/kategorie/<slug>` and `/blog/<slug>` (also with `/en/
 - The newest article is shown over the whole row (`@article-featured.latte`), the others as cards
   (`@article-item.latte`) with the image, date, category, perex and the author with a Gravatar. Other pages show
   articles the same way with `ArticleListFactory::create()` and `@article-list.latte`.
-- Anyone may comment; a comment is shown after approval. Each article allows comments by its own switch.
+- Anyone may comment; a comment is shown after approval. Each article allows comments by a switch in its form.
   A signed-in user comments under the name and email of the account. Comments are numbered, and "#2" in a comment
   links that comment, which lists its replies.
 

@@ -28,10 +28,16 @@ use Nette\Utils\Html;
 
 class ArticleControl extends BaseControl
 {
+	/** The colors of the theme the badges of the categories take in turn. */
+	private const array CategoryColors = ['primary', 'info', 'warning', 'success', 'danger'];
+
+	/** The name of the offcanvas of the comments, for its id. */
+	private const string Comments = 'comments';
+
 	/** Largest uploaded cover image (8 MB); it is made smaller by ArticleImages. */
 	private const int MaxImageSize = 8 * 1024 * 1024;
 
-	/** The article whose comments a comment signal redraws (its form is not sent then). */
+	/** The article whose comments are shown in their offcanvas. */
 	private ?int $commentsArticleId = null;
 
 	/** The comment that asks for the confirmation of its delete. */
@@ -71,12 +77,17 @@ class ArticleControl extends BaseControl
 		// a new category written before a validation error stays open
 		$template->newCategory = (string) $this->getComponent('article')->getComponent(ArticleValues::NewCategory)->getValue() !== '';
 
-		// the edited article has the tab of its comments
-		$template->articleId = $articleId = $this->commentsArticleId ?? $id;
-		$template->comments = $comments = $articleId > 0 ? $this->commentRepository->getByArticle($articleId)->recordAll() : [];
-		foreach ($comments as $comment) {
-			// basic Texy like on the website, made safe by TexyFormatter
-			$template->commentHtml[$comment->id] = $this->texyFormatter->toBasicHtml($comment->content);
+		$template->articleId = $id;
+
+		// the comments of the article chosen in the grid, in their own offcanvas
+		$template->commentsId = $this->getUniqueIdComponent(self::Comments);
+		if ($this->commentsArticleId !== null) {
+			$template->commentsTitle = $this->getItemTitle($this->commentsArticleId);
+			$template->comments = $this->commentRepository->getByArticle($this->commentsArticleId)->recordAll();
+			foreach ($template->comments as $comment) {
+				// basic Texy like on the website, made safe by TexyFormatter
+				$template->commentHtml[$comment->id] = $this->texyFormatter->toBasicHtml($comment->content);
+			}
 		}
 
 		$template->confirmDeleteComment = $this->confirmDeleteComment;
@@ -87,7 +98,25 @@ class ArticleControl extends BaseControl
 
 
 	/**
-	 * Approves a comment in the tab of the article.
+	 * Opens the comments of an article (the button of the grid); it only reads, the page is enough.
+	 * @throws Exception
+	 * @throws InvalidLinkException
+	 */
+	#[Access]
+	#[Requires(ajax: true)]
+	public function handleComments(int $id): void
+	{
+		if ($this->getItemTitle($id) === null) {
+			$this->error();
+		}
+
+		$this->getPresenter()->payload->offcanvas = $this->getUniqueIdComponent(self::Comments);
+		$this->redrawComments($id);
+	}
+
+
+	/**
+	 * Approves a comment of the article.
 	 * @throws Exception
 	 * @throws InvalidLinkException
 	 */
@@ -103,7 +132,7 @@ class ArticleControl extends BaseControl
 
 
 	/**
-	 * Asks in the tab of the article whether to delete a comment.
+	 * Asks at a comment whether to delete it.
 	 * @throws Exception
 	 * @throws InvalidLinkException
 	 */
@@ -131,7 +160,7 @@ class ArticleControl extends BaseControl
 
 
 	/**
-	 * Deletes a comment in the tab of the article.
+	 * Deletes a comment of the article.
 	 * @throws Exception
 	 * @throws InvalidLinkException
 	 */
@@ -220,8 +249,8 @@ class ArticleControl extends BaseControl
 
 
 	/**
-	 * Publishes an article or takes it back to a draft (the switch of the grid); a published article without
-	 * a date gets today.
+	 * Publishes an article or takes it back to a draft (the menu of the state in the grid); a published article
+	 * without a date gets today.
 	 * @throws Exception
 	 * @throws InvalidLinkException
 	 */
@@ -233,21 +262,6 @@ class ArticleControl extends BaseControl
 			$publish ? 'The article has been published.' : 'The article has been taken back to a draft.',
 			Alert::Success,
 		);
-		$this->addRedraw($this->snippetMessage);
-		$this['dataGrid']->redrawDataGrid();
-	}
-
-
-	/**
-	 * Allows or disallows the comments of an article (the switch of the grid).
-	 * @throws Exception
-	 * @throws InvalidLinkException
-	 */
-	#[Requires(methods: 'POST', ajax: true)]
-	public function handleComments(int $id, bool $allow = true): void
-	{
-		$this->articleRepository->setCommentsEnabled($id, $allow);
-		$this->addFlashMessage($allow ? 'Comments have been allowed.' : 'Comments have been disallowed.', Alert::Success);
 		$this->addRedraw($this->snippetMessage);
 		$this['dataGrid']->redrawDataGrid();
 	}
@@ -274,51 +288,59 @@ class ArticleControl extends BaseControl
 		$grid->setDataSource($this->articleRepository->getArticlesFluent())
 			->setPrimaryKey(ArticleEntity::PrimaryKey);
 
-		$grid->addColumnText(ArticleEntity::ColumnTitle, 'Title')
+		$grid->addColumnText(
+			ArticleEntity::ColumnTitle,
+			'Title',
+			formatter: fn(mixed $value, array $row): Html => $this->formatTitle((string) $value, $row[ArticleEntity::ColumnImage]),
+		)
 			->setNaturalSort()
 			->setFilterText();
 
+		$grid->addColumnText(ArticleEntity::ColumnSlug, 'Slug')
+			->setFilterText();
+
+		// a category is a badge; its color follows its place in the list, so it stays the same on every page
 		$categories = $this->categoryRepository->getNames();
-		$grid->addColumnText(
-			ArticleEntity::ColumnCategoryId,
-			'Category',
-			sortable: false,
-			formatter: fn(mixed $value): string => $categories[(int) $value] ?? '',
-		)->setFilterSelect($categories, translate: false);
+		$badges = [];
+		foreach (array_keys($categories) as $index => $id) {
+			$badges[$id] = [$categories[$id], self::CategoryColors[$index % count(self::CategoryColors)]];
+		}
 
-		$statuses = [
-			ArticleEntity::StatusDraft => 'Draft',
-			ArticleEntity::StatusPublished => 'Published',
-		];
-		// the status is switched right in the grid; without the privilege the switch only shows it
-		$grid->addColumnText(ArticleEntity::ColumnStatus, 'Status')
-			->setSwitch(
-				'publish',
-				fn(int $id, bool $on) => $this->handlePublish($id, $on),
-				on: ArticleEntity::StatusPublished,
-				labels: ['Published', 'Draft'],
-				enabled: $this->isAllowed('publish'),
-			)
-			->setFilterSelect($statuses);
+		$grid->addColumnText(ArticleEntity::ColumnCategoryId, 'Category', sortable: false)
+			->setBadges($badges, translate: false)
+			->setFilterSelect($categories, translate: false);
 
-		// the comments of an article are allowed by a switch like its status; their number has its own column
-		$grid->addColumnText(ArticleEntity::ColumnCommentsEnabled, 'Comments')
-			->setSwitch(
-				'comments',
-				fn(int $id, bool $on) => $this->handleComments($id, $on),
-				labels: ['Allowed', 'Disallowed'],
-				enabled: $this->isAllowed('comments'),
-			)
-			->setFilterSelect([1 => 'Allowed', 0 => 'Disallowed']);
-
+		// the number of comments is a button that opens them; the ones waiting for approval stand next to it
 		$grid->addColumnText(
 			'comments_total',
-			'Count',
-			formatter: fn(mixed $value, array $row): Html => $this->formatCommentCount((int) $value, (int) $row['comments_pending']),
+			'Comments',
+			formatter: fn(mixed $value, array $row): Html => $this->formatComments((int) $row[ArticleEntity::PrimaryKey], (int) $value, (int) $row['comments_pending']),
 		);
 
-		$grid->addColumnDate(ArticleEntity::ColumnUpdatedAt, 'Updated at')
+		$grid->addColumnDate(ArticleEntity::ColumnPublishedAt, 'Published at', format: 'j. n. Y H:i')
 			->setFilterDate(range: true);
+
+		$grid->addColumnText(
+			'author_name',
+			'Author',
+			formatter: fn(mixed $value): Html => $this->formatAuthor((string) $value),
+		);
+
+		// the status is a badge that opens a menu of the states; without the privilege it is only read
+		$grid->addColumnText(ArticleEntity::ColumnStatus, 'Status')
+			->setState(
+				'publish',
+				fn(int $id, int|string $status) => $this->handlePublish($id, $status === ArticleEntity::StatusPublished),
+				[
+					ArticleEntity::StatusPublished => ['Published', 'success'],
+					ArticleEntity::StatusDraft => ['Draft', 'secondary'],
+				],
+				enabled: $this->isAllowed('publish'),
+			)
+			->setFilterSelect([
+				ArticleEntity::StatusDraft => 'Draft',
+				ArticleEntity::StatusPublished => 'Published',
+			]);
 
 		// The actions stand in the bar under the table and work with the rows chosen by their checkboxes
 		// or by a click anywhere on a row; Edit is for one row.
@@ -437,15 +459,15 @@ class ArticleControl extends BaseControl
 
 
 	/**
-	 * Redraws only the tab of the comments (and its count), so unsaved changes of the article form stay.
-	 * The grid shows the numbers of comments, so it is redrawn after a change.
+	 * Redraws the offcanvas of the comments. The grid shows the numbers of comments, so it is redrawn after
+	 * a change.
 	 * @throws InvalidLinkException
 	 */
 	private function redrawComments(int $articleId, bool $gridChanged = false): void
 	{
 		$this->commentsArticleId = $articleId;
 		$this->redrawControl('comments');
-		$this->redrawControl('commentCount');
+		$this->redrawControl('commentsTitle');
 		if ($gridChanged) {
 			$this['dataGrid']->redrawDataGrid();
 		}
@@ -469,18 +491,65 @@ class ArticleControl extends BaseControl
 	}
 
 
+	/** The cell of the title in the grid: a small main image (a placeholder without one) and the title. */
+	private function formatTitle(string $title, mixed $image): Html
+	{
+		$thumb = is_string($image) && $image !== ''
+			? Html::el('img', [
+				'src' => $this->getPresenter()->getHttpRequest()->getUrl()->getBasePath() . ArticleImages::Path . '/' . $image,
+				'alt' => '',
+				'width' => 40,
+				'height' => 40,
+				'loading' => 'lazy',
+				'class' => 'flex-shrink-0 rounded object-fit-cover bg-body-tertiary',
+			])
+			: Html::el('span', ['class' => 'avatar rounded', 'style' => '--cs-avatar-size: 2.5rem'])
+				->addHtml(Html::el('i', ['class' => 'bi bi-image', 'aria-hidden' => 'true']));
+
+		return Html::el('div', ['class' => 'd-flex align-items-center gap-2'])
+			->addHtml($thumb)
+			->addHtml(Html::el('span', ['class' => 'fw-semibold text-body-emphasis'])->setText($title));
+	}
+
+
+	/** The cell of the author in the grid: an icon of a person and the name; empty without an author. */
+	private function formatAuthor(string $name): Html
+	{
+		if ($name === '') {
+			return Html::el();
+		}
+
+		return Html::el('div', ['class' => 'd-flex align-items-center gap-2 text-nowrap'])
+			->addHtml(
+				Html::el('span', ['class' => 'avatar avatar-sm'])
+					->addHtml(Html::el('i', ['class' => 'bi bi-person', 'aria-hidden' => 'true'])),
+			)
+			->addHtml(Html::el('span')->setText($name));
+	}
+
+
 	/**
-	 * Whether the article allows comments, their number and the ones waiting for approval, for the grid.
-	 * A click on the state switches it, so the switch is right next to what it changes.
+	 * The cell of the comments in the grid: a button with their number that opens them in the offcanvas (gray
+	 * without comments) and, next to it, the number of the ones waiting for approval.
 	 * @throws InvalidLinkException
 	 */
-	private function formatCommentCount(int $total, int $pending): Html
+	private function formatComments(int $id, int $total, int $pending): Html
 	{
-		// no comments are a quiet zero, so the column is not empty and reads in one look
-		$cell = Html::el()->addHtml(Html::el('span', ['class' => $total > 0 ? null : 'text-body-secondary'])->setText((string) $total));
+		$label = $this->translate('Comments: %d', $total);
+		$cell = Html::el('div', ['class' => 'd-flex align-items-center gap-2 text-nowrap'])->addHtml(
+			Html::el('a', [
+				'href' => $this->link('comments!', ['id' => $id]),
+				'class' => 'ajax btn btn-xs btn-subtle ' . ($total > 0 ? 'theme-primary' : 'theme-secondary'),
+				'data-naja-history' => 'off',
+				'data-tooltip' => true,
+				'aria-label' => $label,
+			])
+				->addHtml(Html::el('i', ['class' => 'bi bi-chat me-1', 'aria-hidden' => 'true']))
+				->addText((string) $total),
+		);
 
 		if ($pending > 0) {
-			$cell->addHtml(' ')->addHtml(
+			$cell->addHtml(
 				Html::el('span', ['class' => 'badge badge-subtle theme-warning'])->setText($this->translate('%d pending', $pending)),
 			);
 		}
