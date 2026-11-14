@@ -1,13 +1,11 @@
 {default array $deleteTitles = []}
 {* asks about one item or about the items chosen in the grid; a long list is cut after five *}
-<p n:if="$deleteTitles" class="fw-semibold text-center">
-	<em>
-		{if count($deleteTitles) === 1}
-			{_'Are you sure you want to delete the item?'}
-		{else}
-			{_'Are you sure you want to delete the chosen items?'} ({count($deleteTitles)})
-		{/if}
-		<span n:foreach="array_slice($deleteTitles, 0, 5) as $title" class="d-block text-danger">{$title}</span>
-		<span n:if="count($deleteTitles) > 5" class="d-block text-danger">&hellip;</span>
-	</em>
+<p n:if="$deleteTitles">
+	{if count($deleteTitles) === 1}
+		{_'Are you sure you want to delete the item?'}
+	{else}
+		{_'Are you sure you want to delete the chosen items?'} ({count($deleteTitles)})
+	{/if}
+	<strong n:foreach="array_slice($deleteTitles, 0, 5) as $title" class="d-block text-body">{$title}</strong>
+	<span n:if="count($deleteTitles) > 5" class="d-block">&hellip;</span>
 </p>

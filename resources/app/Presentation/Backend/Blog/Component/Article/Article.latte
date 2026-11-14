@@ -163,7 +163,7 @@
 	{/block}
 {/embed}
 
-{embed '../../../../Accessory/Widget/@modal.latte', modalId: $modalId, options: [header: 'danger']}
+{embed '../../../../Accessory/Widget/@modal.latte', modalId: $modalId, options: [theme: 'danger', confirm: true]}
 	{block title}{_'Confirm delete'}{/block}
 	{block body}
 		{snippet content}
