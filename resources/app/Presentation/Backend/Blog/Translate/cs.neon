@@ -74,6 +74,7 @@
 "Delete the category %s? Its articles stay without one.": "Smazat kategorii %s? Její články zůstanou bez kategorie."
 "All": "Vše"
 "Comments: %d": "Komentáře: %d"
+"Show the comments": "Zobrazit komentáře"
 "Comments of the article": "Komentáře článku"
 
 # main image of an article
@@ -119,3 +120,7 @@
 "Preview of a comment": "Náhled komentáře"
 "Publishing articles (and taking them back to drafts)": "Publikování článků (a jejich vracení mezi koncepty)"
 "Exporting articles to CSV": "Export článků do CSV"
+
+# the widgets of the blog on the dashboard
+"Comments in the last 30 days": "Komentáře za posledních 30 dní"
+"Most commented articles": "Nejkomentovanější články"

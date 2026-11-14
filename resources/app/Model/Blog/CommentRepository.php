@@ -95,4 +95,54 @@ readonly class CommentRepository
 			->where('%n = ?', CommentEntity::PrimaryKey, $id)
 			->execute();
 	}
+
+
+	/**
+	 * Numbers of all comments of each of the last days, today included, the oldest first; a day without one is 0.
+	 * @return array<string, int> Y-m-d => number
+	 * @throws Exception
+	 */
+	public function countByDay(int $days): array
+	{
+		$today = new \DateTimeImmutable('today');
+		$from = $today->modify('-' . ($days - 1) . ' days');
+
+		/** @var array<string, int> $counts */
+		$counts = $this->table->read('CAST(DATE(%n) AS CHAR) AS day, COUNT(*) AS count', CommentEntity::ColumnCreatedAt)
+			->where('%n >= ?', CommentEntity::ColumnCreatedAt, $from)
+			->groupBy('day')
+			->fetchPairs('day', 'count');
+
+		$result = [];
+		for ($day = $from; $day <= $today; $day = $day->modify('+1 day')) {
+			$result[$day->format('Y-m-d')] = (int) ($counts[$day->format('Y-m-d')] ?? 0);
+		}
+
+		return $result;
+	}
+
+
+	/**
+	 * The articles with the most approved comments, the most first (the same number by title), for the dashboard.
+	 * @return list<array{title: string, count: int}>
+	 * @throws Exception
+	 */
+	public function getMostCommented(int $limit): array
+	{
+		$rows = $this->table->getConnection()
+			->select('a.%n, COUNT(*) AS count', ArticleEntity::ColumnTitle)
+			->from('%n c', CommentEntity::Table)
+			->join('%n a', ArticleEntity::Table)
+			->on('a.%n = c.%n', ArticleEntity::PrimaryKey, CommentEntity::ColumnArticleId)
+			->where('c.%n = 1', CommentEntity::ColumnApproved)
+			->groupBy('a.%n, a.%n', ArticleEntity::PrimaryKey, ArticleEntity::ColumnTitle)
+			->orderBy('count DESC, a.%n ASC', ArticleEntity::ColumnTitle)
+			->limit($limit)
+			->fetchAll();
+
+		return array_map(fn($row): array => [
+			'title' => (string) $row[ArticleEntity::ColumnTitle],
+			'count' => (int) $row['count'],
+		], $rows);
+	}
 }

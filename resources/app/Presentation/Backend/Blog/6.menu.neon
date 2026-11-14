@@ -9,3 +9,6 @@ parameters:
 services:
 	# the number of comments waiting for approval next to "Blog" (read by drago-ex/project-backend-ui)
 	- {factory: App\Presentation\Backend\Blog\CommentBadge, tags: [sidebar.badge], autowired: no}
+
+	# the chart and the ranking of the blog on the dashboard (read by drago-ex/project-backend-ui)
+	- {factory: App\Presentation\Backend\Blog\DashboardWidget, tags: [dashboard.widget], autowired: no}

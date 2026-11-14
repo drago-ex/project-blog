@@ -287,11 +287,7 @@ class ArticleControl extends BaseControl
 		$grid->setDataSource($this->articleRepository->getArticlesFluent())
 			->setPrimaryKey(ArticleEntity::PrimaryKey);
 
-		$grid->addColumnText(
-			ArticleEntity::ColumnTitle,
-			'Title',
-			formatter: fn(mixed $value, array $row): Html => $this->formatTitle((string) $value, $row[ArticleEntity::ColumnImage]),
-		)
+		$grid->addColumnText(ArticleEntity::ColumnTitle, 'Title')
 			->setNaturalSort()
 			->setFilterText();
 
@@ -308,7 +304,11 @@ class ArticleControl extends BaseControl
 		$grid->addColumnText(
 			'comments_total',
 			'Comments',
-			formatter: fn(mixed $value, array $row): Html => $this->formatComments((int) $row[ArticleEntity::PrimaryKey], (int) $value, (int) $row['comments_pending']),
+			formatter: fn(mixed $value, array $row): Html => $this->formatComments(
+				(int) $row[ArticleEntity::PrimaryKey],
+				(int) $value,
+				(int) $row['comments_pending'],
+			),
 		);
 
 		$grid->addColumnDate(ArticleEntity::ColumnPublishedAt, 'Published at', format: 'j. n. Y H:i')
@@ -330,11 +330,13 @@ class ArticleControl extends BaseControl
 				ArticleEntity::StatusPublished => 'Published',
 			]);
 
-		// The actions stand in the bar under the table and work with the rows chosen by their checkboxes
-		// or by a click anywhere on a row; Edit is for one row.
-		$grid->setRowClickAction('select');
-		$grid->addBulkActionEdit(fn(int $id) => $this->handleEdit($id))
+		// A row has a menu of three dots with Edit and Delete of that row; the bar under the table works with the rows
+		// chosen by their checkboxes or by a click anywhere on a row.
+		$grid->addActionEdit(fn(int $id) => $this->handleEdit($id))
 			->setVisible($this->isAllowed('edit'));
+		$grid->addActionDelete(fn(int $id) => $this->handleDelete([$id]))
+			->setVisible($this->isAllowed('delete'));
+		$grid->setRowClickAction('select');
 		$grid->addBulkActionExport()
 			->setVisible($this->isAllowed('export'));
 		$grid->addBulkActionDelete(fn(array $ids) => $this->handleDelete($ids))
@@ -489,27 +491,6 @@ class ArticleControl extends BaseControl
 	}
 
 
-	/** The cell of the title in the grid: a small main image (a placeholder without one) and the title. */
-	private function formatTitle(string $title, mixed $image): Html
-	{
-		$thumb = is_string($image) && $image !== ''
-			? Html::el('img', [
-				'src' => $this->getPresenter()->getHttpRequest()->getUrl()->getBasePath() . ArticleImages::Path . '/' . $image,
-				'alt' => '',
-				'width' => 28,
-				'height' => 28,
-				'loading' => 'lazy',
-				'class' => 'flex-shrink-0 rounded object-fit-cover bg-body-tertiary',
-			])
-			: Html::el('span', ['class' => 'avatar rounded', 'style' => '--cs-avatar-size: 1.75rem'])
-				->addHtml(Html::el('i', ['class' => 'bi bi-image', 'aria-hidden' => 'true']));
-
-		return Html::el('div', ['class' => 'd-flex align-items-center gap-2'])
-			->addHtml($thumb)
-			->addHtml(Html::el('span', ['class' => 'fw-semibold text-body-emphasis'])->setText($title));
-	}
-
-
 	/**
 	 * The cell of the comments in the grid: a button with their number that opens them in the offcanvas (gray
 	 * without comments) and, next to it, the number of the ones waiting for approval.
@@ -517,16 +498,18 @@ class ArticleControl extends BaseControl
 	 */
 	private function formatComments(int $id, int $total, int $pending): Html
 	{
-		$label = $this->translate('Comments: %d', $total);
 		$cell = Html::el('div', ['class' => 'd-flex align-items-center gap-2 text-nowrap'])->addHtml(
 			Html::el('a', [
 				'href' => $this->link('comments!', ['id' => $id]),
-				'class' => 'ajax btn btn-xs btn-subtle ' . ($total > 0 ? 'theme-primary' : 'theme-secondary'),
+				// a badge like the state in its row (a button would be 2px higher and stretch the row); flex keeps the icon
+				// and the number on one line in the middle
+				'class' => 'ajax badge badge-subtle d-inline-flex align-items-center gap-1 '
+					. ($total > 0 ? 'theme-primary' : 'theme-secondary'),
 				'data-naja-history' => 'off',
 				'data-tooltip' => true,
-				'aria-label' => $label,
+				'aria-label' => $this->translate('Show the comments'),
 			])
-				->addHtml(Html::el('i', ['class' => 'bi bi-chat me-1', 'aria-hidden' => 'true']))
+				->addHtml(Html::el('i', ['class' => 'bi bi-chat', 'aria-hidden' => 'true']))
 				->addText((string) $total),
 		);
 
