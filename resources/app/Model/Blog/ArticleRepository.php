@@ -25,15 +25,12 @@ readonly class ArticleRepository
 	/** @return ExtraFluent<ArticleEntity> */
 	public function getArticlesFluent(): ExtraFluent
 	{
-		// numbers of all and of the not yet approved comments and the name of the author, for the columns of
-		// the administration grid
+		// numbers of all and of the not yet approved comments, for the column of the administration grid
 		$comments = '(SELECT COUNT(*) FROM %n c WHERE c.%n = %n.%n';
 		$args = [CommentEntity::Table, CommentEntity::ColumnArticleId, ArticleEntity::Table, ArticleEntity::PrimaryKey];
 		return $this->table->read(
-			"*, $comments) AS comments_total, $comments AND c.%n = 0) AS comments_pending,"
-			. ' (SELECT u.%n FROM %n u WHERE u.%n = %n.%n) AS author_name',
+			"*, $comments) AS comments_total, $comments AND c.%n = 0) AS comments_pending",
 			...[...$args, ...$args, CommentEntity::ColumnApproved],
-			...[UserEntity::ColumnUsername, UserEntity::Table, UserEntity::ColumnId, ArticleEntity::Table, ArticleEntity::ColumnAuthorId],
 		)
 			->orderBy(ArticleEntity::PrimaryKey, 'DESC');
 	}

@@ -16,18 +16,25 @@
 									{* the height follows the window, so the whole form fits without scrolling the page *}
 									<div class="col-12 form-error">
 										{label content, class => 'form-label fw-semibold' /}
-										{input content, class => 'form-control', style => 'height: calc(100vh - 22rem); min-height: 14rem'}
+										{input content, class => 'form-control', style => 'height: calc(100dvh - 22rem); min-height: 14rem'}
 									</div>
 								</div>
 							</div>
 
 							<div class="col-lg-4">
 								<div class="vstack gap-3">
-									<section class="card border-0 shadow-sm bg-body-tertiary">
+									<section class="card border-0 bg-body-tertiary">
 										<div class="card-body">
 											<div class="row g-3">
 												{include input, type: 'select', name: 'status'}
-												{include input, name: 'publishedAt'}
+												{* the datepicker of compostrap with a time: a text field (Nette prints datetime-local and
+												   the value with a T), the value as "2026-11-14 09:15", which the server reads *}
+												<div class="col-12 form-error">
+													{label publishedAt, class => 'form-label fw-semibold' /}
+													{input publishedAt, class => 'form-control', type => 'text', autocomplete => 'off',
+														data-bs-toggle => 'datepicker', data-bs-selection-time-mode => '24',
+														value => $form['publishedAt']->getValue()?->format('Y-m-d H:i')}
+												</div>
 												{* a category is chosen, or written right here by the + button; a written one is used instead of the select,
 												   so the × button empties it when it switches back to the select *}
 												<div class="col-12 form-error">
@@ -36,18 +43,18 @@
 														<div class="input-group">
 															{input categoryId, class => 'form-select'}
 															<button type="button" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target=".article-category"
-																title="{_'New category'}" aria-label="{_'New category'}">
-																<i class="fa-solid fa-plus"></i>
+																aria-label="{_'New category'}" data-tooltip="end">
+																<i class="bi bi-plus-lg" aria-hidden="true"></i>
 															</button>
 														</div>
 													</div>
 													<div n:class="article-category, collapse, $newCategory ? show">
 														<div class="input-group">
 															{input newCategory, class => 'form-control'}
-															<button type="button" class="btn btn-dark" data-bs-toggle="collapse" data-bs-target=".article-category"
+															<button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target=".article-category"
 																onclick="this.parentElement.querySelector('input').value = ''"
-																title="{_'Choose a category'}" aria-label="{_'Choose a category'}">
-																<i class="fa-solid fa-xmark"></i>
+																aria-label="{_'Choose a category'}" data-tooltip="end">
+																<i class="bi bi-x-lg" aria-hidden="true"></i>
 															</button>
 														</div>
 													</div>
@@ -57,7 +64,7 @@
 										</div>
 									</section>
 
-									<section class="card border-0 shadow-sm bg-body-tertiary">
+									<section class="card border-0 bg-body-tertiary">
 										<div class="card-body">
 											{* the image is removed at once by a signal, which redraws only it, so unsaved changes stay *}
 											<div n:snippet="mainImage">
@@ -66,12 +73,12 @@
 													<div n:if="$control->isAllowed('edit')" class="article-image-actions position-absolute top-0 end-0 m-2 d-flex flex-wrap justify-content-end align-items-center gap-2">
 														{if $confirmRemoveImage}
 															<span class="badge text-bg-light">{_'Remove the main image?'}</span>
-															<a n:href="removeImage!, id: $articleId" class="ajax btn btn-xs btn-danger" data-naja-history="off">{_'Remove'}</a>
 															<a n:href="cancelRemoveImage!, id: $articleId" class="ajax btn btn-xs btn-secondary" data-naja-history="off">{_'Cancel'}</a>
+															<a n:href="removeImage!, id: $articleId" class="ajax btn btn-xs btn-danger" data-naja-history="off">{_'Remove'}</a>
 														{else}
-															<a n:href="confirmRemoveImage!, id: $articleId" class="ajax btn btn-sm btn-danger" data-naja-history="off"
-																title="{_'Remove the main image'}" aria-label="{_'Remove the main image'}">
-																<i class="fa-regular fa-trash-can"></i>
+															<a n:href="confirmRemoveImage!, id: $articleId" class="ajax btn btn-sm btn-icon btn-danger" data-naja-history="off"
+																aria-label="{_'Remove the main image'}" data-tooltip="left">
+																<i class="bi bi-trash" aria-hidden="true"></i>
 															</a>
 														{/if}
 													</div>
@@ -91,7 +98,7 @@
 										</div>
 									</section>
 
-									<section class="card border-0 shadow-sm bg-body-tertiary">
+									<section class="card border-0 bg-body-tertiary">
 										<div class="card-body">
 											<div class="row g-3">
 												{include input, name: 'slug'}
@@ -102,8 +109,8 @@
 								</div>
 							</div>
 
-							{* moved down by the padding of the offcanvas body, so no content shows below the bar *}
-							<div class="col-12 sticky-bottom bg-body pt-3 d-flex justify-content-end gap-2" style="bottom: calc(-1 * var(--bs-offcanvas-padding-y)); padding-bottom: calc(1rem + var(--bs-offcanvas-padding-y))">
+							{* the buttons stay at the bottom of the offcanvas while the form scrolls (offcanvas-actions of compostrap) *}
+							<div class="col-12 offcanvas-actions">
 								{include buttonDismiss, type: 'offcanvas'}
 								{include submit, name: 'send'}
 							</div>
@@ -178,9 +185,11 @@
 		{_'Write, publish and manage the articles of the blog.'}
 	{/block}
 	{block buttons}
-		{* categories are created in the article form; their page is for renaming and deleting them *}
-		<a href="{plink :Backend:Blog:categories}" class="btn btn-secondary btn-sm">{_'Categories'}</a>
+		{* categories are created in the article form; their offcanvas is for adding, renaming and deleting them *}
+		<a n:href="categories-open!" class="ajax btn btn-secondary btn-sm" data-naja-history="off">{_'Categories'}</a>
 	{/block}
 {/embed}
 
 {control dataGrid}
+
+{control categories}

@@ -8,18 +8,31 @@ use App\Presentation\Backend\Blog\Component\BaseControl;
 use App\Presentation\Backend\Blog\Component\Factory;
 use Dibi\Exception;
 use Drago\Application\UI\Alert;
-use Drago\Datagrid\DataGrid;
-use Drago\Datagrid\Exception\InvalidColumnException;
-use Drago\Datagrid\Exception\InvalidConfigurationException;
 use Drago\Form\Autocomplete;
 use Drago\Permission\Access;
 use Nette\Application\Attributes\Requires;
 use Nette\Application\UI\Form;
 
 
-/** Categories of the articles; deleting one leaves its articles without a category. */
+/**
+ * Categories of the articles in an offcanvas opened from the heading of the articles: the list and the form of
+ * a category take turns in it. Deleting a category leaves its articles without one.
+ */
 class CategoryControl extends BaseControl
 {
+	/** @var array<callable(): void> Called after a category is saved or deleted (the article grid shows the names). */
+	public array $onChange = [];
+
+	/** The offcanvas was opened by a signal of this request, so the list is loaded. */
+	private bool $open = false;
+
+	/** The form of a category is shown instead of the list. */
+	private bool $showForm = false;
+
+	/** The category that asks for the confirmation of its delete. */
+	private ?int $confirmDelete = null;
+
+
 	public function __construct(
 		public Factory $factory,
 		private readonly CategoryRepository $categoryRepository,
@@ -28,11 +41,37 @@ class CategoryControl extends BaseControl
 	}
 
 
+	/** @throws Exception */
 	public function render(): void
 	{
 		$template = $this->createRender();
+		assert($template instanceof CategoryTemplate);
+		$template->showForm = $this->showForm;
+		$template->confirmDelete = $this->confirmDelete;
+		if ($this->open && !$this->showForm) {
+			$template->categories = $this->categoryRepository->getCategoriesFluent()->recordAll();
+		}
+
 		$template->setFile(__DIR__ . '/Category.latte');
 		$template->render();
+	}
+
+
+	/** Opens the list of the categories (also the way back from the form); it only reads, the page is enough. */
+	#[Access]
+	#[Requires(ajax: true)]
+	public function handleOpen(): void
+	{
+		$this->redrawList();
+	}
+
+
+	/** Shows the empty form of a new category. */
+	#[Access('edit')]
+	#[Requires(ajax: true)]
+	public function handleAdd(): void
+	{
+		$this->redrawForm();
 	}
 
 
@@ -51,42 +90,53 @@ class CategoryControl extends BaseControl
 		$sendControl = $this->getFormComponent($form, 'send');
 		$sendControl?->setCaption('Edit category');
 
-		$this->redrawOffCanvas();
+		$this->redrawForm();
 	}
 
 
 	/**
-	 * @throws InvalidColumnException
-	 * @throws InvalidConfigurationException
+	 * Asks at a category in the list whether to delete it.
+	 * @throws Exception
 	 */
-	protected function createComponentDataGrid(): DataGrid
+	#[Access('delete')]
+	#[Requires(ajax: true)]
+	public function handleConfirmDelete(int $id): void
 	{
-		$grid = new DataGrid;
-		$grid->setTranslator($this->translator);
-		$grid->setFilterMode('inline');
-		$grid->setDataSource($this->categoryRepository->getCategoriesFluent())
-			->setPrimaryKey(CategoryEntity::PrimaryKey);
+		if ($this->getItemTitle($id) === null) {
+			$this->error();
+		}
 
-		$grid->addColumnText(CategoryEntity::ColumnName, 'Title')
-			->setFilterText();
+		$this->confirmDelete = $id;
+		$this->redrawList();
+	}
 
-		$grid->addColumnText(CategoryEntity::ColumnSlug, 'Slug')
-			->setFilterText();
 
-		// The actions stand in the bar under the table and work with the rows chosen by their checkboxes
-		// or by a click anywhere on a row; Edit is for one row.
-		$grid->setRowClickAction('select');
-		$grid->addBulkActionEdit(fn(int $id) => $this->handleEdit($id))
-			->setVisible($this->isAllowed('edit'));
-		$grid->addBulkActionExport()
-			->setVisible($this->isAllowed('export'));
-		$grid->addBulkActionDelete(fn(array $ids) => $this->handleDelete($ids))
-			->setVisible($this->isAllowed('delete'));
+	/** Hides the confirmation of a delete. */
+	#[Access('delete')]
+	#[Requires(ajax: true)]
+	public function handleCancelDelete(): void
+	{
+		$this->redrawList();
+	}
 
-		// "Export" under the table: all rows of the current filters
-		$grid->setExport('categories.csv', button: $this->isAllowed('export'));
 
-		return $grid;
+	/**
+	 * Deletes a category confirmed in the list.
+	 * @throws Exception
+	 */
+	#[Access('delete')]
+	#[Requires(ajax: true)]
+	public function handleRemove(int $id): void
+	{
+		if ($this->getItemTitle($id) === null) {
+			$this->error();
+		}
+
+		$this->deleteItem($id);
+		$this->addFlashMessage('Delete successful.', Alert::Success);
+		$this->addRedraw($this->snippetMessage);
+		$this->redrawList();
+		$this->onChange();
 	}
 
 
@@ -108,8 +158,8 @@ class CategoryControl extends BaseControl
 
 		$form->addSubmit('send', 'Send');
 		$form->onSuccess[] = $this->processCategoryForm(...);
-		// errors found on the server (e.g. a reserved slug) are shown in the open offcanvas
-		$form->onError[] = fn() => $this->redrawOffCanvas();
+		// errors found on the server (e.g. a taken slug) are shown in the open offcanvas
+		$form->onError[] = fn() => $this->redrawForm();
 		return $form;
 	}
 
@@ -143,8 +193,8 @@ class CategoryControl extends BaseControl
 			$this->addRedraw($this->snippetMessage);
 
 			$form->reset();
-			$this->closeComponent();
-			$this['dataGrid']->redrawDataGrid();
+			$this->redrawList();
+			$this->onChange();
 
 		} catch (\Throwable $e) {
 			// shown in the open offcanvas by onError
@@ -153,5 +203,23 @@ class CategoryControl extends BaseControl
 				default => $this->logUnexpected($e),
 			});
 		}
+	}
+
+
+	/** Shows the list of the categories in the offcanvas (opened, if it is not yet). */
+	private function redrawList(): void
+	{
+		$this->open = true;
+		$this->showForm = false;
+		$this->redrawOffCanvas();
+	}
+
+
+	/** Shows the form of a category in the offcanvas instead of the list. */
+	private function redrawForm(): void
+	{
+		$this->open = true;
+		$this->showForm = true;
+		$this->redrawOffCanvas();
 	}
 }

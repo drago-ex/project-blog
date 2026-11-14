@@ -1,21 +1,21 @@
 {* published articles of App\Model\Blog\ArticleListFactory: the newest over the whole row, the others as cards;
-   used by the blog list and the home page of project-preset *}
+   used by the blog list and the home page of project-front-ui *}
 {parameters App\Model\Blog\ArticleList $list}
 
 {define article, string $file, App\Model\Blog\ArticleEntity $article}
 	{include $file,
 		article: $article,
-		author: $list->authors[$article->authorId] ?? null,
-		category: $list->categories[$article->categoryId] ?? null,
+		author: $article->authorId !== null ? ($list->authors[$article->authorId] ?? null) : null,
+		category: $article->categoryId !== null ? ($list->categories[$article->categoryId] ?? null) : null,
 		commentCount: $article->commentsEnabled ? ($list->commentCounts[$article->id] ?? 0) : null,
 	}
 {/define}
 
 {var $articles = $list->articles}
 
-<div n:if="$articles" class="mb-5">
+{if $articles}
 	{include article, file: '@article-featured.latte', article: $articles[array_key_first($articles)]}
-</div>
+{/if}
 
 <div n:if="count($articles) > 1" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
 	<div n:foreach="array_slice($articles, 1) as $article" class="col">

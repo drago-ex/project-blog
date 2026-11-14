@@ -2,11 +2,11 @@
 
 {* the list of all articles (default) and of one category (category), with the categories as pills *}
 {block content}
-	<h1 n:block="title" class="display-6 fw-semibold mb-4">{if $category}{$category->name}{else}{_'Blog'}{/if}</h1>
+	<h1 n:block="title" class="blog-title">{if $category}{$category->name}{else}{_'Blog'}{/if}</h1>
 
-	<nav n:if="$list->categories" class="nav nav-pills gap-2 mb-5 small" aria-label="{_'Categories'}">
-		<a n:href="default" n:class="nav-link, rounded-pill, $category ? blog-pill : active" n:attr="aria-current: $category ? null : page">{_'All'}</a>
-		<a n:foreach="$list->categories as $item" n:href="category, category: $item->slug" n:class="nav-link, rounded-pill, $category?->id === $item->id ? active : blog-pill" n:attr="aria-current: $category?->id === $item->id ? page : null">{$item->name}</a>
+	<nav n:if="$list->categories" class="blog-pills" aria-label="{_'Categories'}">
+		<a n:href="default" n:class="blog-pill, $category ? null : active" n:attr="aria-current: $category ? null : page">{_'All'}</a>
+		<a n:foreach="$list->categories as $item" n:href="category, category: $item->slug" n:class="blog-pill, $category?->id === $item->id ? active" n:attr="aria-current: $category?->id === $item->id ? page : null">{$item->name}</a>
 	</nav>
 
 	{include '@article-list.latte', list: $list}

@@ -1,71 +1,66 @@
 {templateType App\Presentation\Front\Blog\BlogTemplate}
 
 {block content}
-	<article class="mx-auto" style="max-width: 48rem">
-		<a n:href="default" class="d-inline-block mb-4 small link-secondary text-decoration-none">&larr; {_'Blog'}</a>
-		<h1 n:block="title" class="display-6 fw-semibold mb-3">{$article->title}</h1>
-		<p n:if="$article->perex" class="lead text-body-secondary">{$article->perex}</p>
+	<article class="blog-article">
+		<a n:href="default" class="blog-back">&larr; {_'Blog'}</a>
+		<h1 n:block="title" class="blog-article-title">{$article->title}</h1>
+		<p n:if="$article->perex" class="blog-article-lead">{$article->perex}</p>
 
-		{* author, date and category, separated by dots *}
-		<div class="d-flex flex-wrap align-items-center gap-2 mb-4 small text-body-secondary">
-			{if $author}
-				<img src={$author[avatar]} alt="" width="24" height="24" class="rounded-circle">
-				<span class="fw-semibold text-body">{$author[name]}</span>
-			{/if}
-			{if $article->publishedAt}
-				<span n:if="$author" aria-hidden="true">&middot;</span>
-				<time datetime={$article->publishedAt|date:'c'} title={$article->publishedAt|date:'j. n. Y'}>{$article->publishedAt|ago}</time>
-			{/if}
-			{if $category}
-				<span n:if="$author || $article->publishedAt" aria-hidden="true">&middot;</span>
-				<a n:href="category, category: $category->slug" class="link-secondary">{$category->name}</a>
-			{/if}
+		{* author, date and category, parted by dots *}
+		<div n:if="$author || $article->publishedAt || $category" class="blog-meta blog-article-meta">
+			<span n:if="$author" class="blog-author">
+				<span class="avatar avatar-sm"><img src={$author[avatar]} alt="" width="24" height="24"></span>
+				<span class="blog-author-name">{$author[name]}</span>
+			</span>
+			<time n:if="$article->publishedAt" datetime={$article->publishedAt|date:'c'} title={$article->publishedAt|date:'j. n. Y'}>{$article->publishedAt|ago}</time>
+			<a n:if="$category" n:href="category, category: $category->slug">{$category->name}</a>
 		</div>
 
-		<div n:if="$article->image" class="ratio ratio-21x9 rounded-3 overflow-hidden mb-4">
-			<img src="{$basePath}/{App\Model\Blog\ArticleImages::Path}/{$article->image}" alt="" class="object-fit-cover" style="object-position: top">
+		<div n:if="$article->image" class="blog-article-image">
+			<img src="{$basePath}/{App\Model\Blog\ArticleImages::Path}/{$article->image}" alt="">
 		</div>
 
-		<div class="content mt-4">
+		<div class="blog-content">
 			{$content|noescape}
 		</div>
 
-		<section n:if="$commentsEnabled" id="comments" class="mt-5 pt-4">
-			<h2 class="h4 mb-4">{_'Comments'} <span class="text-body-secondary fw-normal">({count($comments)})</span></h2>
-			<div class="vstack gap-3">
-				{foreach $comments as $comment}
-					{var int $number = $commentNumbers[$comment->id]}
-					<article id="comment-{$number}" class="comment p-4 bg-body-tertiary rounded-4">
-						<div class="small mb-2">
-							<span class="fw-semibold">{$comment->authorName}</span>
-							<a href="#comment-{$number}" class="link-secondary text-decoration-none">#{$number}</a>
-							<span class="text-body-secondary">&middot; {$comment->createdAt|date:'j. n. Y H:i'}</span>
-						</div>
-						<div class="comment-content">{$commentHtml[$comment->id]|noescape}</div>
-						<div class="d-flex flex-wrap column-gap-2 mt-2 small text-body-secondary">
-							{* front.js inserts "#2 Name " into the comment form; without JavaScript the link only goes to the form *}
-							<a href="#comment-form" class="link-secondary" data-comment-reply="#{$number} {$comment->authorName} ">{_'Reply'}</a>
-							{if isset($commentReplies[$number])}
-								<span aria-hidden="true">&middot;</span>
-								<span>
-									{_'Replies:'}
-									{foreach $commentReplies[$number] as $reply}
-										<a href="#comment-{$reply}" class="link-secondary">#{$reply} {$commentNames[$reply]}</a>{sep}, {/sep}
-									{/foreach}
-								</span>
-							{/if}
-						</div>
-					</article>
-				{else}
-					<p class="text-body-secondary mb-0">{_'No comments yet.'}</p>
-				{/foreach}
-			</div>
+		<section n:if="$commentsEnabled" id="comments" class="blog-comments">
+			<h2 class="blog-comments-title">{_'Comments'} <span>({count($comments)})</span></h2>
 
-			<div id="comment-form" class="mt-5 p-4 bg-body-tertiary rounded-4">
+			{* the avatar of a comment holds the initials of its author, in a color given by the name *}
+			{var array $avatarThemes = ['primary', 'success', 'info', 'warning', 'danger']}
+			{foreach $comments as $comment}
+				{var int $number = $commentNumbers[$comment->id]}
+				{var string $initials = implode('', array_map(fn(string $word) => mb_substr($word, 0, 1), array_slice(explode(' ', trim($comment->authorName)), 0, 2)))}
+				<article id="comment-{$number}" class="blog-comment">
+					<div class="blog-comment-head">
+						<span class="avatar avatar-sm theme-{$avatarThemes[crc32($comment->authorName) % count($avatarThemes)]}" aria-hidden="true">{$initials|upper}</span>
+						<span class="blog-comment-author">{$comment->authorName}</span>
+						<a href="#comment-{$number}">#{$number}</a>
+						<time datetime={$comment->createdAt|date:'c'}>&middot; {$comment->createdAt|date:'j. n. Y H:i'}</time>
+					</div>
+					<div class="blog-comment-content">{$commentHtml[$comment->id]|noescape}</div>
+					<div class="blog-meta blog-comment-foot">
+						{* front.js inserts "#2 Name " into the comment form; without JavaScript the link only goes to the form *}
+						<a href="#comment-form" data-comment-reply="#{$number} {$comment->authorName} ">{_'Reply'}</a>
+						<span n:if="isset($commentReplies[$number])">
+							{_'Replies:'}
+							{foreach $commentReplies[$number] as $reply}
+								<a href="#comment-{$reply}">#{$reply} {$commentNames[$reply]}</a>{sep}, {/sep}
+							{/foreach}
+						</span>
+					</div>
+				</article>
+			{else}
+				<p class="text-body-secondary mb-0">{_'No comments yet.'}</p>
+			{/foreach}
+
+			<h3 class="blog-comment-form-title">{_'Add a comment'}</h3>
+			<div id="comment-form" class="blog-comment-form">
 				{embed '../../Accessory/Widget/@form.latte', name: 'comment'}
 					{block form}
 						{if $commentAuthor}
-							<p class="col-12 small text-body-secondary mb-0">{_'You are commenting as %s.', $commentAuthor}</p>
+							<p class="col-12 text-body-secondary mb-0">{_'You are commenting as %s.', $commentAuthor}</p>
 						{else}
 							{include input, name: 'name', columns: 6}
 							{include input, name: 'email', columns: 6}
@@ -73,7 +68,7 @@
 						{include input, type: 'textarea', name: 'content', rows: 5}
 						<div class="d-none" aria-hidden="true">{input website}</div>
 						<div class="col-12">
-							<p class="small text-body-secondary">{_'Comments appear after approval.'}</p>
+							<p class="text-body-secondary">{_'Comments appear after approval.'}</p>
 							{include submit, name: 'send'}
 						</div>
 					{/block}

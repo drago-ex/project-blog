@@ -60,9 +60,25 @@ and import its styles in `assets/admin.scss`:
 @import 'compostrap/src/scss/dropzone';
 ```
 
+### Date of publication
+
+The date of publication of an article is a datepicker of [compostrap](https://github.com/compostrap/compostrap) with a
+time. It needs `vanilla-calendar-pro` in `package.json`, `Datepicker.init()` in `assets/admin.js` and its styles in
+`assets/admin.scss` (the same lines as the date filter of [drago-ex/datagrid](https://github.com/drago-ex/datagrid)):
+
+```js
+import { Datepicker } from 'compostrap/datepicker';
+
+Datepicker.init();
+```
+
+```scss
+@import 'compostrap/src/scss/datepicker';
+```
+
 ### Used libraries
 
-- [drago-ex/datagrid](https://github.com/drago-ex/datagrid): the lists of articles and categories, set up in
+- [drago-ex/datagrid](https://github.com/drago-ex/datagrid): the list of articles, set up in
   `admin.js` and `admin.scss`.
 - [drago-ex/texy-toolbar](https://github.com/drago-ex/texy-toolbar): the toolbar of the content field (`admin.js`),
   of comments and the copy button of code blocks (`front.js`).
@@ -70,19 +86,18 @@ and import its styles in `assets/admin.scss`:
 ## Administration
 
 ```latte
-{link :Backend:Blog:}            {* articles with their comments *}
-{link :Backend:Blog:categories}  {* categories *}
+{link :Backend:Blog:}  {* articles with their comments and categories *}
 ```
 
 The menu item comes from `Backend/Blog/6.menu.neon` with [Backend UI](https://github.com/drago-ex/project-backend-ui),
 together with the number of comments waiting for approval (`CommentBadge`), shown in the menu and the navbar bell.
 
 - A new category is written right in the article form (the "+" button next to the category); its slug is made
-  from the name. The button "Categories" above the articles opens their list for renaming and deleting.
+  from the name. The button "Categories" above the articles opens them in a side panel to add, rename
+  and delete them; the articles of a deleted category stay without one.
 - The cover image is resized to fit 1600 × 1200 px and saved in `www/upload/blog/`; replacing or removing it and
   deleting the article delete the file. Add `/www/upload/` to `.gitignore`.
-- The article list shows the main image, the slug, the category, the date of publication and the author of each
-  article.
+- The article list shows the main image, the category and the date of publication of each article.
 - The status of an article is a badge in the article list; a click on it opens a menu that publishes the article
   or takes it back to a draft.
 - The article list shows the number of comments of each article and those waiting for approval; a click on the
@@ -110,7 +125,7 @@ The routes `/blog`, `/blog/kategorie/<slug>` and `/blog/<slug>` (also with `/en/
 
 The rules are in `Backend/Blog/acl.neon` (resource `Backend:Blog`, the administrator only) and
 `Front/Blog/acl.neon` (resource `Front:Blog`, everyone). The privileges of `Backend:Blog` are `default`,
-`categories`, `edit`, `delete`, `approveComment` and `deleteComment`; buttons are shown only to those who may use
+`edit`, `delete`, `publish`, `export`, `approveComment` and `deleteComment`; buttons are shown only to those who may use
 them. [Project Permission](https://github.com/drago-ex/project-permission) gives them to other roles, e.g. a
 moderator with `default` and `approveComment`.
 

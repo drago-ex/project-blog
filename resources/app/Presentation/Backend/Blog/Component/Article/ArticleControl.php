@@ -10,6 +10,7 @@ use App\Model\Blog\CategoryRepository;
 use App\Model\Blog\CommentEntity;
 use App\Model\Blog\CommentRepository;
 use App\Presentation\Backend\Blog\Component\BaseControl;
+use App\Presentation\Backend\Blog\Component\Category\CategoryControl;
 use App\Presentation\Backend\Blog\Component\Factory;
 use Dibi\Exception;
 use Drago\Application\UI\Alert;
@@ -28,9 +29,6 @@ use Nette\Utils\Html;
 
 class ArticleControl extends BaseControl
 {
-	/** The colors of the theme the badges of the categories take in turn. */
-	private const array CategoryColors = ['primary', 'info', 'warning', 'success', 'danger'];
-
 	/** The name of the offcanvas of the comments, for its id. */
 	private const string Comments = 'comments';
 
@@ -58,6 +56,7 @@ class ArticleControl extends BaseControl
 		private readonly CommentRepository $commentRepository,
 		private readonly TexyToolbar $texyToolbar,
 		private readonly TexyFormatter $texyFormatter,
+		private readonly CategoryControl $categoryControl,
 	) {
 		parent::__construct($this->factory);
 	}
@@ -296,18 +295,13 @@ class ArticleControl extends BaseControl
 			->setNaturalSort()
 			->setFilterText();
 
-		$grid->addColumnText(ArticleEntity::ColumnSlug, 'Slug')
-			->setFilterText();
-
-		// a category is a badge; its color follows its place in the list, so it stays the same on every page
 		$categories = $this->categoryRepository->getNames();
-		$badges = [];
-		foreach (array_keys($categories) as $index => $id) {
-			$badges[$id] = [$categories[$id], self::CategoryColors[$index % count(self::CategoryColors)]];
-		}
-
-		$grid->addColumnText(ArticleEntity::ColumnCategoryId, 'Category', sortable: false)
-			->setBadges($badges, translate: false)
+		$grid->addColumnText(
+			ArticleEntity::ColumnCategoryId,
+			'Category',
+			sortable: false,
+			formatter: fn(mixed $value): string => $categories[(int) $value] ?? '',
+		)
 			->setFilterSelect($categories, translate: false);
 
 		// the number of comments is a button that opens them; the ones waiting for approval stand next to it
@@ -319,12 +313,6 @@ class ArticleControl extends BaseControl
 
 		$grid->addColumnDate(ArticleEntity::ColumnPublishedAt, 'Published at', format: 'j. n. Y H:i')
 			->setFilterDate(range: true);
-
-		$grid->addColumnText(
-			'author_name',
-			'Author',
-			formatter: fn(mixed $value): Html => $this->formatAuthor((string) $value),
-		);
 
 		// the status is a badge that opens a menu of the states; without the privilege it is only read
 		$grid->addColumnText(ArticleEntity::ColumnStatus, 'Status')
@@ -356,6 +344,16 @@ class ArticleControl extends BaseControl
 		$grid->setExport('articles.csv', button: $this->isAllowed('export'));
 
 		return $grid;
+	}
+
+
+	/** The categories in their offcanvas; the grid shows their names, so it is redrawn after a change. */
+	protected function createComponentCategories(): CategoryControl
+	{
+		$control = $this->categoryControl;
+		$control->translator = $this->translator;
+		$control->onChange[] = fn() => $this->getComponent('dataGrid')->redrawDataGrid();
+		return $control;
 	}
 
 
@@ -509,22 +507,6 @@ class ArticleControl extends BaseControl
 		return Html::el('div', ['class' => 'd-flex align-items-center gap-2'])
 			->addHtml($thumb)
 			->addHtml(Html::el('span', ['class' => 'fw-semibold text-body-emphasis'])->setText($title));
-	}
-
-
-	/** The cell of the author in the grid: an icon of a person and the name; empty without an author. */
-	private function formatAuthor(string $name): Html
-	{
-		if ($name === '') {
-			return Html::el();
-		}
-
-		return Html::el('div', ['class' => 'd-flex align-items-center gap-2 text-nowrap'])
-			->addHtml(
-				Html::el('span', ['class' => 'avatar avatar-sm'])
-					->addHtml(Html::el('i', ['class' => 'bi bi-person', 'aria-hidden' => 'true'])),
-			)
-			->addHtml(Html::el('span')->setText($name));
 	}
 
 

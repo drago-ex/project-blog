@@ -1,47 +1,68 @@
-{templateType App\Presentation\Backend\Blog\Component\BaseTemplate}
-{embed '../../../../Accessory/Widget/@offcanvas.latte', offcanvasId: $offcanvasId}
-	{block title}{_'Manage category'}{/block}
+{templateType App\Presentation\Backend\Blog\Component\Category\CategoryTemplate}
+{* the categories of the articles, opened by the button in the heading of the articles; the list and the form of
+   a category take turns in one offcanvas, every signal redraws only its snippet *}
+{embed '../../../../Accessory/Widget/@offcanvas.latte', offcanvasId: $offcanvasId, size: '32rem', categories: $categories,
+	showForm: $showForm, confirmDelete: $confirmDelete}
+	{block title}{_'Categories'}{/block}
 	{block body}
 		{snippet offcanvas}
-			{embed '../../../../Accessory/Widget/@form.latte', class: 'ajax', name: 'category', najaHistory: 'off'}
-				{import '../../../../Accessory/Widget/@dismiss-button.latte'}
-				{block form}
-					{include input, name: 'name'}
-					{include input, name: 'slug'}
-					<div class="col-12">
-						{include buttonDismiss, type: 'offcanvas'}
-						{include submit, name: 'send'}
-					</div>
-				{/block}
-			{/embed}
+			{if $showForm}
+				{embed '../../../../Accessory/Widget/@form.latte', class: 'ajax', name: 'category', najaHistory: 'off'}
+					{block form}
+						{include input, name: 'name'}
+						{include input, name: 'slug'}
+						{* Cancel goes back to the list *}
+						<div class="col-12">
+							<a n:href="open!" class="ajax btn btn-secondary" data-naja-history="off">{_'Cancel'}</a>
+							{include submit, name: 'send'}
+						</div>
+					{/block}
+				{/embed}
+			{else}
+				<div n:if="$control->isAllowed('edit')" class="mb-3">
+					<a n:href="add!" class="ajax btn btn-primary btn-sm" data-naja-history="off">
+						<i class="bi bi-plus-lg me-1" aria-hidden="true"></i>{_'Add category'}
+					</a>
+				</div>
+
+				{var $editAllowed = $control->isAllowed('edit')}
+				{var $deleteAllowed = $control->isAllowed('delete')}
+				<div class="vstack gap-2">
+					{foreach $categories as $category}
+						<div class="d-flex flex-wrap align-items-center gap-2 py-2 px-3 bg-body-tertiary rounded-3">
+							{if $confirmDelete === $category->id}
+								{* Cancel first, the main action last *}
+								<span class="fw-semibold text-danger me-auto">{_'Delete the category %s? Its articles stay without one.', $category->name}</span>
+								<a n:href="cancelDelete!" class="ajax btn btn-xs btn-secondary" data-naja-history="off">{_'Cancel'}</a>
+								<a n:href="remove!, id: $category->id" class="ajax btn btn-xs btn-danger" data-naja-history="off">{_'Delete'}</a>
+							{else}
+								<span class="me-auto">{$category->name}</span>
+								{* the actions in a menu of three dots, delete last after a divider (the row menu of compostrap) *}
+								<div n:if="$editAllowed || $deleteAllowed" class="dropdown">
+									<button type="button" class="btn btn-xs btn-icon btn-text" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{_'Actions'}">
+										<i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+									</button>
+									<ul class="dropdown-menu dropdown-menu-end">
+										<li n:if="$editAllowed">
+											<a n:href="edit!, id: $category->id" class="ajax dropdown-item" data-naja-history="off">
+												<i class="bi bi-pencil me-2" aria-hidden="true"></i>{_'Edit'}
+											</a>
+										</li>
+										<li n:if="$editAllowed && $deleteAllowed"><hr class="dropdown-divider"></li>
+										<li n:if="$deleteAllowed">
+											<a n:href="confirmDelete!, id: $category->id" class="ajax dropdown-item text-danger" data-naja-history="off">
+												<i class="bi bi-trash me-2" aria-hidden="true"></i>{_'Delete'}
+											</a>
+										</li>
+									</ul>
+								</div>
+							{/if}
+						</div>
+					{else}
+						<p class="text-body-secondary mb-0">{_'No categories yet.'}</p>
+					{/foreach}
+				</div>
+			{/if}
 		{/snippet}
 	{/block}
 {/embed}
-
-{embed '../../../../Accessory/Widget/@modal.latte', modalId: $modalId, options: [header: 'danger']}
-	{block title}{_'Confirm delete'}{/block}
-	{block body}
-		{snippet content}
-			{include '../@modal-body.latte'}
-		{/snippet}
-	{/block}
-	{block footer}
-		{snippet modal}
-			{include '../@modal-footer.latte'}
-		{/snippet}
-	{/block}
-{/embed}
-
-{embed '../@datagrid-heading.latte', addButton: $control->isAllowed('edit')}
-	{block title}
-		{_'Categories'}
-	{/block}
-	{block subtitle}
-		{_'Rename or delete the categories of the articles.'}
-	{/block}
-	{block buttons}
-		<a href="{plink :Backend:Blog:}" class="btn btn-secondary btn-sm">&larr; {_'Articles'}</a>
-	{/block}
-{/embed}
-
-{control dataGrid}
