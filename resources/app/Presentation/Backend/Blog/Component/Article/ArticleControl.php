@@ -496,12 +496,12 @@ class ArticleControl extends BaseControl
 			? Html::el('img', [
 				'src' => $this->getPresenter()->getHttpRequest()->getUrl()->getBasePath() . ArticleImages::Path . '/' . $image,
 				'alt' => '',
-				'width' => 40,
-				'height' => 40,
+				'width' => 28,
+				'height' => 28,
 				'loading' => 'lazy',
 				'class' => 'flex-shrink-0 rounded object-fit-cover bg-body-tertiary',
 			])
-			: Html::el('span', ['class' => 'avatar rounded', 'style' => '--cs-avatar-size: 2.5rem'])
+			: Html::el('span', ['class' => 'avatar rounded', 'style' => '--cs-avatar-size: 1.75rem'])
 				->addHtml(Html::el('i', ['class' => 'bi bi-image', 'aria-hidden' => 'true']));
 
 		return Html::el('div', ['class' => 'd-flex align-items-center gap-2'])
