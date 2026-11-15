@@ -2,11 +2,11 @@
 
 namespace App\Model\Blog;
 
+use DateMalformedStringException;
 use Dibi\Connection;
 use Dibi\Exception;
 use Drago\Database\ExtraFluent;
 use Drago\Database\Table;
-use DateMalformedStringException;
 
 
 readonly class CommentRepository
