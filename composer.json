@@ -17,6 +17,7 @@
 		"drago-ex/migration": "^1.0",
 		"drago-ex/project-auth": "^2.0",
 		"drago-ex/project-backend": "^1.0",
+		"drago-ex/project-backend-ui": "^1.0",
 		"drago-ex/translator": "^4.0.1",
 		"drago-ex/utils": "^2.0",
 		"drago-ex/texy-toolbar": "^1.0",
@@ -24,8 +25,7 @@
 		"drago-ex/permission": "^2.0"
 	},
 	"suggest": {
-		"drago-ex/project-permission": "Administration of custom roles and their privileges.",
-		"drago-ex/project-backend-ui": "Administration layout; the blog administration uses its content widget and gets its menu item from Backend/Blog/6.menu.neon."
+		"drago-ex/project-permission": "Administration of custom roles and their privileges."
 	},
 	"require-dev": {
 		"nette/tester": "^2.5",
