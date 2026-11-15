@@ -63,8 +63,9 @@ and import its styles in `assets/admin.scss`:
 ### Date of publication
 
 The date of publication of an article is a datepicker of [compostrap](https://github.com/compostrap/compostrap) with a
-time. It needs `vanilla-calendar-pro` in `package.json`, `Datepicker.init()` in `assets/admin.js` and its styles in
-`assets/admin.scss` (the same lines as the date filter of [drago-ex/datagrid](https://github.com/drago-ex/datagrid)):
+time. The package brings `vanilla-calendar-pro` in its `package.json`; it needs `Datepicker.init()` in
+`assets/admin.js` and its styles in `assets/admin.scss` (the same lines as the date filter of
+[drago-ex/datagrid](https://github.com/drago-ex/datagrid)):
 
 ```js
 import { Datepicker } from 'compostrap/datepicker';

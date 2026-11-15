@@ -1,0 +1,8 @@
+{
+	"name": "drago-project-blog",
+	"private": true,
+	"dependencies": {
+		"compostrap": "^1.0.0",
+		"vanilla-calendar-pro": "^3.4.0"
+	}
+}

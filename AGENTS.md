@@ -12,6 +12,9 @@ dependencies are in `composer.json`.
 - `resources/app/Presentation/Front/Blog`: `BlogPresenter`, `BlogRouter` (`7.conf.neon`), `CommentReferences`,
   `TimeAgoExtension` (filter `|ago`), the article templates, `acl.neon`.
 - `resources/assets/naja/comment-reply.js`: Naja extension `CommentReply`, copied to `assets/naja/`.
+- `package.json` (with `name`): `compostrap` and `vanilla-calendar-pro` (the datepicker of the date of publication), installed
+  by `npm-loader.js` of drago-ex/project; compostrap keeps the calendar an optional peer, so the user of the datepicker
+  declares it.
 - `migrations/001_blog.sql`, `tests/` (Nette Tester).
 
 ## Permissions
