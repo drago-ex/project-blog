@@ -16,6 +16,7 @@ use Nette\Application\UI\Template;
 use Nette\Forms\Controls\SubmitButton;
 use Tracy\Debugger;
 use Tracy\ILogger;
+use Nette\Application\UI\InvalidLinkException;
 
 
 /**
@@ -138,6 +139,7 @@ abstract class BaseControl extends ExtraControl implements OffcanvasHandle, Moda
 	}
 
 
+	/** @throws InvalidLinkException */
 	private function delete(SubmitButton $button): void
 	{
 		$form = $button->getForm();

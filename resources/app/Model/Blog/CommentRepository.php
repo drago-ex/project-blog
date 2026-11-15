@@ -6,6 +6,7 @@ use Dibi\Connection;
 use Dibi\Exception;
 use Drago\Database\ExtraFluent;
 use Drago\Database\Table;
+use DateMalformedStringException;
 
 
 readonly class CommentRepository
@@ -101,6 +102,7 @@ readonly class CommentRepository
 	 * Numbers of all comments of each of the last days, today included, the oldest first; a day without one is 0.
 	 * @return array<string, int> Y-m-d => number
 	 * @throws Exception
+	 * @throws DateMalformedStringException
 	 */
 	public function countByDay(int $days): array
 	{

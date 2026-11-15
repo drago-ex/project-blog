@@ -4,6 +4,7 @@ namespace App\Presentation\Backend\Blog;
 
 use App\Model\Blog\CommentRepository;
 use Dibi\Exception;
+use DateMalformedStringException;
 
 
 /**
@@ -22,6 +23,7 @@ final readonly class DashboardWidget
 	/**
 	 * @return list<array<string, mixed>>
 	 * @throws Exception
+	 * @throws DateMalformedStringException
 	 */
 	public function __invoke(): array
 	{

@@ -24,6 +24,7 @@ use Nette\Application\Attributes\Requires;
 use Nette\Application\UI\Form;
 use Nette\Application\UI\InvalidLinkException;
 use Nette\Http\IRequest;
+use Throwable;
 use function is_string;
 
 
@@ -146,7 +147,10 @@ final class BlogPresenter extends BasePresenter
 	}
 
 
-	/** @throws InvalidLinkException */
+	/**
+	 * @throws InvalidLinkException
+	 * @throws Throwable
+	 */
 	protected function createComponentComment(): Form
 	{
 		$form = new Forms;
@@ -185,6 +189,7 @@ final class BlogPresenter extends BasePresenter
 	/**
 	 * @param array{name?: string, email?: ?string, content: string, website: string} $values
 	 * @throws Exception
+	 * @throws Throwable
 	 */
 	private function processCommentForm(Form $form, array $values): void
 	{
