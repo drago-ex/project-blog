@@ -66,7 +66,7 @@ dependencies are in `composer.json`.
   covers the area, so it stays the field of the Nette form and its rules. It has no `data-dropzone-submit`, the image is saved with the article
   (an automatic submit would send the whole unfinished article). `DropzoneInput.init()` runs in `admin.js` on load and after every snippet update,
   because the form is redrawn in the offcanvas. A validation message shows under the area (`form-error`).
-- `CommentBadge` (in `6.menu.neon`, tag `sidebar.badge`, `autowired: no`) returns the pending count for the menu
+- `CommentBadge` (in `6.menu.neon`, tag `sidebar.badge`, `autowired: no`) returns the pending count, only to a user allowed `approveComment` of `Backend:Blog` (an editor without it would see comments they cannot approve), for the menu
   badge and the navbar bell of project-backend-ui; it is duck-typed, so the blog needs no backend-ui class.
 
 ## Website

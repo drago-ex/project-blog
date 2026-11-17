@@ -109,7 +109,8 @@ Datepicker.init();
 ```
 
 The menu item comes from `Backend/Blog/6.menu.neon` with [Backend UI](https://github.com/drago-ex/project-backend-ui),
-together with the number of comments waiting for approval (`CommentBadge`), shown in the menu and the navbar bell.
+together with the number of comments waiting for approval (`CommentBadge`), shown in the menu and the navbar bell to
+those who may approve them (`approveComment`).
 The dashboard of Backend UI shows the widgets of the blog (`DashboardWidget`): the comments of the last 30 days as
 a chart and the most commented articles.
 
