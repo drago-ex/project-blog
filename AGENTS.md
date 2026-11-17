@@ -82,7 +82,7 @@ dependencies are in `composer.json`.
   `@article-featured.latte`, the rest as cards `@article-item.latte`. The front templates are written in
   the classes of the compostrap module `blog` (`blog-title`, `blog-pills`, `blog-featured`, `blog-card`, `blog-meta`,
   `blog-author` with the Gravatar in an `avatar`, `blog-article`, `blog-content`, `blog-comment`, `blog-comment-form`),
-  which `front.scss` of project-front-ui imports. The avatar of a comment holds the initials of its author in a
+  which `front.scss` of project-front-ui imports; without project-front-ui the project imports it itself (README Assets › Website), else the fixed-size images overflow the page. The avatar of a comment holds the initials of its author in a
   `theme-*` color picked by `crc32()` of the name.
 - `ArticleAuthors` gives names and Gravatar URLs, so email addresses never reach templates.
 - Comments: allowed per article (`blog_article.comments_enabled`), no global setting. Approved comments are

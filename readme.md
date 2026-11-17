@@ -10,6 +10,7 @@ articles and approves comments, the website shows the article list, categories a
 
 - PHP >= 8.3, < 9
 - PHP extensions GD and intl
+- MySQL or MariaDB
 - [Drago Project](https://github.com/drago-ex/project)
 
 ## Installation
@@ -19,14 +20,31 @@ composer require drago-ex/project-blog
 ```
 
 [Project Tools](https://github.com/drago-ex/project-tools) copies the files of the package into the project,
-where you adapt them.
+where you adapt them. Add its scripts and styles as [Assets](#assets) shows, run `npm install` (the package brings
+`vanilla-calendar-pro`) and build the assets again (`npm run vite:build`).
 
 ## Database
 
-The migrations create the tables `blog_article`, `blog_category` and `blog_comment`; run them with
-`bin/project-setup` of Drago Project or `php vendor/bin/migration db:migrate --packages`.
+The migrations create the tables `blog_article`, `blog_category` and `blog_comment`, empty:
+
+```bash
+php vendor/bin/migration db:migrate --packages
+```
+
+Articles and categories are then written in the administration. `bin/project-setup` of Drago Project runs the
+migrations for you.
 
 ## Assets
+
+### Website
+
+The pages of the blog on the website (the list, the article, the comments) are in the look of the module `blog` of
+[compostrap](https://github.com/compostrap/compostrap); without it the images of the articles overflow the page.
+[Front UI](https://github.com/drago-ex/project-front-ui) already imports it; otherwise import it in `assets/front.scss`:
+
+```scss
+@import 'compostrap/src/scss/blog';
+```
 
 ### Comment replies
 
